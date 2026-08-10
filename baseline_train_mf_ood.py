@@ -18,6 +18,10 @@ from minigpt4.tasks import base_task
 import time
 import numpy as np
 
+# Kaggle paths: set COLLM_ML1M_DIR (dir with *_ood2.pkl) and COLLM_OUTPUT_DIR (dir for the .pth).
+ML1M_DATA_DIR = os.environ.get("COLLM_ML1M_DIR", "/kaggle/working/ml-1m/")
+MF_SAVE_DIR = os.environ.get("COLLM_OUTPUT_DIR", "/kaggle/working/")
+
 def uAUC_me(user, predict, label):
     if not isinstance(predict,np.ndarray):
         predict = np.array(predict)
@@ -119,7 +123,7 @@ def run_a_trail(train_config,log_file=None, save_mode=False,save_file=None,need_
     # load dataset
     # data_dir = "/home/zyang/LLM/MiniGPT-4/dataset/ml-100k/"
     # data_dir = "/home/sist/zyang/LLM/datasets/ml-1m/"
-    data_dir = "/data/zyang/datasets/ml-1m/"
+    data_dir = ML1M_DATA_DIR
     train_data = pd.read_pickle(data_dir+"train_ood2.pkl")[['uid','iid','label']].values
     valid_data = pd.read_pickle(data_dir+"valid_ood2.pkl")[['uid','iid','label']].values
     test_data = pd.read_pickle(data_dir+"test_ood2.pkl")[['uid','iid','label']].values
@@ -339,19 +343,13 @@ def run_a_trail(train_config,log_file=None, save_mode=False,save_file=None,need_
 
 
 
-#### /data/zyang/LLM/PretrainedModels/mf/best_model_d128.pth
-# with prtrain version:
+# save-best training run: known-good default config, no warm/cold eval.
 if __name__=='__main__':
     # lr_ = [1e-1,1e-2,1e-3]
     lr_=[1e-3] #1e-2
     dw_ = [1e-4]
     # embedding_size_ = [32, 64, 128, 156, 512]
     embedding_size_ = [256]
-    save_path = "/data/zyang/LLM/PretrainedModels/mf/"
-    # try:
-    #     f = open("rec_mf_search_lr"+str(lr_[0])+".log",'rw+')
-    # except:
-    #     f = open("rec_mf_search_lr"+str(lr_[0])+".log",'w+')
     f=None
     for lr in lr_:
         for wd in dw_:
@@ -362,19 +360,13 @@ if __name__=='__main__':
                     'embedding_size': embedding_size,
                     "epoch": 5000,
                     "eval_epoch":1,
-                    "patience":50,
-                    "batch_size":1024
+                    "patience":100,
+                    "batch_size":2048
                 }
                 print(train_config)
-                # save_path = "/data/zyang/LLM/PretrainedModels/mf/0912_ml100k_oodv2_best_model_d64lr-0.001wd0.0001.pth"
-                save_path = "/data/zyang/LLM/PretrainedModels/mf/0912_ml1m_oodv2_best_model_d256lr-0.001wd0.0001.pth"
-                # if os.path.exists(save_path + "0912_ml100k_oodv2_best_model_d" + str(embedding_size)+ 'lr-'+ str(lr) + "wd"+str(wd) + ".pth"):
-                #     save_path += "0912_ml100k_oodv2_best_model_d" + str(embedding_size)+ 'lr-'+ str(lr) + "wd"+str(wd) + ".pth"
-                #     print(save_path)
-                # else:
-                #     save_path += "best_model_d" + str(embedding_size) + ".pth"
-                
-                run_a_trail(train_config=train_config, log_file=f, save_mode=False,save_file=save_path,need_train=False,warm_or_cold='warm')
+                save_file = os.path.join(MF_SAVE_DIR, "0912_ml1m_oodv2_best_model_d" + str(embedding_size)+ 'lr-'+ str(lr) + "wd"+str(wd) + ".pth")
+                print("save path: ", save_file)
+                run_a_trail(train_config=train_config, log_file=f, save_mode=True, save_file=save_file, need_train=True)
     if f is not None:
         f.close()
         
