@@ -374,6 +374,9 @@ class RunnerBase:
         best_agg_metric = -100000
         best_epoch = 0
         not_change = 0
+        early_stop_epochs = self.config.run_cfg.get("early_stop_epochs", 20)
+        save_ckpt_freq = self.config.run_cfg.get("save_ckpt_freq", 0)
+        stop_reason = "max_epoch reached"
         self.set_model_mode(self.config.run_cfg.mode)
     
 
@@ -434,15 +437,24 @@ class RunnerBase:
                     if not self.evaluate_only:
                         self._save_checkpoint(cur_epoch, is_best=False)
 
+                if (
+                    save_ckpt_freq > 0
+                    and not self.evaluate_only
+                    and (cur_epoch + 1) % save_ckpt_freq == 0
+                ):
+                    self._save_checkpoint(cur_epoch, is_best=False)
+
                 if self.evaluate_only:
                     break
 
                 if self.config.run_cfg.distributed:
                     dist.barrier()
                 if not self.model_to_betrained():
+                    stop_reason = "no trainable parameters remain"
                     break
-                if not_change > 20:
-                    logging.info("Early stop. The results has not changed up to 20 epochs.")
+                if not_change > early_stop_epochs:
+                    stop_reason = "early stop: no validation improvement for {} epochs".format(early_stop_epochs)
+                    logging.info("Early stop. The results has not changed up to {} epochs.".format(early_stop_epochs))
                     break
 
         # testing phase, would only run when evaluate_only==True
@@ -451,6 +463,13 @@ class RunnerBase:
             logging.info("Evaluating on {}.".format(self.test_splits[0]))
             test_epoch = "best" if len(self.valid_splits) > 0 else cur_epoch
             self.evaluate(cur_epoch=test_epoch, skip_reload=self.evaluate_only)
+
+        if not self.evaluate_only:
+            logging.info(
+                "Training stopped: {}. Best epoch: {}, best agg_metrics: {}.".format(
+                    stop_reason, best_epoch, best_agg_metric
+                )
+            )
 
         total_time = time.time() - start_time
         total_time_str = str(datetime.timedelta(seconds=int(total_time)))

@@ -4,8 +4,11 @@ import os
 # os.environ['CURL_CA_BUNDLE'] = ''
 # os.environ["CUDA_VISIBLE_DEVICES"]="4"
 import random
+import warnings
 
 import numpy as np
+
+warnings.filterwarnings("ignore", message="Only one class is present in y_true")
 import pandas as pd
 import torch
 import torch.backends.cudnn as cudnn

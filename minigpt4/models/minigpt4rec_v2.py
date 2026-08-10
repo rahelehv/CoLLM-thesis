@@ -135,6 +135,12 @@ class MiniGPT4Rec_v2(Rec2Base):
         if use_grad_checkpoint:
             self.llama_model.model.gradient_checkpointing = True
             print("Enabling gradient checkpointing on llama_model")
+            # PEFT fix: with checkpointing, the frozen embed_tokens outputs must require grad,
+            # or backward has no graph through the checkpointed (recomputed) decoder layers.
+            def _make_inputs_require_grad(module, input, output):
+                output.requires_grad_(True)
+            self.llama_model.get_input_embeddings().register_forward_hook(_make_inputs_require_grad)
+            print("Enabled input-requires-grad hook for gradient checkpointing")
 
         self.use_lora = False
         if lora_config is not None and lora_config.use_lora:
