@@ -127,8 +127,9 @@ def main():
     device = torch.device("cuda")
     model = registry.get_model_class(cfg.model_cfg.arch).from_config(cfg.model_cfg)
     model.to(device)
-    # mirror Rec2Base.device expectation so the model's internal fp16 autocast is active
-    model.device = device
+    # base_model.device is a read-only property derived from the first parameter,
+    # so after .to(device) it already reads as 'cuda' and Rec2Base.maybe_autocast
+    # (which compares it against cpu) enables fp16 autocast as during real training.
 
     # guarantee the input-requires-grad path exists for every grad-checkpoint case
     def _make_inputs_require_grad(module, input, output):
