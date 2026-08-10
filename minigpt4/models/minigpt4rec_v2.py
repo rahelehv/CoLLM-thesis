@@ -77,7 +77,8 @@ class MiniGPT4Rec_v2(Rec2Base):
         lora_config=None,
         proj_mid=5,
         freeze_lora=False,
-        freeze_proj=False
+        freeze_proj=False,
+        use_grad_checkpoint=False
     ):
         super().__init__()
 
@@ -130,6 +131,10 @@ class MiniGPT4Rec_v2(Rec2Base):
         for name, param in self.llama_model.named_parameters():
             param.requires_grad = False
         print('Loading LLAMA Done')
+
+        if use_grad_checkpoint:
+            self.llama_model.model.gradient_checkpointing = True
+            print("Enabling gradient checkpointing on llama_model")
 
         self.use_lora = False
         if lora_config is not None and lora_config.use_lora:
@@ -1112,6 +1117,7 @@ class MiniGPT4Rec_v2(Rec2Base):
         proj_mid = cfg.get("proj_mid_times")
         freeze_proj = cfg.get("freeze_proj")
         freeze_lora = cfg.get("freeze_lora")
+        use_grad_checkpoint = cfg.get("use_grad_checkpoint", False)
 
 
         # drop_path_rate = cfg.get("drop_path_rate", 0)
@@ -1147,7 +1153,8 @@ class MiniGPT4Rec_v2(Rec2Base):
             lora_config = lora_config,
             proj_mid = proj_mid,
             freeze_lora=freeze_lora,
-            freeze_proj=freeze_proj
+            freeze_proj=freeze_proj,
+            use_grad_checkpoint=use_grad_checkpoint
         )
 
         ckpt_path = cfg.get("ckpt", "")  # load weights of MiniGPT-4
