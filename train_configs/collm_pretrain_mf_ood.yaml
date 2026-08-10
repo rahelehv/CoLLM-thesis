@@ -11,7 +11,7 @@ model:
   end_sym: "###"
   prompt_path: "prompts/tallrec_movie.txt"
   prompt_template: '{}'
-  llama_model: "/data/zyang/LLM/PretrainedModels/vicuna/working-v0/" #vicuna path
+  llama_model: "${oc.env:COLLM_LLAMA_DIR}" #vicuna path
   user_num: -100
   item_num: -100
   ans_type: 'v2' # by default
@@ -26,7 +26,7 @@ model:
     user_num: -100
     item_num: -100
     embedding_size: 256 #embedding size
-    pretrained_path: /data2/zyang/minigpt4rec-log/0912_ml1m_oodv2_best_model_d256lr-0.001wd0.0001.pth # pretrained rec model 
+    pretrained_path: "not_have" 
 
 
   #ckpt: /home/sist/zyang/LLM/minigpt4recLog/20230918143/checkpoint_best.pth # used for CIE tuning or evaluation  
@@ -35,10 +35,10 @@ model:
 
 datasets:
   movie_ood:
-    path: "/data/zyang/datasets/ml-1m/" #data path
+    path: "${oc.env:COLLM_ML1M_DIR}" #data path
     data_type: default
     build_info:
-      storage: "/data/zyang/datasets/ml-1m/" # data path
+      storage: "${oc.env:COLLM_ML1M_DIR}" # data path
 
 run:
   task: rec_pretrain
@@ -50,15 +50,16 @@ run:
 
 
   weight_decay: 1e-3 # by default
-  max_epoch: 200
+  max_epoch: 80
   iters_per_epoch: 50 #100 
-  batch_size_train: 16 # 8
-  batch_size_eval: 64 # 32
+  batch_size_train: 4 # 8
+  batch_size_eval: 16 # 32
   num_workers: 4
+  log_freq: 50
   warmup_steps: 200
 
   seed: 42
-  output_dir: /data2/zyang/minigpt4rec-log #log and model saving path
+  output_dir: ${oc.env:COLLM_OUTPUT_DIR}/collm-stage1 #log and model saving path
 
   amp: True
   resume_ckpt_path: null
@@ -71,4 +72,4 @@ run:
   device: "cuda"
   world_size: 1
   dist_url: "env://"
-  distributed: True
+  distributed: False
