@@ -11,6 +11,9 @@ import omegaconf
 import random 
 
 import os
+import warnings
+
+warnings.filterwarnings("ignore", message="Only one class is present in y_true")
 
 
 
@@ -22,7 +25,7 @@ import numpy as np
 ML1M_DATA_DIR = os.environ.get("COLLM_ML1M_DIR", "/kaggle/working/ml-1m/")
 MF_SAVE_DIR = os.environ.get("COLLM_OUTPUT_DIR", "/kaggle/working/")
 
-def uAUC_me(user, predict, label):
+def uAUC_me(user, predict, label, verbose=True):
     if not isinstance(predict,np.ndarray):
         predict = np.array(predict)
     if not isinstance(label,np.ndarray):
@@ -52,7 +55,8 @@ def uAUC_me(user, predict, label):
         total_num += counts[k]
         
         k+=1
-    print("only one interaction users:",only_one_interaction)
+    if verbose:
+        print("only one interaction users:",only_one_interaction)
     auc=[]
     only_one_class = 0
 
@@ -67,9 +71,11 @@ def uAUC_me(user, predict, label):
             # print("only one class")
         
     auc_for_user = np.array(auc)
-    print("computed user:", auc_for_user.shape[0], "can not users:", only_one_class)
+    if verbose:
+        print("computed user:", auc_for_user.shape[0], "can not users:", only_one_class)
     uauc = auc_for_user.mean()
-    print("uauc for validation Cost:", time.time()-start_time,'uauc:', uauc)
+    if verbose:
+        print("uauc for validation Cost:", time.time()-start_time,'uauc:', uauc)
     return uauc, computed_u, auc_for_user
 
 
@@ -102,6 +108,18 @@ class early_stoper(object):
                 self.reach_count += 1
                 return False
 
+    def state_dict(self):
+        return {
+            "best_metric": self.best_metric,
+            "reach_count": self.reach_count,
+            "patience": self.patience,
+        }
+
+    def load_state_dict(self, ckpt):
+        self.best_metric = ckpt.get("best_metric")
+        self.reach_count = ckpt.get("reach_count", 0)
+        self.patience = ckpt.get("patience", self.patience)
+
     def is_stop(self):
         if self.reach_count>=self.patience:
             return True
@@ -109,7 +127,7 @@ class early_stoper(object):
             return False
 
 # set random seed   
-def run_a_trail(train_config,log_file=None, save_mode=False,save_file=None,need_train=True,warm_or_cold=None):
+def run_a_trail(train_config,log_file=None, save_mode=False,save_file=None,need_train=True,warm_or_cold=None,resume=False,print_every=10,ckpt_freq=10):
     seed=2023
     random.seed(seed)
     np.random.seed(seed)
@@ -181,9 +199,14 @@ def run_a_trail(train_config,log_file=None, save_mode=False,save_file=None,need_
 
 
 
+    # Device placement is hard-coded to CUDA (model + every batch via .cuda()).
+    # For this tiny MF model on a T4 it makes no practical difference; if training
+    # a larger dataset later (e.g. Amazon-Book), switch to device-agnostic .to(device).
     model = MatrixFactorization(mf_config).cuda()
+    print("model device:", next(model.parameters()).device)
     opt = torch.optim.Adam(model.parameters(),lr=train_config['lr'],weight_decay=train_config['wd'])
     early_stop = early_stoper(ref_metric='valid_auc',incerase=True,patience=train_config['patience'])
+    ckpt_path = os.path.splitext(save_file)[0] + "_resume.pth" if save_file else None
     # trainig part
     criterion = nn.BCEWithLogitsLoss()
 
@@ -224,7 +247,39 @@ def run_a_trail(train_config,log_file=None, save_mode=False,save_file=None,need_
         return 
     
 
-    for epoch in range(train_config['epoch']):
+    start_epoch = 0
+    if resume and ckpt_path is not None and os.path.exists(ckpt_path):
+        ckpt = torch.load(ckpt_path, map_location="cpu")
+        if ckpt.get("done"):
+            print("resume: training already finished (epoch {}, reason: {}). Skipping.".format(ckpt["epoch"], ckpt.get("stop_reason")))
+            print("resume: best result:", ckpt.get("best_metric"))
+            return
+        model.load_state_dict(ckpt["model"])
+        opt.load_state_dict(ckpt["optimizer"])
+        early_stop.load_state_dict(ckpt)
+        start_epoch = ckpt["epoch"] + 1
+        print("resumed checkpoint at epoch {}; best_valid_auc={}; early_count={}".format(
+            ckpt["epoch"], (ckpt.get("best_metric") or {}).get("valid_auc"), early_stop.reach_count))
+
+    def _save_ckpt(epoch, done=False, reason=None):
+        if ckpt_path is None:
+            return
+        torch.save({
+            "model": model.state_dict(),
+            "optimizer": opt.state_dict(),
+            "epoch": epoch,
+            "done": done,
+            "stop_reason": reason,
+            "best_metric": early_stop.best_metric,
+            "reach_count": early_stop.reach_count,
+            "patience": early_stop.patience,
+            "train_config": train_config,
+        }, ckpt_path)
+
+    last_epoch = start_epoch
+    stop_reason = None
+    for epoch in range(start_epoch, train_config['epoch']):
+        last_epoch = epoch
         model.train()
         for bacth_id, batch_data in enumerate(train_data_loader):
             batch_data = batch_data.cuda()
@@ -246,7 +301,7 @@ def run_a_trail(train_config,log_file=None, save_mode=False,save_file=None,need_
                 pre.extend(ui_matching.detach().cpu().numpy())
                 label.extend(batch_data[:,-1].cpu().numpy())
             valid_auc = roc_auc_score(label,pre)
-            valid_uauc, _, _ = uAUC_me(users, pre, label)
+            valid_uauc, _, _ = uAUC_me(users, pre, label, verbose=(epoch % print_every == 0))
 
             pre=[]
             label = []
@@ -258,23 +313,36 @@ def run_a_trail(train_config,log_file=None, save_mode=False,save_file=None,need_
                 pre.extend(ui_matching.detach().cpu().numpy())
                 label.extend(batch_data[:,-1].cpu().numpy())
             test_auc = roc_auc_score(label,pre)
-            test_uauc, _, _ = uAUC_me(users, pre, label)
+            test_uauc, _, _ = uAUC_me(users, pre, label, verbose=(epoch % print_every == 0))
 
             updated = early_stop.update({'valid_auc':valid_auc, 'valid_uauc':valid_uauc,'test_auc':test_auc, 'test_uauc':test_uauc, 'epoch':epoch})
             if updated and save_mode:
                 torch.save(model.state_dict(),save_file)
 
 
-            print("epoch:{}, valid_auc:{}, test_auc:{}, early_count:{}".format(epoch, valid_auc, test_auc, early_stop.reach_count))
+            if epoch % print_every == 0:
+                print("epoch:{}, valid_auc:{}, test_auc:{}, early_count:{}".format(epoch, valid_auc, test_auc, early_stop.reach_count))
+            if epoch % ckpt_freq == 0:
+                _save_ckpt(epoch)
             if early_stop.is_stop():
                 print("early stop is reached....!")
+                stop_reason = "early_stop (valid_auc made no improvement for {} eval epochs)".format(early_stop.patience)
+                _save_ckpt(epoch, done=True, reason=stop_reason)
                 # print("best results:", early_stop.best_metric)
                 break
             if epoch>500 and early_stop.best_metric[early_stop.ref_metric] < 0.52:
                 print("training reaches to 500 epoch but the valid_auc is still less than 0.55")
+                stop_reason = "low_auc_guard (epoch>500 and valid_auc<0.52)"
+                _save_ckpt(epoch, done=True, reason=stop_reason)
                 break
+    if stop_reason is None:
+        stop_reason = "finished all {} epochs with no early stop".format(train_config['epoch'])
+        _save_ckpt(last_epoch, done=True, reason=stop_reason)
+    best = early_stop.best_metric or {}
+    print("Training stopped due to: {}, at epoch {}, best_valid_auc={}".format(stop_reason, last_epoch, best.get("valid_auc")))
     print("train_config:", train_config,"\nbest result:",early_stop.best_metric) 
     if log_file is not None:
+        print("Training stopped due to: {}, at epoch {}, best_valid_auc={}".format(stop_reason, last_epoch, best.get("valid_auc")), file=log_file)
         print("train_config:", train_config, "best result:", early_stop.best_metric, file=log_file)
         log_file.flush()
 
@@ -366,7 +434,7 @@ if __name__=='__main__':
                 print(train_config)
                 save_file = os.path.join(MF_SAVE_DIR, "0912_ml1m_oodv2_best_model_d" + str(embedding_size)+ 'lr-'+ str(lr) + "wd"+str(wd) + ".pth")
                 print("save path: ", save_file)
-                run_a_trail(train_config=train_config, log_file=f, save_mode=True, save_file=save_file, need_train=True)
+                run_a_trail(train_config=train_config, log_file=f, save_mode=True, save_file=save_file, need_train=True, resume=True)
     if f is not None:
         f.close()
         
