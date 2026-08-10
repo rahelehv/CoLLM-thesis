@@ -394,7 +394,7 @@ class RunnerBase:
                     # having lora or IDs are used
                     train_stats = self.train_epoch(cur_epoch)
                     self.log_stats(split_name="train", stats=train_stats)
-                    # torch.cuda.empty_cache()
+                    torch.cuda.empty_cache()
                 
                         
                 # evaluation phase
@@ -405,7 +405,7 @@ class RunnerBase:
                         val_log = self.eval_epoch(
                             split_name=split_name, cur_epoch=cur_epoch
                         )
-                        # torch.cuda.empty_cache()
+                        torch.cuda.empty_cache()
                         
                         if val_log is not None:
                             if is_main_process():
@@ -430,7 +430,8 @@ class RunnerBase:
                                 not_change += 1
                                 # if not_change > 20: # early stop
                                 #     break
-                        # torch.cuda.empty_cache()
+                        torch.cuda.empty_cache()
+                    # torch.cuda.empty_cache()
 
                 else:
                     # if no validation split is provided, we just save the checkpoint at the end of each epoch.
