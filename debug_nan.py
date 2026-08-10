@@ -27,13 +27,16 @@ def parse_args():
     return parser.parse_args()
 
 
-def build_samples(device, b):
-    # synthetic batch feeding forward_v2 exactly like training does for tallrec (no IDs):
-    # only UserID / TargetItemID / label are touched on the no-ID path.
+def build_samples(device, b, ann):
+    # Mirror MoiveOOData.__getitem__ (no-history branch, minigpt4/datasets/datasets/rec_datasets.py:304)
+    # using real train_ood2 rows, so the batch has exactly the fields recprompt_wrap_v2 touches
+    # (notably TargetItemTitle, which it indexes for every sample at minigpt4rec_v2.py:518).
+    rows = ann.iloc[:b]
     return {
-        "UserID": torch.randint(0, 800, (b,), device=device),
-        "TargetItemID": torch.randint(0, 3000, (b,), device=device),
-        "label": torch.tensor([1, 0] * (b // 2 + 1), dtype=torch.long, device=device)[:b],
+        "UserID": torch.tensor(rows["uid"].values, dtype=torch.long, device=device),
+        "TargetItemID": torch.tensor(rows["iid"].values, dtype=torch.long, device=device),
+        "TargetItemTitle": [str(t).strip(" ") for t in rows["title"].values],
+        "label": torch.tensor(rows["label"].values.astype(np.int64), dtype=torch.long, device=device),
     }
 
 
@@ -55,7 +58,7 @@ def scan_params(tag, named_params):
     print("scan {:<18} max|w|={:.4e} nan={} inf={} worst={}".format(tag, max_abs, total_nan, total_inf, worst))
 
 
-def run_case(model, device, name, grad_check, use_lora, train_mode, b):
+def run_case(model, device, ann, name, grad_check, use_lora, train_mode, b):
     torch.cuda.empty_cache()
     model.llama_model.model.gradient_checkpointing = bool(grad_check)
     model.use_lora = use_lora
@@ -76,7 +79,7 @@ def run_case(model, device, name, grad_check, use_lora, train_mode, b):
     for i, layer in enumerate(model.llama_model.model.layers):
         hooks.append(layer.register_forward_hook(make_output_hook(i)))
 
-    samples = build_samples(device, b)
+    samples = build_samples(device, b, ann)
     loss_val = float("nan")
     logits_max = float("nan")
     try:
@@ -153,7 +156,7 @@ def main():
         ("C train ckpt ON no-lora", True, False, True, 1),
         ("D eval ckpt OFF", False, True, False, 2),
     ]
-    results = [run_case(model, device, *case) for case in cases]
+    results = [run_case(model, device, train_, *case) for case in cases]
 
     print("== verdict ==")
     for case, res in zip(cases, results):
