@@ -723,12 +723,27 @@ class RunnerBase:
         self.start_epoch = checkpoint["epoch"] + 1
         logging.info("Resume checkpoint from {}".format(url_or_filename))
 
+    def _json_safe(self, obj):
+        import numpy as np
+
+        if isinstance(obj, dict):
+            return {k: self._json_safe(v) for k, v in obj.items()}
+        if isinstance(obj, (list, tuple)):
+            return [self._json_safe(v) for v in obj]
+        if isinstance(obj, (np.integer, np.floating)):
+            return obj.item()
+        if isinstance(obj, np.ndarray):
+            return self._json_safe(obj.tolist())
+        if isinstance(obj, torch.Tensor):
+            return self._json_safe(obj.detach().cpu().tolist())
+        return obj
+
     @main_process
     def log_stats(self, stats, split_name):
         if isinstance(stats, dict):
             log_stats = {**{f"{split_name}_{k}": v for k, v in stats.items()}}
             with open(os.path.join(self.output_dir, "log.txt"), "a") as f:
-                f.write(json.dumps(log_stats) + "\n")
+                f.write(json.dumps(self._json_safe(log_stats)) + "\n")
         elif isinstance(stats, list):
             pass
 
