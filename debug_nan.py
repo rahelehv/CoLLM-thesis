@@ -186,10 +186,10 @@ def replicate_inputs(model, device, ann, b=2):
     stat("raw attention_mask", raw_mask)
     stat("prepared mask4d", mask4d)
     print("  raw_mask pad count: {} of {}".format(int((raw_mask == 0).sum()), raw_mask.numel()))
-    return inputs_embeds, mask4d, position_ids
+    return inputs_embeds, mask4d, position_ids, raw_mask
 
 
-def _layer0_steps(layer0, h, mask4d, position_ids, tag):
+def _layer0_steps(layer0, h, mask4d, position_ids, tag, raw_mask=None):
     # step-by-step clone of LlamaDecoderLayer.forward inside LlamaAttention, recording
     # finite-ness at every intermediate so the first NaN/Inf op is identified.
     bsz, q_len, _ = h.shape
@@ -207,8 +207,13 @@ def _layer0_steps(layer0, h, mask4d, position_ids, tag):
         v = v0.view(bsz, q_len, nh, hd).transpose(1, 2)
         steps["q_proj"], steps["k_proj"], steps["v_proj"] = q0, k0, v0
         cos, sin = layer0.self_attn.rotary_emb(v, seq_len=q_len)
+        steps["rotary_cos"], steps["rotary_sin"] = cos, sin
+        qabs = q.abs().amax(dim=(0, 1, 3))
+        steps["q_absmax_per_pos"] = qabs
         q, k = apply_rotary_pos_emb(q, k, cos, sin, position_ids)
         steps["q_rot"], steps["k_rot"] = q, k
+        qrotabs = q.abs().amax(dim=(0, 1, 3))
+        steps["q_rot_absmax_per_pos"] = qrotabs
         qk = torch.matmul(q, k.transpose(-2, -1)) / math.sqrt(hd)
         steps["attn_qk"] = qk
         qk_m = torch.max(
@@ -230,12 +235,33 @@ def _layer0_steps(layer0, h, mask4d, position_ids, tag):
     print("  -- {} layer-0 steps --".format(tag))
     for name, t in steps.items():
         stat(name, t)
+    print("    position_ids =", position_ids.view(-1).cpu().tolist())
+    print("    max|q| per position =", [float(x) for x in steps["q_absmax_per_pos"].cpu()])
+    print("    max|q_rot| per position =", [float(x) for x in steps["q_rot_absmax_per_pos"].cpu()])
+    if raw_mask is not None:
+        pad_pos = [int(i) for i in range(raw_mask.size(1)) if int(raw_mask[0, i]) == 0]
+        print("    padded positions (sample 0) =", pad_pos)
+        qrot_n = steps["q_rot"][:, :, pad_pos, :].abs()
+        if qrot_n.numel():
+            print(
+                "    q_rot max over padded positions = {:.3e}".format(float(qrot_n.max()))
+            )
     return steps
 
 
-def probe_layer0(model, device, inputs_embeds, mask4d, position_ids):
+def probe_layer0(model, device, inputs_embeds, mask4d, position_ids, raw_mask=None):
     layer0 = model.llama_model.model.layers[0]
     bsz, seq, _ = inputs_embeds.shape
+
+    print("-- module identity (is this repo's modeling_llama running?) --")
+    attn = layer0.self_attn
+    print("  self_attn class: {}".format(type(attn)))
+    print("  rotary_emb class: {}".format(type(attn.rotary_emb)))
+    print("  rotary_emb module: {}".format(attn.rotary_emb.__class__.__module__))
+    print("  q/k/v/o proj type: {}".format(type(attn.q_proj)))
+    print("  cfg rope_scaling/rope_type: {}/{}".format(
+        getattr(model.llama_model.config, "rope_scaling", None),
+        getattr(model.llama_model.config, "rope_type", None)))
 
     print("-- mask variant quick checks (fp16 layer0 out) --")
     variants = {
@@ -248,7 +274,7 @@ def probe_layer0(model, device, inputs_embeds, mask4d, position_ids):
     for name, out in variants.items():
         stat("layer0_out: " + name, out)
 
-    _layer0_steps(layer0, inputs_embeds, mask4d, position_ids, "FP16")
+    _layer0_steps(layer0, inputs_embeds, mask4d, position_ids, "FP16", raw_mask=raw_mask)
 
     layer0_f32 = copy.deepcopy(layer0).float().to(device)
     pos_ids_t = position_ids.long()
@@ -258,7 +284,21 @@ def probe_layer0(model, device, inputs_embeds, mask4d, position_ids):
         mask4d.float(),
         pos_ids_t,
         "FP32",
+        raw_mask=raw_mask,
     )
+
+    print("-- canary: bounded random input through the same code path --")
+    rot = layer0.self_attn.rotary_emb
+    print("    inv_freq head/tail =", rot.inv_freq[:5].cpu().tolist(), rot.inv_freq[-3:].cpu().tolist())
+    print("    max_seq_len_cached =", rot.max_seq_len_cached,
+          " cos_cached min/max = {:.3f}/{:.3f}".format(
+              float(rot.cos_cached.min()), float(rot.cos_cached.max())))
+    h_fake = torch.randn(1, seq, 64, device=device, dtype=torch.float16).abs() * (1.0 / 128) + 0.0001
+    cos_f, sin_f = rot(h_fake.transpose(1, 2), seq_len=seq)
+    q_f = torch.randn(1, 32, seq, 128, device=device) * 0.1
+    q_f_rot, _ = apply_rotary_pos_emb(q_f, q_f, cos_f.float(), sin_f.float(), position_ids.long())
+    print("    canary max|q_rot|  = {:.3e}  (must be ~<1.0; if ~1e35 -> code path broken)".format(
+        float(q_f_rot.abs().max())))
 
 
 def main():
@@ -309,9 +349,9 @@ def main():
     for case, res in zip(cases, results):
         print("  {} -> {}".format(case[0], "NaN" if res[0] else "finite"))
 
-    inputs_embeds, mask4d, position_ids = replicate_inputs(model, device, train_)
+    inputs_embeds, mask4d, position_ids, raw_mask = replicate_inputs(model, device, train_)
     print("== case E: layer-0 step-by-step fp16 vs fp32 ==")
-    probe_layer0(model, device, inputs_embeds, mask4d, position_ids)
+    probe_layer0(model, device, inputs_embeds, mask4d, position_ids, raw_mask)
 
 
 if __name__ == "__main__":
