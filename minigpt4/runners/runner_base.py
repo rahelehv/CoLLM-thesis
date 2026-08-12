@@ -638,18 +638,28 @@ class RunnerBase:
     def _save_checkpoint(self, cur_epoch, is_best=False):
         """
         Save the checkpoint at the current epoch.
+
+        Only genuinely trainable parameters are persisted (LoRA adapters and any
+        stage-specific trainable module such as the CIE/llama_proj mapping layer),
+        so checkpoints stay tiny. Never persist the frozen LLM base weights.
         """
         model_no_ddp = self.unwrap_dist_model(self.model)
-        param_grad_dic = {
-            k: v.requires_grad for (k, v) in model_no_ddp.named_parameters()
+        trainable = {
+            k: v for (k, v) in model_no_ddp.named_parameters() if v.requires_grad
         }
         state_dict = model_no_ddp.state_dict()
-        for k in list(state_dict.keys()):
-            if k in param_grad_dic.keys() and not param_grad_dic[k]:
-                # delete parameters that do not require gradient
-                del state_dict[k]
+        saved_state = {}
+        for k in state_dict.keys():
+            if k not in trainable:
+                # skip frozen parameters and buffers (e.g. rotary inv_freq,
+                # which is re-derived deterministically at init)
+                continue
+            if k.startswith("llama_model") and "lora_" not in k:
+                # never persist the base LLM weights under any name
+                continue
+            saved_state[k] = state_dict[k]
         save_obj = {
-            "model": state_dict,
+            "model": saved_state,
             "optimizer": self.optimizer.state_dict(),
             "config": self.config.to_dict(),
             "scaler": self.scaler.state_dict() if self.scaler else None,
@@ -659,7 +669,14 @@ class RunnerBase:
             self.output_dir,
             "checkpoint_{}.pth".format("best" if is_best else cur_epoch),
         )
-        logging.info("Saving checkpoint at epoch {} to {}.".format(cur_epoch, save_to))
+        model_mb = (
+            sum(v.numel() * v.element_size() for v in saved_state.values()) / 1e6
+        )
+        logging.info(
+            "Saving checkpoint at epoch {} to {} (model state {:.1f} MB, {} keys).".format(
+                cur_epoch, save_to, model_mb, len(saved_state)
+            )
+        )
         torch.save(save_obj, save_to)
 
     def _reload_best_model(self, model):
