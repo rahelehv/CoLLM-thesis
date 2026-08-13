@@ -9,6 +9,10 @@ import warnings
 import numpy as np
 
 warnings.filterwarnings("ignore", message="Only one class is present in y_true")
+warnings.filterwarnings("ignore", category=FutureWarning)
+warnings.filterwarnings("ignore", category=DeprecationWarning)
+warnings.filterwarnings("ignore", category=UserWarning, module="transformers")
+warnings.filterwarnings("ignore", category=UserWarning, module="peft")
 import pandas as pd
 import torch
 import torch.backends.cudnn as cudnn
