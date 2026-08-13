@@ -397,8 +397,10 @@ class RunnerBase:
                     torch.cuda.empty_cache()
                 
                         
-                # evaluation phase
-                if len(self.valid_splits) > 0:
+                # evaluation phase (only every eval_freq epochs; validation is
+                # the dominant wall-clock cost, so skip it when possible)
+                eval_freq = self.config.run_cfg.get("eval_freq", 1)
+                if len(self.valid_splits) > 0 and cur_epoch % eval_freq == 0:
                     for split_name in self.valid_splits:
                         logging.info("Evaluating on {}.".format(split_name))
 

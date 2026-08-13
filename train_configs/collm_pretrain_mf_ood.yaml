@@ -54,6 +54,7 @@ run:
   max_epoch: 80
   early_stop_epochs: 20 # stop if no validation improvement for this many epochs
   save_ckpt_freq: 20 # also save a plain checkpoint every N epochs (for session resume)
+  eval_freq: 2 # run validation (1300 batches/epoch, the dominant cost) every N epochs
   iters_per_epoch: 50 #100 
   batch_size_train: 4 # 8
   batch_size_eval: 4 # 32
