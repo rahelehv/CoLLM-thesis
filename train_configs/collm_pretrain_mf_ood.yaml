@@ -52,7 +52,7 @@ run:
 
   weight_decay: 1e-3 # by default
   max_epoch: 80
-  early_stop_epochs: 20 # stop if no validation improvement for this many epochs
+  early_stop_epochs: 10 # in EVALUATED epochs (eval_freq=2 -> ~20 real epochs), keeps patience equivalent to before
   save_ckpt_freq: 20 # also save a plain checkpoint every N epochs (for session resume)
   eval_freq: 2 # run validation (1300 batches/epoch, the dominant cost) every N epochs
   iters_per_epoch: 50 #100 
