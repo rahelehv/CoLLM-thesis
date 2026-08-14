@@ -542,7 +542,13 @@ class MiniGPT4Rec_v2(Rec2Base):
                 
 
             replaced_idx = torch.nonzero(prompts_tokens.input_ids==unk_token_id)
-            prompt_embeds = self.llama_model.model.embed_tokens(prompts_tokens.input_ids)
+            # clone the embed output before in-place ID injection: with grad
+            # checkpointing the input-requires-grad hook makes this output a leaf
+            # that requires grad, and in-place assignment on such a leaf raises
+            # "a leaf Variable that requires grad is being used in an in-place
+            # operation". .clone() makes it a non-leaf, so the write is legal AND
+            # autograd still backprops into the assigned CIE (llama_proj) values.
+            prompt_embeds = self.llama_model.model.embed_tokens(prompts_tokens.input_ids).clone()
             # prompt_embeds[replaced_idx[:,0],replaced_idx[:,1]] = samples['merged_embs']
             if "<UserID>" in prompt_ori  and "<ItemIDList>" in prompt_ori and  "<TargetItemID>" in prompt_ori:
                 prompt_embeds[replaced_idx[:,0],replaced_idx[:,1]] = samples['merged_embs']
