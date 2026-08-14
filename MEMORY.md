@@ -3,14 +3,15 @@
 ## Phase 1: MF recommender training - DONE
 - baseline_train_mf_ood.py trained successfully on ML-1M.
 - Result: best_valid_auc=0.676, epoch 467, early-stopped.
-- Output .pth file saved locally on my machine (not in repo/Kaggle) - needs to be re-uploaded to Kaggle when Phase 3 starts.
+- Output committed to repo: weights/0912_ml1m_oodv2_best_model_d256lr-0.001wd0.0001.pth (~4MB). On Kaggle: /kaggle/working/CoLLM/weights/... ; used as model.rec_config.pretrained_path in stage 2 via env var COLLM_MF_REC_PTH.
 - Added: warning suppression, throttled logging, checkpoint/resume, env-var paths (COLLM_ML1M_DIR, COLLM_OUTPUT_DIR).
 
-## Phase 2: LoRA + Vicuna text-only (paper Stage 1) - DIAGNOSTIC DONE, READY FOR FULL TRAINING RUN
+## Phase 2: LoRA + Vicuna text-only (paper Stage 1) - DONE
 - Entrypoint: train_collm_mf_din.py --cfg-path=train_configs/collm_pretrain_mf_ood.yaml
-- Env vars needed: COLLM_LLAMA_DIR, COLLM_ML1M_DIR, COLLM_OUTPUT_DIR
-- Vicuna-7B v0 weights: HF mirror mvsoom/pandagpt-vicuna-v0-7b (~18GB, download via huggingface_hub.snapshot_download on Kaggle each fresh session).
-- Fixed: CUDA OOM (gradient checkpointing + empty_cache + reduced eval batch), grad_fn RuntimeError (LoRA+checkpointing interaction), and the ROOT CAUSE of NaN loss: transformers version mismatch. Kaggle pip install had pulled transformers v4.50 (incompatible with this repo's 4.28-era modeling_llama.py fork), corrupting rotary embeddings.
+- Result: best_valid_auc=0.662, best epoch 10, early-stopped after 10 evaluated epochs. Total 5h08m (eval_freq=2 cut it from ~8.5h).
+- Checkpoint (~17MB LoRA-only): backed up as Kaggle Model collm-stage1-lora-checkpoint AND locally on my machine.
+- Env vars: COLLM_LLAMA_DIR, COLLM_ML1M_DIR, COLLM_OUTPUT_DIR.
+- Fixed: CUDA OOM (gradient checkpointing + empty_cache + reduced eval batch), grad_fn RuntimeError (LoRA+checkpointing interaction), and ROOT CAUSE of NaN loss: transformers version mismatch. Kaggle pip had pulled transformers v4.50 (incompatible with this repo's 4.28-era modeling_llama.py fork), corrupting rotary embeddings.
 - REQUIRED KAGGLE SETUP (every fresh session, in this exact order):
   1. pip install torch pandas numpy scikit-learn pyyaml omegaconf iopath decord webdataset bitsandbytes (NO transformers, NO peft here)
   2. pip install "transformers==4.28.0" --no-deps
@@ -18,12 +19,23 @@
   4. Patch tokenizers version check: find transformers/dependency_versions_table.py and replace the "tokenizers": "tokenizers>=...,<0.14" line with "tokenizers": "tokenizers" (bypasses an artificial version gate; this repo never uses the fast tokenizer, confirmed safe by code audit).
   5. Restart kernel/session after the patch (Python caches the import).
   6. Verify: import transformers, peft; should show 4.28.0 and 0.3.0 with no ImportError.
-- debug_nan.py exists at repo root as a diagnostic tool (5 forward-pass cases + weight scan + layer-0 step trace + canary) - reusable if similar issues appear in Phase 3.
-- NEXT STEP: run the full training command above and let it run to completion (~3-6h estimated for 80 epochs on single T4, fp16, batch 4, grad checkpointing on).
+- debug_nan.py exists at repo root as a diagnostic tool (5 forward-pass cases + weight scan + layer-0 step trace + canary).
+- NOTE: the automatic Kaggle Dataset sync (kaggle_checkpoint_sync.py / collm-stage1-checkpoints) did NOT reliably push; fell back to manual download from the session Output panel. Prefer manual backup for stage-2 too.
+
+## Phase 3: CIE module tuning (paper Stage 2) - DONE
+- Entrypoint: train_collm_mf_din.py --cfg-path=train_configs/collm_finetune_mf_ood.yaml
+- Config: freeze_rec=True, freeze_proj=False, freeze_lora=True, prompt=prompts/collm_movie.txt (WITH IDs), model.ckpt=${oc.env:COLLM_STAGE1_CKPT}, rec_config.pretrained_path=${oc.env:COLLM_MF_REC_PTH}, output_dir=${COLLM_OUTPUT_DIR}/collm-stage2.
+- Result: best_valid_auc=0.7257, best epoch 28, early-stopped after 10 evaluated epochs with no improvement. Total 9h22m.
+- Clear improvement over stage-1 (0.662) -> confirms the paper's claim that collaborative info via CIE over frozen MF + frozen LoRA helps.
+- Checkpoint: /kaggle/working/collm_logs/collm-stage2/*/checkpoint_best.pth (~44MB). NOT YET BACKED UP (TODO: download locally + create Kaggle Model collm-stage2-cie-checkpoint).
+- Fixed during Phase 3: in-place autograd error "a leaf Variable that requires grad is being used in an in-place operation" at minigpt4rec_v2.py:550 (recprompt_wrap_v2 ID-embedding merge). Cause: our grad-checkpoint input-requires-grad hook makes the embed output a grad-requiring LEAF, and in-place indexed assignment on a leaf raises; stage-1 never hit it because tallrec prompt has no ID tags. Fix: .clone() the embed output before the indexed assignment (minigpt4rec_v2.py:545, commit 219438f). Verified via repro that grad still flows into llama_proj (detach would have silently killed it).
+
+## Phase 4: Evaluation against paper's Table II - NEXT
+- Use the stage-2 (CIE) checkpoint. Evaluate-only run of train_collm_mf_din.py with run.evaluate=True (test_splits: ["test","valid"] already set; optionally warm/cold via test_warm_cold_ood2.pkl).
+- No training -> short run (~30-40 min for both splits at batch_size_eval 4).
+- Optional: dedicated eval config file (e.g. collm_eval_mf_ood.yaml) or --options overrides (details in session notes).
 
 ## Not yet started
-- Phase 3: CIE module (mapping layer) tuning, using Phase 1 + Phase 2 outputs.
-- Phase 4: Evaluation against paper's Table II.
 - LightGCN/SASRec baseline scripts: same logging/checkpoint improvements as MF are planned but deferred until actually needed.
 
 ## Kaggle setup notes
