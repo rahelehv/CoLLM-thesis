@@ -66,6 +66,62 @@ def uAUC_me(user, predict, label):
     print("uauc for validation Cost:", time.time()-start_time,'uauc:', uauc)
     return uauc, computed_u, auc_for_user
 
+def u_dcg(predict, label):
+    pos_num = label.sum()
+    labels_unique = np.unique(label)
+    if labels_unique.shape[0] <2 or label.shape[-1] <2:
+        return -1
+    ranked_id = np.argsort(-predict)
+    ranked_label = label[ranked_id]
+    flag = 1.0 / np.log2(np.arange(ranked_label.shape[-1])+2.0)
+    dcg = (ranked_label * flag).sum()
+    idcg = flag[:pos_num].sum()
+    return dcg/idcg
+
+def compute_dcg(user, predict, label):
+    predict = predict.squeeze()
+    label = label.squeeze()
+    start_time = time.time()
+    u, inverse, counts = np.unique(user,return_inverse=True,return_counts=True) # sort in increasing
+    index = np.argsort(inverse)
+    candidates_dict = {}
+    k = 0
+    total_num = 0
+    only_one_interaction = 0
+    computed_u = []
+    for u_i in u:
+        start_id,end_id = total_num, total_num+counts[k]
+        u_i_counts = counts[k]
+        index_ui = index[start_id:end_id]
+        if u_i_counts ==1:
+            only_one_interaction += 1
+            total_num += counts[k]
+            k += 1
+            continue
+        candidates_dict[u_i] = [predict[index_ui], label[index_ui]]
+        total_num += counts[k]
+
+        k+=1
+    print("only one interaction users:",only_one_interaction)
+    ndcg=[]
+    only_one_class = 0
+
+    for ui,pre_and_true in candidates_dict.items():
+        pre_i,label_i = pre_and_true
+
+        ui_ndcg = u_dcg(pre_i,label_i)
+        if ui_ndcg >=0:
+            ndcg.append(ui_ndcg)
+            computed_u.append(ui)
+        else:
+            only_one_class += 1
+
+    ndcg_for_user = np.array(ndcg)
+    print("computed user:", ndcg_for_user.shape[0], "can not users:", only_one_class)
+    ndcg = ndcg_for_user.mean()
+    print("ndcg for validation Cost:", time.time()-start_time,'ndcg:', ndcg)
+    return ndcg, computed_u, ndcg_for_user
+
 # Function to gather tensors across processes
 def gather_tensor(tensor, dst=0):
     if dist.is_available():
@@ -230,10 +286,12 @@ class RecBaseTask(BaseTask):
                 print("computing....")
                 auc = roc_auc_score(labels_a, results_logits_a)
                 uauc, _, _ = uAUC_me(users_a,results_logits_a,labels_a)
+                ndcg, _, _ = compute_dcg(users_a,results_logits_a,labels_a)
                 print("finished comput auc.....")
             else:
                 auc = roc_auc_score(labels_.cpu().numpy(), results_logits_.cpu().numpy())
                 uauc = uAUC_me(users_.cpu().numpy(), results_logits_.cpu().numpy(), labels_.cpu().numpy())
+                ndcg = compute_dcg(users_.cpu().numpy(), results_logits_.cpu().numpy(), labels_.cpu().numpy())[0]
             
 
             if is_dist_avail_and_initialized():
@@ -246,7 +304,7 @@ class RecBaseTask(BaseTask):
             # # print("Label type......",type(labels),labels)
             if use_auc:
                 auc_rank0 = roc_auc_score(labels_.cpu().numpy(), results_logits_.cpu().numpy())
-            logging.info("Averaged stats: " + str(metric_logger.global_avg()) + " ***auc: " + str(auc) + " ***uauc:" +str(uauc) )
+            logging.info("Averaged stats: " + str(metric_logger.global_avg()) + " ***auc: " + str(auc) + " ***uauc:" +str(uauc) + " ***ndcg:" + str(ndcg) )
             print("rank_0 auc:", str(auc_rank0))
             
             if use_auc:
@@ -254,7 +312,8 @@ class RecBaseTask(BaseTask):
                     'agg_metrics':auc,
                     'acc': metric_logger.meters['acc'].global_avg,
                     'loss':  metric_logger.meters['loss'].global_avg,
-                    'uauc': uauc
+                    'uauc': uauc,
+                    'ndcg': ndcg
                 }
             else: # only loss usable
                 results = {
