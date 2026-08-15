@@ -6,7 +6,10 @@
 
 This report is written to serve three purposes at once: (1) a deep technical record for the author's own understanding, (2) a reference for the thesis advisor and committee to probe any decision, and (3) raw material to adapt into the implementation chapter of the thesis. It deliberately includes the messy parts — the wrong turns, the dead ends, and the reasoning behind every choice — because that is what makes it defensible in a thesis defense.
 
-All commit hashes and dates are exact and pulled from `git log`. All metrics are exact and pulled from MEMORY.md and the final run logs.
+All commit hashes and dates are exact and pulled from `git log`. All metrics, timings, config values, and freeze-flag settings in Sections 3-6 were verified against the raw run logs in `raw_logs/` (Phase 1-4 cell outputs and official `log.txt` dumps). Two verification caveats, stated plainly:
+
+- **Config change *history*** (e.g. `max_epoch` 200→80, batch 16→4 / 64→16→8→4) comes from commit diffs; the logs confirm only the **final values actually used at runtime** (`batch_size_train=4`, `batch_size_eval=4`, `max_epoch=80`, ...).
+- **Debugging narratives** in Sections 2 and 4-6 (exact error messages for OOM / `grad_fn` / NaN / JSON / the `cput` typo, NaN magnitudes, the lost 8.5 h run, the 18 GB download) are reconstructed from commit history and session notes, **not** from these run logs — the logs capture only the final successful runs. Where a value is a runtime result it is quoted from the logs; where it is a narrative detail it is flagged as such.
 
 ---
 
@@ -381,7 +384,7 @@ The model builder loads **one** `model.ckpt`. But:
 Loading stage-2's ckpt alone into the eval model would leave LoRA at its *initialized* values (untrained); loading stage-1's alone would leave `llama_proj` random.
 
 ### Solution: `merge_stage_ckpts.py`
-A 61-line tool that loads both `'model'` dicts, unions them (`stage-2 keys take precedence on collision`), and writes one merged file for `model.ckpt`. It prints diagnostics (key counts, overlap, sample keys) so a mismatch is visible in the log. Expected overlap = 0 (they're disjoint by construction). Verified with synthetic checkpoints before use.
+A 60-line tool that loads both `'model'` dicts, unions them (`stage-2 keys take precedence on collision`), and writes one merged file for `model.ckpt`. It prints diagnostics (key counts, overlap, sample keys) so a mismatch is visible in the log. Expected overlap = 0 (they're disjoint by construction). Verified with synthetic checkpoints before use.
 
 Why a merge script rather than teaching the eval path to load two files: the eval path is the authors' single-ckpt design; a standalone merge tool is a zero-risk, reusable utility that leaves the core code untouched. It also gave us the key-count diagnostics that confirm the two artifacts are what we think they are.
 
@@ -444,7 +447,17 @@ Config: `collm_eval_mf_ood.yaml` (`evaluate: True`, `test_splits: ["test","valid
 
 **Valid split (sanity):** AUC=0.7257, NDCG=0.8646 — matches the training-time `best_valid_auc` exactly, confirming the eval path is consistent with what early-stopping saw.
 
-**UAUC = nan:** UAUC averages per-user AUC, and per-user AUC requires each user to have **both classes** present. Our test split contains users with only single interactions (or single-class label sets), for whom per-user AUC is undefined. `uAUC_me` silently produces an empty set for those users; if the *entire* computable subset collapses (in our split the usable per-user set is empty — effectively all users fall into the single-interaction/single-class bucket under this protocol), the mean of an empty array is nan. The paper reports 0.6875, presumably under a different per-user protocol or a split where more users qualify.
+**UAUC = nan:** UAUC is the mean of per-user AUCs, and per-user AUC requires each user to have **both classes** present. The log is explicit about what happened, and it is *not* an empty subset:
+
+```
+only one interaction users: 33
+computed user: 287 can not users: 0
+uauc for validation Cost: ... uauc: nan
+```
+
+287 users **were** computed (no single-class exclusions, no exceptions), yet the result is `nan`. Inspecting the logged `***uauc:` tuple shows why: the reported value is `(np.float64(nan), [user ids...], array([... per-user AUCs ...]))` — the third element, the per-user AUC array itself, contains `nan` entries, and `np.mean` of an array containing any `nan` is `nan`. So at least one user's `roc_auc_score` call returned `nan` (rather than raising, which would have been counted in `can not users`). This is a **per-user metric artifact**, not a "no valid users" situation: 287 users were computable, and the aggregate mean is poisoned by a `nan` returned for some subset of them.
+
+The same `nan` appears in **every** phase's logs, including Phase 1's plain-MF baseline (`computed user: 326 can not users: 0 ... uauc: nan` and `287 ... uauc: nan` on the same test/valid sets) and Phase 2's and Phase 3's validation loops — so it is a consistent property of this data + metric code path, not something Phase 4 (or the fused CoLLM model) introduced. We did not further chase which exact per-user input produces the `nan` (it does not affect training or the AUC/NDCG results). The paper's 0.6875 presumably comes from a different per-user protocol or a split where the per-user AUCs are all finite.
 
 ### What this means (and how to present it in a thesis)
 - The **headline claim is reproduced**: fusing collaborative info (0.7434) beats text-only (0.662) by a wide margin, and the fused system is right in the paper's range — even slightly above on AUC.
@@ -537,7 +550,7 @@ These must be stated plainly in the thesis. None invalidate the headline result,
 
 2. **NDCG is our own implementation, protocol not verified against the paper.** (Section 6.2.) We ported the repo's dormant `u_dcg`/`compute_dcg` and compute per-user NDCG over all test samples ranked by logit. The paper's exact NDCG protocol (candidate set, top-k, aggregation) is unknown to us. The 0.8663 vs 0.8714 gap is likely protocol noise; claim it as "our NDCG," not "the paper's NDCG."
 
-3. **UAUC is nan in our test split.** (Section 6.4.) A protocol/data artifact (no computable per-user AUC subset), not a model failure. The paper's 0.6875 is not reproduced; we did not reverse-engineer their per-user protocol.
+3. **UAUC is nan in our test split.** (Section 6.4.) The log shows 287 users *were* computable (`computed user: 287 can not users: 0`), but the per-user AUC array contains `nan` entries, so the aggregate mean is `nan`. This is a metric-code artifact — it appears identically in every phase including the plain MF baseline — not a model failure. The paper's 0.6875 is not reproduced; we did not reverse-engineer their per-user protocol.
 
 4. **Single-GPU vs. paper's likely multi-GPU.** We ran single-T4 (`world_size=1`, `distributed=False`). DDP in this repo replicates the model (no activation sharding), so our config is memory-equivalent but slower; batch size and any batch-dependent regularization/statistics may differ slightly from the authors' runs. Single-GPU also means our results have not been *replicated across seeds* (seed=42 only, in config).
 
