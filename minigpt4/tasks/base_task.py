@@ -48,6 +48,7 @@ class BaseTask:
 
         datasets_config = cfg.datasets_cfg
         evaluate_only = cfg.run_cfg.evaluate
+        test_splits = cfg.run_cfg.get("test_splits", [])
 
         assert len(datasets_config) > 0, "At least one dataset has to be specified."
 
@@ -55,7 +56,9 @@ class BaseTask:
             dataset_config = datasets_config[name]
 
             builder = registry.get_builder_class(name)(dataset_config)
-            dataset = builder.build_datasets(evaluate_only=evaluate_only)
+            dataset = builder.build_datasets(
+                evaluate_only=evaluate_only, test_splits=test_splits
+            )
 
             dataset['train'].name = name
             if 'sample_ratio' in dataset_config:

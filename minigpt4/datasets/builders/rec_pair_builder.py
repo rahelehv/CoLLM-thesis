@@ -98,7 +98,7 @@ class MoiveOODBuilder(RecBaseDatasetBuilder):
     DATASET_CONFIG_DICT = {
         "default": "configs/datasets/movielens/default.yaml",
     }
-    def build_datasets(self,evaluate_only=False):
+    def build_datasets(self, evaluate_only=False, test_splits=None):
         # at this point, all the annotations and image/videos should be all downloaded to the specified locations.
         logging.info("Building datasets...")
         self.build_processors()
@@ -125,11 +125,13 @@ class MoiveOODBuilder(RecBaseDatasetBuilder):
             datasets['test'] = dataset_cls(
             text_processor=self.text_processors["train"],
             ann_paths=[os.path.join(storage_path, 'test')])
-            if evaluate_only:
+            test_splits = test_splits or []
+            if evaluate_only and "test_warm" in test_splits:
                 datasets['test_warm'] = dataset_cls(
                 text_processor=self.text_processors["train"],
                 ann_paths=[os.path.join(storage_path, 'test_warm_cold=warm')])
 
+            if evaluate_only and "test_cold" in test_splits:
                 datasets['test_cold'] = dataset_cls(
                 text_processor=self.text_processors["train"],
                 ann_paths=[os.path.join(storage_path, 'test_warm_cold=cold')])
@@ -146,7 +148,7 @@ class MoiveOODBuilder_sasrec(RecBaseDatasetBuilder):
     DATASET_CONFIG_DICT = {
         "default": "configs/datasets/movielens/default.yaml",
     }
-    def build_datasets(self,evaluate_only=False):
+    def build_datasets(self, evaluate_only=False, test_splits=None):
         # at this point, all the annotations and image/videos should be all downloaded to the specified locations.
         logging.info("Building datasets...")
         self.build_processors()
@@ -187,7 +189,7 @@ class AmazonOODBuilder(RecBaseDatasetBuilder):
     DATASET_CONFIG_DICT = {
         "default": "configs/datasets/amazon/default.yaml",
     }
-    def build_datasets(self, evaluate_only=False):
+    def build_datasets(self, evaluate_only=False, test_splits=None):
         # at this point, all the annotations and image/videos should be all downloaded to the specified locations.
         logging.info("Building datasets...")
         self.build_processors()
@@ -214,11 +216,13 @@ class AmazonOODBuilder(RecBaseDatasetBuilder):
             datasets['test'] = dataset_cls(
             text_processor=self.text_processors["train"],
             ann_paths=[os.path.join(storage_path, 'test')])
-            if evaluate_only:
+            test_splits = test_splits or []
+            if evaluate_only and "test_warm" in test_splits:
                 datasets['test_warm'] = dataset_cls(
                 text_processor=self.text_processors["train"],
                 ann_paths=[os.path.join(storage_path, 'test=warm')])
 
+            if evaluate_only and "test_cold" in test_splits:
                 datasets['test_cold'] = dataset_cls(
                 text_processor=self.text_processors["train"],
                 ann_paths=[os.path.join(storage_path, 'test=cold')])
@@ -235,7 +239,7 @@ class AmazonOODBuilder_sasrec(RecBaseDatasetBuilder):
     DATASET_CONFIG_DICT = {
         "default": "configs/datasets/amazon/default.yaml",
     }
-    def build_datasets(self,evaluate_only=False):
+    def build_datasets(self, evaluate_only=False, test_splits=None):
         # at this point, all the annotations and image/videos should be all downloaded to the specified locations.
         logging.info("Building datasets...")
         self.build_processors()
