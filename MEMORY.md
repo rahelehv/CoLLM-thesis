@@ -30,13 +30,23 @@
 - Checkpoint: /kaggle/working/collm_logs/collm-stage2/*/checkpoint_best.pth (~44MB). NOT YET BACKED UP (TODO: download locally + create Kaggle Model collm-stage2-cie-checkpoint).
 - Fixed during Phase 3: in-place autograd error "a leaf Variable that requires grad is being used in an in-place operation" at minigpt4rec_v2.py:550 (recprompt_wrap_v2 ID-embedding merge). Cause: our grad-checkpoint input-requires-grad hook makes the embed output a grad-requiring LEAF, and in-place indexed assignment on a leaf raises; stage-1 never hit it because tallrec prompt has no ID tags. Fix: .clone() the embed output before the indexed assignment (minigpt4rec_v2.py:545, commit 219438f). Verified via repro that grad still flows into llama_proj (detach would have silently killed it).
 
-## Phase 4: Evaluation against paper's Table II - NEXT
-- Use the stage-2 (CIE) checkpoint. Evaluate-only run of train_collm_mf_din.py with run.evaluate=True (test_splits: ["test","valid"] already set; optionally warm/cold via test_warm_cold_ood2.pkl).
-- No training -> short run (~30-40 min for both splits at batch_size_eval 4).
-- Optional: dedicated eval config file (e.g. collm_eval_mf_ood.yaml) or --options overrides (details in session notes).
+## Phase 4: Final Evaluation (Table II comparison) - DONE
+- Config: train_configs/collm_eval_mf_ood.yaml, merged checkpoint (stage-1 LoRA + stage-2 CIE via merge_stage_ckpts.py).
+- Results on ML-1M "test" split (compare to paper's Table II CoLLM-MF row: AUC=0.7295, UAUC=0.6875, NDCG=0.8714):
+  - AUC = 0.7434 (paper: 0.7295) -- we exceed the paper's number
+  - NDCG = 0.8663 (paper: 0.8714) -- very close
+  - UAUC = nan (not computable due to single-interaction users in our split; paper reports 0.6875)
+- Also ran on "valid" split: AUC=0.7257, NDCG=0.8646 (consistent with training-time best_valid_auc).
+- Total eval time: 45m54s.
+- CONCLUSION: full CoLLM pipeline (MF -> LoRA text-only -> CIE mapping) successfully reproduced and validated against the paper, with results in the same range as reported (even exceeding on AUC).
+- Fixed during Phase 4: rec builders unconditionally built test_warm/test_cold on evaluate_only=True (requiring missing test_warm_cold_ood2.pkl). Threaded run.test_splits from task.build_datasets into the builders so warm/cold are only built when requested (commit 8d10dc3).
+
+## Project status: Baseline reproduction COMPLETE
+All 4 phases done. Next step (not started): literature review / improvement ideas for the thesis's novel contribution, building on this validated baseline.
 
 ## Not yet started
 - LightGCN/SASRec baseline scripts: same logging/checkpoint improvements as MF are planned but deferred until actually needed.
+- Full report: TODO -- a separate detailed report (not in MEMORY.md) will be requested next; MEMORY.md stays short/factual.
 
 ## Kaggle setup notes
 - 2x T4 GPUs, 30 GPU-hrs/week quota, ~9hr session limit.
