@@ -1,0 +1,412 @@
+/usr/local/lib/python3.12/dist-packages/timm/models/hub.py:4: FutureWarning: Importing from timm.models.hub is deprecated, please import via timm.models
+  warnings.warn(f"Importing from {__name__} is deprecated, please import via timm.models", FutureWarning)
+/kaggle/working/CoLLM-thesis/minigpt4/models/minigpt4rec_v2.py:247: SyntaxWarning: invalid escape sequence '\i'
+  mode \in ['v1','v2',None]
+{'lr': 0.001, 'wd': 0.0001, 'embedding_size': 256, 'epoch': 5000, 'eval_epoch': 1, 'patience': 100, 'batch_size': 2048}
+save path:  /kaggle/working/0912_ml1m_oodv2_best_model_d256lr-0.001wd0.0001.pth
+user nums: 839 item nums: 3256
+creat MF model, user num: 839 item num: 3256
+model device: cuda:0
+only one interaction users: 30
+computed user: 326 can not users: 0
+uauc for validation Cost: 0.34909725189208984 uauc: nan
+only one interaction users: 33
+computed user: 287 can not users: 0
+uauc for validation Cost: 0.2805194854736328 uauc: nan
+epoch:0, valid_auc:0.49680350924959765, test_auc:0.4863690095873019, early_count:0
+only one interaction users: 30
+computed user: 326 can not users: 0
+uauc for validation Cost: 0.3342247009277344 uauc: nan
+only one interaction users: 33
+computed user: 287 can not users: 0
+uauc for validation Cost: 0.2784111499786377 uauc: nan
+epoch:10, valid_auc:0.4966846968689247, test_auc:0.48602601630848424, early_count:10
+only one interaction users: 30
+computed user: 326 can not users: 0
+uauc for validation Cost: 0.34337711334228516 uauc: nan
+only one interaction users: 33
+computed user: 287 can not users: 0
+uauc for validation Cost: 0.2817862033843994 uauc: nan
+epoch:20, valid_auc:0.49690345928385404, test_auc:0.4857774671914415, early_count:0
+only one interaction users: 30
+computed user: 326 can not users: 0
+uauc for validation Cost: 0.35363030433654785 uauc: nan
+only one interaction users: 33
+computed user: 287 can not users: 0
+uauc for validation Cost: 0.2938382625579834 uauc: nan
+epoch:30, valid_auc:0.49718973294849444, test_auc:0.4858445574422374, early_count:0
+only one interaction users: 30
+computed user: 326 can not users: 0
+uauc for validation Cost: 0.34204745292663574 uauc: nan
+only one interaction users: 33
+computed user: 287 can not users: 0
+uauc for validation Cost: 0.2846081256866455 uauc: nan
+epoch:40, valid_auc:0.49739592046581277, test_auc:0.4861389965910048, early_count:0
+only one interaction users: 30
+computed user: 326 can not users: 0
+uauc for validation Cost: 0.3405308723449707 uauc: nan
+only one interaction users: 33
+computed user: 287 can not users: 0
+uauc for validation Cost: 0.27997732162475586 uauc: nan
+epoch:50, valid_auc:0.4975949859172275, test_auc:0.4866200727126239, early_count:0
+only one interaction users: 30
+computed user: 326 can not users: 0
+uauc for validation Cost: 0.34627532958984375 uauc: nan
+only one interaction users: 33
+computed user: 287 can not users: 0
+uauc for validation Cost: 0.28736233711242676 uauc: nan
+epoch:60, valid_auc:0.49786315766436295, test_auc:0.4872068122269956, early_count:0
+only one interaction users: 30
+computed user: 326 can not users: 0
+uauc for validation Cost: 0.346820592880249 uauc: nan
+only one interaction users: 33
+computed user: 287 can not users: 0
+uauc for validation Cost: 0.2872798442840576 uauc: nan
+epoch:70, valid_auc:0.49803566374501224, test_auc:0.48785726496611637, early_count:0
+only one interaction users: 30
+computed user: 326 can not users: 0
+uauc for validation Cost: 0.37633728981018066 uauc: nan
+only one interaction users: 33
+computed user: 287 can not users: 0
+uauc for validation Cost: 0.2812845706939697 uauc: nan
+epoch:80, valid_auc:0.4982077617906358, test_auc:0.4887128532763232, early_count:0
+only one interaction users: 30
+computed user: 326 can not users: 0
+uauc for validation Cost: 0.3428366184234619 uauc: nan
+only one interaction users: 33
+computed user: 287 can not users: 0
+uauc for validation Cost: 0.28504204750061035 uauc: nan
+epoch:90, valid_auc:0.49840988750474335, test_auc:0.4897171057776113, early_count:0
+only one interaction users: 30
+computed user: 326 can not users: 0
+uauc for validation Cost: 0.350750207901001 uauc: nan
+only one interaction users: 33
+computed user: 287 can not users: 0
+uauc for validation Cost: 0.29664134979248047 uauc: nan
+epoch:100, valid_auc:0.4986401676356262, test_auc:0.4908890839058893, early_count:0
+only one interaction users: 30
+computed user: 326 can not users: 0
+uauc for validation Cost: 0.3597705364227295 uauc: nan
+only one interaction users: 33
+computed user: 287 can not users: 0
+uauc for validation Cost: 0.28638720512390137 uauc: nan
+epoch:110, valid_auc:0.49893732841663496, test_auc:0.4921370826427315, early_count:0
+only one interaction users: 30
+computed user: 326 can not users: 0
+uauc for validation Cost: 0.3536653518676758 uauc: nan
+only one interaction users: 33
+computed user: 287 can not users: 0
+uauc for validation Cost: 0.28925371170043945 uauc: nan
+epoch:120, valid_auc:0.49933006212889686, test_auc:0.49359850942572997, early_count:0
+only one interaction users: 30
+computed user: 326 can not users: 0
+uauc for validation Cost: 0.3428058624267578 uauc: nan
+only one interaction users: 33
+computed user: 287 can not users: 0
+uauc for validation Cost: 0.2835972309112549 uauc: nan
+epoch:130, valid_auc:0.4998493237932271, test_auc:0.4951550182532011, early_count:0
+only one interaction users: 30
+computed user: 326 can not users: 0
+uauc for validation Cost: 0.3463451862335205 uauc: nan
+only one interaction users: 33
+computed user: 287 can not users: 0
+uauc for validation Cost: 0.28847169876098633 uauc: nan
+epoch:140, valid_auc:0.5006094930461558, test_auc:0.4968796279327783, early_count:0
+only one interaction users: 30
+computed user: 326 can not users: 0
+uauc for validation Cost: 0.354625940322876 uauc: nan
+only one interaction users: 33
+computed user: 287 can not users: 0
+uauc for validation Cost: 0.28705716133117676 uauc: nan
+epoch:150, valid_auc:0.5016127398921378, test_auc:0.49873774270873805, early_count:0
+only one interaction users: 30
+computed user: 326 can not users: 0
+uauc for validation Cost: 0.34983134269714355 uauc: nan
+only one interaction users: 33
+computed user: 287 can not users: 0
+uauc for validation Cost: 0.28283023834228516 uauc: nan
+epoch:160, valid_auc:0.5029954407649989, test_auc:0.5006895887187518, early_count:0
+only one interaction users: 30
+computed user: 326 can not users: 0
+uauc for validation Cost: 0.34577345848083496 uauc: nan
+only one interaction users: 33
+computed user: 287 can not users: 0
+uauc for validation Cost: 0.2937357425689697 uauc: nan
+epoch:170, valid_auc:0.5049474988751217, test_auc:0.5029160995139034, early_count:0
+only one interaction users: 30
+computed user: 326 can not users: 0
+uauc for validation Cost: 0.3446066379547119 uauc: nan
+only one interaction users: 33
+computed user: 287 can not users: 0
+uauc for validation Cost: 0.3150622844696045 uauc: nan
+epoch:180, valid_auc:0.5074429483572325, test_auc:0.5057657091371969, early_count:0
+only one interaction users: 30
+computed user: 326 can not users: 0
+uauc for validation Cost: 0.3416166305541992 uauc: nan
+only one interaction users: 33
+computed user: 287 can not users: 0
+uauc for validation Cost: 0.29783105850219727 uauc: nan
+epoch:190, valid_auc:0.5108520995442248, test_auc:0.5092062983186763, early_count:0
+only one interaction users: 30
+computed user: 326 can not users: 0
+uauc for validation Cost: 0.3441042900085449 uauc: nan
+only one interaction users: 33
+computed user: 287 can not users: 0
+uauc for validation Cost: 0.28593015670776367 uauc: nan
+epoch:200, valid_auc:0.5156965510283039, test_auc:0.5144075938359218, early_count:0
+only one interaction users: 30
+computed user: 326 can not users: 0
+uauc for validation Cost: 0.34444117546081543 uauc: nan
+only one interaction users: 33
+computed user: 287 can not users: 0
+uauc for validation Cost: 0.2867157459259033 uauc: nan
+epoch:210, valid_auc:0.5217092809792246, test_auc:0.5209897177811829, early_count:0
+only one interaction users: 30
+computed user: 326 can not users: 0
+uauc for validation Cost: 0.34442663192749023 uauc: nan
+only one interaction users: 33
+computed user: 287 can not users: 0
+uauc for validation Cost: 0.28638648986816406 uauc: nan
+epoch:220, valid_auc:0.5297814007990809, test_auc:0.5293209160836043, early_count:0
+only one interaction users: 30
+computed user: 326 can not users: 0
+uauc for validation Cost: 0.3380460739135742 uauc: nan
+only one interaction users: 33
+computed user: 287 can not users: 0
+uauc for validation Cost: 0.29116082191467285 uauc: nan
+epoch:230, valid_auc:0.5415833687891041, test_auc:0.5386334781552191, early_count:0
+only one interaction users: 30
+computed user: 326 can not users: 0
+uauc for validation Cost: 0.3536391258239746 uauc: nan
+only one interaction users: 33
+computed user: 287 can not users: 0
+uauc for validation Cost: 0.29563260078430176 uauc: nan
+epoch:240, valid_auc:0.5568819929320915, test_auc:0.5515316163932551, early_count:0
+only one interaction users: 30
+computed user: 326 can not users: 0
+uauc for validation Cost: 0.3439607620239258 uauc: nan
+only one interaction users: 33
+computed user: 287 can not users: 0
+uauc for validation Cost: 0.2889101505279541 uauc: nan
+epoch:250, valid_auc:0.5740911112537173, test_auc:0.5670329163981931, early_count:0
+only one interaction users: 30
+computed user: 326 can not users: 0
+uauc for validation Cost: 0.35100507736206055 uauc: nan
+only one interaction users: 33
+computed user: 287 can not users: 0
+uauc for validation Cost: 0.2859475612640381 uauc: nan
+epoch:260, valid_auc:0.5954008517545691, test_auc:0.5856255460463505, early_count:0
+only one interaction users: 30
+computed user: 326 can not users: 0
+uauc for validation Cost: 0.3478221893310547 uauc: nan
+only one interaction users: 33
+computed user: 287 can not users: 0
+uauc for validation Cost: 0.2836587429046631 uauc: nan
+epoch:270, valid_auc:0.6164501175326345, test_auc:0.5994289148774807, early_count:0
+only one interaction users: 30
+computed user: 326 can not users: 0
+uauc for validation Cost: 0.35336756706237793 uauc: nan
+only one interaction users: 33
+computed user: 287 can not users: 0
+uauc for validation Cost: 0.2924773693084717 uauc: nan
+epoch:280, valid_auc:0.63224867731737, test_auc:0.6110608559605335, early_count:0
+only one interaction users: 30
+computed user: 326 can not users: 0
+uauc for validation Cost: 0.35209083557128906 uauc: nan
+only one interaction users: 33
+computed user: 287 can not users: 0
+uauc for validation Cost: 0.2850620746612549 uauc: nan
+epoch:290, valid_auc:0.6441606663879664, test_auc:0.621524608688983, early_count:0
+only one interaction users: 30
+computed user: 326 can not users: 0
+uauc for validation Cost: 0.364882230758667 uauc: nan
+only one interaction users: 33
+computed user: 287 can not users: 0
+uauc for validation Cost: 0.2890183925628662 uauc: nan
+epoch:300, valid_auc:0.6520696649327652, test_auc:0.629080704468646, early_count:0
+only one interaction users: 30
+computed user: 326 can not users: 0
+uauc for validation Cost: 0.3614041805267334 uauc: nan
+only one interaction users: 33
+computed user: 287 can not users: 0
+uauc for validation Cost: 0.2983112335205078 uauc: nan
+epoch:310, valid_auc:0.6566440528709531, test_auc:0.6337053165046369, early_count:0
+only one interaction users: 30
+computed user: 326 can not users: 0
+uauc for validation Cost: 0.36779093742370605 uauc: nan
+only one interaction users: 33
+computed user: 287 can not users: 0
+uauc for validation Cost: 0.2892262935638428 uauc: nan
+epoch:320, valid_auc:0.6610532793589547, test_auc:0.637875868627383, early_count:0
+only one interaction users: 30
+computed user: 326 can not users: 0
+uauc for validation Cost: 0.35208797454833984 uauc: nan
+only one interaction users: 33
+computed user: 287 can not users: 0
+uauc for validation Cost: 0.3143744468688965 uauc: nan
+epoch:330, valid_auc:0.6642094302829501, test_auc:0.6413947297681244, early_count:1
+only one interaction users: 30
+computed user: 326 can not users: 0
+uauc for validation Cost: 0.34210753440856934 uauc: nan
+only one interaction users: 33
+computed user: 287 can not users: 0
+uauc for validation Cost: 0.2850475311279297 uauc: nan
+epoch:340, valid_auc:0.6673685487344051, test_auc:0.6443132307227721, early_count:0
+only one interaction users: 30
+computed user: 326 can not users: 0
+uauc for validation Cost: 0.3436472415924072 uauc: nan
+only one interaction users: 33
+computed user: 287 can not users: 0
+uauc for validation Cost: 0.29172730445861816 uauc: nan
+epoch:350, valid_auc:0.6685909103892024, test_auc:0.6458661373891266, early_count:0
+only one interaction users: 30
+computed user: 326 can not users: 0
+uauc for validation Cost: 0.35454821586608887 uauc: nan
+only one interaction users: 33
+computed user: 287 can not users: 0
+uauc for validation Cost: 0.28440308570861816 uauc: nan
+epoch:360, valid_auc:0.6696180087371426, test_auc:0.6469806310295863, early_count:2
+only one interaction users: 30
+computed user: 326 can not users: 0
+uauc for validation Cost: 0.3553345203399658 uauc: nan
+only one interaction users: 33
+computed user: 287 can not users: 0
+uauc for validation Cost: 0.2837080955505371 uauc: nan
+epoch:370, valid_auc:0.6699435094053928, test_auc:0.6477929934063941, early_count:1
+only one interaction users: 30
+computed user: 326 can not users: 0
+uauc for validation Cost: 0.3529045581817627 uauc: nan
+only one interaction users: 33
+computed user: 287 can not users: 0
+uauc for validation Cost: 0.2884666919708252 uauc: nan
+epoch:380, valid_auc:0.672009761681579, test_auc:0.6481988368921934, early_count:0
+only one interaction users: 30
+computed user: 326 can not users: 0
+uauc for validation Cost: 0.34529948234558105 uauc: nan
+only one interaction users: 33
+computed user: 287 can not users: 0
+uauc for validation Cost: 0.31975817680358887 uauc: nan
+epoch:390, valid_auc:0.6728059122049583, test_auc:0.650668493562713, early_count:0
+only one interaction users: 30
+computed user: 326 can not users: 0
+uauc for validation Cost: 0.3466954231262207 uauc: nan
+only one interaction users: 33
+computed user: 287 can not users: 0
+uauc for validation Cost: 0.2778482437133789 uauc: nan
+epoch:400, valid_auc:0.6738347539752811, test_auc:0.6495201546167624, early_count:0
+only one interaction users: 30
+computed user: 326 can not users: 0
+uauc for validation Cost: 0.34583163261413574 uauc: nan
+only one interaction users: 33
+computed user: 287 can not users: 0
+uauc for validation Cost: 0.2885863780975342 uauc: nan
+epoch:410, valid_auc:0.6743836538201167, test_auc:0.6512638257322481, early_count:3
+only one interaction users: 30
+computed user: 326 can not users: 0
+uauc for validation Cost: 0.35419392585754395 uauc: nan
+only one interaction users: 33
+computed user: 287 can not users: 0
+uauc for validation Cost: 0.2780437469482422 uauc: nan
+epoch:420, valid_auc:0.6753216150619824, test_auc:0.6517703045942412, early_count:0
+only one interaction users: 30
+computed user: 326 can not users: 0
+uauc for validation Cost: 0.3505396842956543 uauc: nan
+only one interaction users: 33
+computed user: 287 can not users: 0
+uauc for validation Cost: 0.28090882301330566 uauc: nan
+epoch:430, valid_auc:0.6756361544256777, test_auc:0.650446285248835, early_count:0
+only one interaction users: 30
+computed user: 326 can not users: 0
+uauc for validation Cost: 0.33780384063720703 uauc: nan
+only one interaction users: 33
+computed user: 287 can not users: 0
+uauc for validation Cost: 0.27245497703552246 uauc: nan
+epoch:440, valid_auc:0.6753359519290226, test_auc:0.649982281870008, early_count:6
+only one interaction users: 30
+computed user: 326 can not users: 0
+uauc for validation Cost: 0.3372964859008789 uauc: nan
+only one interaction users: 33
+computed user: 287 can not users: 0
+uauc for validation Cost: 0.2774622440338135 uauc: nan
+epoch:450, valid_auc:0.6749880835225441, test_auc:0.6499544401663777, early_count:16
+only one interaction users: 30
+computed user: 326 can not users: 0
+uauc for validation Cost: 0.3380756378173828 uauc: nan
+only one interaction users: 33
+computed user: 287 can not users: 0
+uauc for validation Cost: 0.28010010719299316 uauc: nan
+epoch:460, valid_auc:0.6749798486338431, test_auc:0.6493008730587916, early_count:26
+only one interaction users: 30
+computed user: 326 can not users: 0
+uauc for validation Cost: 0.3393418788909912 uauc: nan
+only one interaction users: 33
+computed user: 287 can not users: 0
+uauc for validation Cost: 0.27509379386901855 uauc: nan
+epoch:470, valid_auc:0.6750255114626312, test_auc:0.6489063238489932, early_count:3
+only one interaction users: 30
+computed user: 326 can not users: 0
+uauc for validation Cost: 0.3357231616973877 uauc: nan
+only one interaction users: 33
+computed user: 287 can not users: 0
+uauc for validation Cost: 0.2788095474243164 uauc: nan
+epoch:480, valid_auc:0.6746851546100354, test_auc:0.6496345232322132, early_count:13
+only one interaction users: 30
+computed user: 326 can not users: 0
+uauc for validation Cost: 0.3287525177001953 uauc: nan
+only one interaction users: 33
+computed user: 287 can not users: 0
+uauc for validation Cost: 0.27610111236572266 uauc: nan
+epoch:490, valid_auc:0.6747590460437851, test_auc:0.64898470837579, early_count:23
+only one interaction users: 30
+computed user: 326 can not users: 0
+uauc for validation Cost: 0.3328852653503418 uauc: nan
+only one interaction users: 33
+computed user: 287 can not users: 0
+uauc for validation Cost: 0.27977728843688965 uauc: nan
+epoch:500, valid_auc:0.6748291167859303, test_auc:0.6489440339731822, early_count:33
+only one interaction users: 30
+computed user: 326 can not users: 0
+uauc for validation Cost: 0.34579992294311523 uauc: nan
+only one interaction users: 33
+computed user: 287 can not users: 0
+uauc for validation Cost: 0.2840757369995117 uauc: nan
+epoch:510, valid_auc:0.674390590415554, test_auc:0.6480240195105054, early_count:43
+only one interaction users: 30
+computed user: 326 can not users: 0
+uauc for validation Cost: 0.35772061347961426 uauc: nan
+only one interaction users: 33
+computed user: 287 can not users: 0
+uauc for validation Cost: 0.28767824172973633 uauc: nan
+epoch:520, valid_auc:0.6743841545903755, test_auc:0.6481777492406569, early_count:53
+only one interaction users: 30
+computed user: 326 can not users: 0
+uauc for validation Cost: 0.34565043449401855 uauc: nan
+only one interaction users: 33
+computed user: 287 can not users: 0
+uauc for validation Cost: 0.2941756248474121 uauc: nan
+epoch:530, valid_auc:0.6743558888913206, test_auc:0.6464096509700995, early_count:63
+only one interaction users: 30
+computed user: 326 can not users: 0
+uauc for validation Cost: 0.33409619331359863 uauc: nan
+only one interaction users: 33
+computed user: 287 can not users: 0
+uauc for validation Cost: 0.2872278690338135 uauc: nan
+epoch:540, valid_auc:0.6733110224727143, test_auc:0.6470116996692166, early_count:73
+only one interaction users: 30
+computed user: 326 can not users: 0
+uauc for validation Cost: 0.34908437728881836 uauc: nan
+only one interaction users: 33
+computed user: 287 can not users: 0
+uauc for validation Cost: 0.28839707374572754 uauc: nan
+epoch:550, valid_auc:0.6730195370879727, test_auc:0.6457900417355393, early_count:83
+only one interaction users: 30
+computed user: 326 can not users: 0
+uauc for validation Cost: 0.3411271572113037 uauc: nan
+only one interaction users: 33
+computed user: 287 can not users: 0
+uauc for validation Cost: 0.29323363304138184 uauc: nan
+epoch:560, valid_auc:0.672562185465273, test_auc:0.6457832876834456, early_count:93
+early stop is reached....!
+Training stopped due to: early_stop (valid_auc made no improvement for 100 eval epochs), at epoch 567, best_valid_auc=0.676173276895907
+train_config: {'lr': 0.001, 'wd': 0.0001, 'embedding_size': 256, 'epoch': 5000, 'eval_epoch': 1, 'patience': 100, 'batch_size': 2048} 
+best result: {'valid_auc': np.float64(0.676173276895907), 'valid_uauc': np.float64(nan), 'test_auc': np.float64(0.649366087184006), 'test_uauc': np.float64(nan), 'epoch': 467}

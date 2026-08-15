@@ -1,0 +1,1681 @@
+/usr/local/lib/python3.12/dist-packages/timm/models/hub.py:4: FutureWarning: Importing from timm.models.hub is deprecated, please import via timm.models
+  warnings.warn(f"Importing from {__name__} is deprecated, please import via timm.models", FutureWarning)
+/kaggle/working/CoLLM-thesis/minigpt4/models/minigpt4rec_v2.py:258: SyntaxWarning: invalid escape sequence '\i'
+  mode \in ['v1','v2',None]
+Not using distributed mode
+2026-08-13 09:25:35,102 [INFO] Building datasets...
+data path: /kaggle/working/ml-1m/train data size: (33891, 7)
+Movie OOD datasets, max history length: 10
+2026-08-13 09:25:35,436 [INFO] Movie OOD datasets, max history length:10
+data path: /kaggle/working/ml-1m/valid_small data size: (5200, 7)
+Movie OOD datasets, max history length: 10
+2026-08-13 09:25:35,823 [INFO] Movie OOD datasets, max history length:10
+data path: /kaggle/working/ml-1m/test data size: (7331, 7)
+Movie OOD datasets, max history length: 10
+2026-08-13 09:25:35,943 [INFO] Movie OOD datasets, max history length:10
+data dir: /kaggle/working/ml-1m/
+2026-08-13 09:25:36,340 [INFO] 
+=====  Running Parameters    =====
+2026-08-13 09:25:36,341 [INFO] {
+    "amp": true,
+    "batch_size_eval": 4,
+    "batch_size_train": 4,
+    "device": "cuda",
+    "dist_url": "env://",
+    "distributed": false,
+    "early_stop_epochs": 10,
+    "eval_freq": 2,
+    "evaluate": false,
+    "init_lr": 0.001,
+    "iters_per_epoch": 50,
+    "log_freq": 50,
+    "lr_sched": "linear_warmup_cosine_lr",
+    "max_epoch": 80,
+    "min_lr": 8e-05,
+    "mode": "v2",
+    "num_workers": 4,
+    "output_dir": "/kaggle/working//collm-stage1",
+    "resume_ckpt_path": null,
+    "save_ckpt_freq": 20,
+    "seed": 42,
+    "task": "rec_pretrain",
+    "test_splits": [
+        "test",
+        "valid"
+    ],
+    "train_splits": [
+        "train"
+    ],
+    "valid_splits": [
+        "valid"
+    ],
+    "warmup_lr": 1e-05,
+    "warmup_steps": 200,
+    "weight_decay": 0.001,
+    "world_size": 1
+}
+2026-08-13 09:25:36,342 [INFO] 
+======  Dataset Attributes  ======
+2026-08-13 09:25:36,342 [INFO] 
+======== movie_ood =======
+2026-08-13 09:25:36,342 [INFO] {
+    "build_info": {
+        "storage": "/kaggle/working/ml-1m/"
+    },
+    "data_type": "default",
+    "path": "/kaggle/working/ml-1m/"
+}
+2026-08-13 09:25:36,343 [INFO] 
+======  Model Attributes  ======
+2026-08-13 09:25:36,343 [INFO] {
+    "ans_type": "v2",
+    "arch": "mini_gpt4rec_v2",
+    "end_sym": "###",
+    "freeze_lora": false,
+    "freeze_proj": true,
+    "freeze_rec": true,
+    "item_num": -100,
+    "llama_model": "/kaggle/working/vicuna-v0-7b/pretrained_ckpt/vicuna_ckpt/7b_v0",
+    "lora_config": {
+        "alpha": 16,
+        "dropout": 0.05,
+        "r": 8,
+        "target_modules": [
+            "q_proj",
+            "v_proj"
+        ],
+        "use_lora": true
+    },
+    "max_txt_len": 1024,
+    "model_type": "pretrain_vicuna",
+    "proj_drop": 0,
+    "proj_mid_times": 10,
+    "proj_token_num": 1,
+    "prompt_path": "prompts/tallrec_movie.txt",
+    "prompt_template": "{}",
+    "rec_config": {
+        "embedding_size": 256,
+        "item_num": 3256,
+        "pretrained_path": "not_have",
+        "user_num": 839
+    },
+    "rec_model": "MF",
+    "use_grad_checkpoint": true,
+    "user_num": -100
+}
+runing MiniGPT4Rec_v2 ...... 
+Loading Rec_model
+### rec_encoder: MF
+creat MF model, user num: 839 item num: 3256
+2026-08-13 09:25:36,386 [INFO] freeze rec encoder
+freeze rec encoder
+Loading Rec_model Done
+Loading LLAMA
+Loading checkpoint shards: 100%|██████████████████| 2/2 [00:43<00:00, 21.51s/it]
+Some weights of LlamaForCausalLM were not initialized from the model checkpoint at /kaggle/working/vicuna-v0-7b/pretrained_ckpt/vicuna_ckpt/7b_v0 and are newly initialized: ['model.layers.2.self_attn.rotary_emb.inv_freq', 'model.layers.28.self_attn.rotary_emb.inv_freq', 'model.layers.11.self_attn.rotary_emb.inv_freq', 'model.layers.1.self_attn.rotary_emb.inv_freq', 'model.layers.16.self_attn.rotary_emb.inv_freq', 'model.layers.25.self_attn.rotary_emb.inv_freq', 'model.layers.31.self_attn.rotary_emb.inv_freq', 'model.layers.8.self_attn.rotary_emb.inv_freq', 'model.layers.29.self_attn.rotary_emb.inv_freq', 'model.layers.20.self_attn.rotary_emb.inv_freq', 'model.layers.23.self_attn.rotary_emb.inv_freq', 'model.layers.7.self_attn.rotary_emb.inv_freq', 'model.layers.24.self_attn.rotary_emb.inv_freq', 'model.layers.12.self_attn.rotary_emb.inv_freq', 'model.layers.10.self_attn.rotary_emb.inv_freq', 'model.layers.21.self_attn.rotary_emb.inv_freq', 'model.layers.26.self_attn.rotary_emb.inv_freq', 'model.layers.27.self_attn.rotary_emb.inv_freq', 'model.layers.9.self_attn.rotary_emb.inv_freq', 'model.layers.15.self_attn.rotary_emb.inv_freq', 'model.layers.22.self_attn.rotary_emb.inv_freq', 'model.layers.0.self_attn.rotary_emb.inv_freq', 'model.layers.6.self_attn.rotary_emb.inv_freq', 'model.layers.13.self_attn.rotary_emb.inv_freq', 'model.layers.4.self_attn.rotary_emb.inv_freq', 'model.layers.30.self_attn.rotary_emb.inv_freq', 'model.layers.18.self_attn.rotary_emb.inv_freq', 'model.layers.5.self_attn.rotary_emb.inv_freq', 'model.layers.14.self_attn.rotary_emb.inv_freq', 'model.layers.3.self_attn.rotary_emb.inv_freq', 'model.layers.19.self_attn.rotary_emb.inv_freq', 'model.layers.17.self_attn.rotary_emb.inv_freq']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+Loading LLAMA Done
+Enabling gradient checkpointing on llama_model
+Enabled input-requires-grad hook for gradient checkpointing
+Setting Lora
+Setting Lora Done
+type: <class 'int'> 10
+2026-08-13 09:27:32,721 [INFO] !!!! freeze llama_proj...
+Load 4 training prompts
+Prompt List: 
+['#Question: A user has given high ratings to the following movies: <ItemTitleList>. Leverage the information to predict whether the user would enjoy the movie titled <TargetItemTitle>? Answer with "Yes" or "No". \\n#Answer:', '#Question: A user has given high ratings to the following movies: <ItemTitleList>. Leverage the information to predict whether the user would enjoy the movie titled <TargetItemTitle>? Answer with "Yes" or "No". \\n#Answer:', '#Question: A user has given high ratings to the following movies: <ItemTitleList>. Leverage the information to predict whether the user would enjoy the movie titled <TargetItemTitle>? Answer with "Yes" or "No". \\n#Answer:', '#Question: A user has given high ratings to the following movies: <ItemTitleList>. Leverage the information to predict whether the user would enjoy the movie titled <TargetItemTitle>? Answer with "Yes" or "No". \\n#Answer:']
+answer token ids: pos: 3869 neg ids: 1939
+Prompt Pos Example 
+#Question: A user has given high ratings to the following movies: <ItemTitleList>. Leverage the information to predict whether the user would enjoy the movie titled <TargetItemTitle>? Answer with "Yes" or "No". \n#Answer: Yes or No
+2026-08-13 09:27:37,011 [INFO] Start training
+2026-08-13 09:27:37,037 [INFO] dataset_ratios not specified, datasets will be concatenated (map-style datasets) or chained (webdataset.DataPipeline).
+2026-08-13 09:27:37,037 [INFO] Loaded 33891 records for train split from the dataset.
+2026-08-13 09:27:37,038 [INFO] Loaded 5200 records for valid split from the dataset.
+2026-08-13 09:27:37,038 [INFO] Loaded 7331 records for test split from the dataset.
+llama_model.model.layers.0.self_attn.q_proj.lora_A.default.weight
+llama_model.model.layers.0.self_attn.q_proj.lora_B.default.weight
+llama_model.model.layers.0.self_attn.v_proj.lora_A.default.weight
+llama_model.model.layers.0.self_attn.v_proj.lora_B.default.weight
+llama_model.model.layers.1.self_attn.q_proj.lora_A.default.weight
+llama_model.model.layers.1.self_attn.q_proj.lora_B.default.weight
+llama_model.model.layers.1.self_attn.v_proj.lora_A.default.weight
+llama_model.model.layers.1.self_attn.v_proj.lora_B.default.weight
+llama_model.model.layers.2.self_attn.q_proj.lora_A.default.weight
+llama_model.model.layers.2.self_attn.q_proj.lora_B.default.weight
+llama_model.model.layers.2.self_attn.v_proj.lora_A.default.weight
+llama_model.model.layers.2.self_attn.v_proj.lora_B.default.weight
+llama_model.model.layers.3.self_attn.q_proj.lora_A.default.weight
+llama_model.model.layers.3.self_attn.q_proj.lora_B.default.weight
+llama_model.model.layers.3.self_attn.v_proj.lora_A.default.weight
+llama_model.model.layers.3.self_attn.v_proj.lora_B.default.weight
+llama_model.model.layers.4.self_attn.q_proj.lora_A.default.weight
+llama_model.model.layers.4.self_attn.q_proj.lora_B.default.weight
+llama_model.model.layers.4.self_attn.v_proj.lora_A.default.weight
+llama_model.model.layers.4.self_attn.v_proj.lora_B.default.weight
+llama_model.model.layers.5.self_attn.q_proj.lora_A.default.weight
+llama_model.model.layers.5.self_attn.q_proj.lora_B.default.weight
+llama_model.model.layers.5.self_attn.v_proj.lora_A.default.weight
+llama_model.model.layers.5.self_attn.v_proj.lora_B.default.weight
+llama_model.model.layers.6.self_attn.q_proj.lora_A.default.weight
+llama_model.model.layers.6.self_attn.q_proj.lora_B.default.weight
+llama_model.model.layers.6.self_attn.v_proj.lora_A.default.weight
+llama_model.model.layers.6.self_attn.v_proj.lora_B.default.weight
+llama_model.model.layers.7.self_attn.q_proj.lora_A.default.weight
+llama_model.model.layers.7.self_attn.q_proj.lora_B.default.weight
+llama_model.model.layers.7.self_attn.v_proj.lora_A.default.weight
+llama_model.model.layers.7.self_attn.v_proj.lora_B.default.weight
+llama_model.model.layers.8.self_attn.q_proj.lora_A.default.weight
+llama_model.model.layers.8.self_attn.q_proj.lora_B.default.weight
+llama_model.model.layers.8.self_attn.v_proj.lora_A.default.weight
+llama_model.model.layers.8.self_attn.v_proj.lora_B.default.weight
+llama_model.model.layers.9.self_attn.q_proj.lora_A.default.weight
+llama_model.model.layers.9.self_attn.q_proj.lora_B.default.weight
+llama_model.model.layers.9.self_attn.v_proj.lora_A.default.weight
+llama_model.model.layers.9.self_attn.v_proj.lora_B.default.weight
+llama_model.model.layers.10.self_attn.q_proj.lora_A.default.weight
+llama_model.model.layers.10.self_attn.q_proj.lora_B.default.weight
+llama_model.model.layers.10.self_attn.v_proj.lora_A.default.weight
+llama_model.model.layers.10.self_attn.v_proj.lora_B.default.weight
+llama_model.model.layers.11.self_attn.q_proj.lora_A.default.weight
+llama_model.model.layers.11.self_attn.q_proj.lora_B.default.weight
+llama_model.model.layers.11.self_attn.v_proj.lora_A.default.weight
+llama_model.model.layers.11.self_attn.v_proj.lora_B.default.weight
+llama_model.model.layers.12.self_attn.q_proj.lora_A.default.weight
+llama_model.model.layers.12.self_attn.q_proj.lora_B.default.weight
+llama_model.model.layers.12.self_attn.v_proj.lora_A.default.weight
+llama_model.model.layers.12.self_attn.v_proj.lora_B.default.weight
+llama_model.model.layers.13.self_attn.q_proj.lora_A.default.weight
+llama_model.model.layers.13.self_attn.q_proj.lora_B.default.weight
+llama_model.model.layers.13.self_attn.v_proj.lora_A.default.weight
+llama_model.model.layers.13.self_attn.v_proj.lora_B.default.weight
+llama_model.model.layers.14.self_attn.q_proj.lora_A.default.weight
+llama_model.model.layers.14.self_attn.q_proj.lora_B.default.weight
+llama_model.model.layers.14.self_attn.v_proj.lora_A.default.weight
+llama_model.model.layers.14.self_attn.v_proj.lora_B.default.weight
+llama_model.model.layers.15.self_attn.q_proj.lora_A.default.weight
+llama_model.model.layers.15.self_attn.q_proj.lora_B.default.weight
+llama_model.model.layers.15.self_attn.v_proj.lora_A.default.weight
+llama_model.model.layers.15.self_attn.v_proj.lora_B.default.weight
+llama_model.model.layers.16.self_attn.q_proj.lora_A.default.weight
+llama_model.model.layers.16.self_attn.q_proj.lora_B.default.weight
+llama_model.model.layers.16.self_attn.v_proj.lora_A.default.weight
+llama_model.model.layers.16.self_attn.v_proj.lora_B.default.weight
+llama_model.model.layers.17.self_attn.q_proj.lora_A.default.weight
+llama_model.model.layers.17.self_attn.q_proj.lora_B.default.weight
+llama_model.model.layers.17.self_attn.v_proj.lora_A.default.weight
+llama_model.model.layers.17.self_attn.v_proj.lora_B.default.weight
+llama_model.model.layers.18.self_attn.q_proj.lora_A.default.weight
+llama_model.model.layers.18.self_attn.q_proj.lora_B.default.weight
+llama_model.model.layers.18.self_attn.v_proj.lora_A.default.weight
+llama_model.model.layers.18.self_attn.v_proj.lora_B.default.weight
+llama_model.model.layers.19.self_attn.q_proj.lora_A.default.weight
+llama_model.model.layers.19.self_attn.q_proj.lora_B.default.weight
+llama_model.model.layers.19.self_attn.v_proj.lora_A.default.weight
+llama_model.model.layers.19.self_attn.v_proj.lora_B.default.weight
+llama_model.model.layers.20.self_attn.q_proj.lora_A.default.weight
+llama_model.model.layers.20.self_attn.q_proj.lora_B.default.weight
+llama_model.model.layers.20.self_attn.v_proj.lora_A.default.weight
+llama_model.model.layers.20.self_attn.v_proj.lora_B.default.weight
+llama_model.model.layers.21.self_attn.q_proj.lora_A.default.weight
+llama_model.model.layers.21.self_attn.q_proj.lora_B.default.weight
+llama_model.model.layers.21.self_attn.v_proj.lora_A.default.weight
+llama_model.model.layers.21.self_attn.v_proj.lora_B.default.weight
+llama_model.model.layers.22.self_attn.q_proj.lora_A.default.weight
+llama_model.model.layers.22.self_attn.q_proj.lora_B.default.weight
+llama_model.model.layers.22.self_attn.v_proj.lora_A.default.weight
+llama_model.model.layers.22.self_attn.v_proj.lora_B.default.weight
+llama_model.model.layers.23.self_attn.q_proj.lora_A.default.weight
+llama_model.model.layers.23.self_attn.q_proj.lora_B.default.weight
+llama_model.model.layers.23.self_attn.v_proj.lora_A.default.weight
+llama_model.model.layers.23.self_attn.v_proj.lora_B.default.weight
+llama_model.model.layers.24.self_attn.q_proj.lora_A.default.weight
+llama_model.model.layers.24.self_attn.q_proj.lora_B.default.weight
+llama_model.model.layers.24.self_attn.v_proj.lora_A.default.weight
+llama_model.model.layers.24.self_attn.v_proj.lora_B.default.weight
+llama_model.model.layers.25.self_attn.q_proj.lora_A.default.weight
+llama_model.model.layers.25.self_attn.q_proj.lora_B.default.weight
+llama_model.model.layers.25.self_attn.v_proj.lora_A.default.weight
+llama_model.model.layers.25.self_attn.v_proj.lora_B.default.weight
+llama_model.model.layers.26.self_attn.q_proj.lora_A.default.weight
+llama_model.model.layers.26.self_attn.q_proj.lora_B.default.weight
+llama_model.model.layers.26.self_attn.v_proj.lora_A.default.weight
+llama_model.model.layers.26.self_attn.v_proj.lora_B.default.weight
+llama_model.model.layers.27.self_attn.q_proj.lora_A.default.weight
+llama_model.model.layers.27.self_attn.q_proj.lora_B.default.weight
+llama_model.model.layers.27.self_attn.v_proj.lora_A.default.weight
+llama_model.model.layers.27.self_attn.v_proj.lora_B.default.weight
+llama_model.model.layers.28.self_attn.q_proj.lora_A.default.weight
+llama_model.model.layers.28.self_attn.q_proj.lora_B.default.weight
+llama_model.model.layers.28.self_attn.v_proj.lora_A.default.weight
+llama_model.model.layers.28.self_attn.v_proj.lora_B.default.weight
+llama_model.model.layers.29.self_attn.q_proj.lora_A.default.weight
+llama_model.model.layers.29.self_attn.q_proj.lora_B.default.weight
+llama_model.model.layers.29.self_attn.v_proj.lora_A.default.weight
+llama_model.model.layers.29.self_attn.v_proj.lora_B.default.weight
+llama_model.model.layers.30.self_attn.q_proj.lora_A.default.weight
+llama_model.model.layers.30.self_attn.q_proj.lora_B.default.weight
+llama_model.model.layers.30.self_attn.v_proj.lora_A.default.weight
+llama_model.model.layers.30.self_attn.v_proj.lora_B.default.weight
+llama_model.model.layers.31.self_attn.q_proj.lora_A.default.weight
+llama_model.model.layers.31.self_attn.q_proj.lora_B.default.weight
+llama_model.model.layers.31.self_attn.v_proj.lora_A.default.weight
+llama_model.model.layers.31.self_attn.v_proj.lora_B.default.weight
+2026-08-13 09:27:37,058 [INFO] number of trainable parameters: 4194304
+/kaggle/working/CoLLM-thesis/minigpt4/runners/runner_base.py:140: FutureWarning: `torch.cuda.amp.GradScaler(args...)` is deprecated. Please use `torch.amp.GradScaler('cuda', args...)` instead.
+  self._scaler = torch.cuda.amp.GradScaler()
+2026-08-13 09:27:37,065 [INFO] Start training epoch 0, 50 iters per inner epoch.
+/kaggle/working/CoLLM-thesis/minigpt4/tasks/base_task.py:219: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with torch.cuda.amp.autocast(enabled=use_amp):
+/kaggle/working/CoLLM-thesis/minigpt4/models/rec_model.py:48: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  return torch.cuda.amp.autocast(dtype=dtype)
+prompt example: <s>#Question: A user has given high ratings to the following movies: "Empire Records (1995)", "Deep End of the Ocean, The (1999)", "Beach, The (2000)", "Color Purple, The (1985)", "Erin Brockovich (2000)", "Monty Python and the Holy Grail (1974)", "Mission: Impossible 2 (2000)", "NeverEnding Story II: The Next Chapter, The (1990)", "NeverEnding Story, The (1984)", "Sister Act 2: Back in the Habit (1993)". Leverage the information to predict whether the user would enjoy the movie titled "Rebecca (1940)"? Answer with "Yes" or "No". \n#Answer:
+#######prmpt decoded example:  </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> <s> # Question : A user has given high ratings to the following mov ies : un kow . Le verage the information to predict whether the user would enjoy the movie titled " W ay of the Gun , The ( 2 0 0 0 )" ? Answer with " Yes " or " No ". \ n # Answer :
+/kaggle/working/CoLLM-thesis/minigpt4/models/rec_model.py:48: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  return torch.cuda.amp.autocast(dtype=dtype)
+2026-08-13 09:27:51,249 [WARNING] `use_cache=True` is incompatible with gradient checkpointing. Setting `use_cache=False`...
+/usr/local/lib/python3.12/dist-packages/torch/_dynamo/eval_frame.py:1181: UserWarning: torch.utils.checkpoint: the use_reentrant parameter should be passed explicitly. Starting in PyTorch 2.9, calling checkpoint without use_reentrant will raise an exception. use_reentrant=False is recommended, but if you need to preserve the current default behavior, you can pass use_reentrant=True. Refer to docs for more details on the differences between the two variants.
+  return fn(*args, **kwargs)
+Train: data epoch: [0]  [ 0/50]  eta: 0:13:45  lr: 0.000010  loss: 3.4570  time: 16.5076  data: 0.0000  max mem: 13469
+/kaggle/working/CoLLM-thesis/minigpt4/tasks/base_task.py:219: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with torch.cuda.amp.autocast(enabled=use_amp):
+Train: data epoch: [0]  [49/50]  eta: 0:00:02  lr: 0.000253  loss: 0.7036  time: 2.0148  data: 0.0000  max mem: 13587
+Train: data epoch: [0] Total time: 0:01:49 (2.1897 s / it)
+2026-08-13 09:29:26,551 [INFO] Averaged stats: lr: 0.000131  loss: 1.953585
+2026-08-13 09:29:26,553 [INFO] Evaluating on valid.
+Evaluation  [   0/1300]  eta: 0:21:18  loss: 1.0729  acc: 0.0000  time: 0.9832  data: 0.1915  max mem: 13681
+Evaluation  [ 260/1300]  eta: 0:12:59  loss: 0.5160  acc: 0.0000  time: 0.7260  data: 0.0008  max mem: 13815
+Evaluation  [ 520/1300]  eta: 0:09:42  loss: 0.6115  acc: 0.0000  time: 0.7596  data: 0.0008  max mem: 13852
+Evaluation  [ 780/1300]  eta: 0:06:28  loss: 0.7279  acc: 0.0000  time: 0.7354  data: 0.0008  max mem: 13888
+Evaluation  [1040/1300]  eta: 0:03:14  loss: 1.2010  acc: 0.0000  time: 0.7422  data: 0.0008  max mem: 13888
+Evaluation  [1299/1300]  eta: 0:00:00  loss: 0.9912  acc: 0.0000  time: 0.7455  data: 0.0041  max mem: 13888
+Evaluation Total time: 0:16:12 (0.7478 s / it)
+only one interaction users: 48
+computed user: 283 can not users: 0
+uauc for validation Cost: 0.2778646945953369 uauc: nan
+2026-08-13 09:45:39,057 [INFO] Averaged stats: loss: 0.854809  acc: 0.035769 ***auc: 0.49701761870094363 ***uauc:(np.float64(nan), [np.int64(20), np.int64(26), np.int64(33), np.int64(34), np.int64(36), np.int64(37), np.int64(39), np.int64(40), np.int64(41), np.int64(48), np.int64(49), np.int64(57), np.int64(71), np.int64(72), np.int64(73), np.int64(79), np.int64(83), np.int64(85), np.int64(87), np.int64(91), np.int64(93), np.int64(95), np.int64(104), np.int64(107), np.int64(108), np.int64(109), np.int64(110), np.int64(112), np.int64(115), np.int64(119), np.int64(121), np.int64(124), np.int64(126), np.int64(139), np.int64(142), np.int64(145), np.int64(147), np.int64(149), np.int64(153), np.int64(155), np.int64(159), np.int64(164), np.int64(165), np.int64(167), np.int64(169), np.int64(170), np.int64(171), np.int64(173), np.int64(174), np.int64(175), np.int64(177), np.int64(178), np.int64(180), np.int64(184), np.int64(185), np.int64(186), np.int64(193), np.int64(195), np.int64(197), np.int64(198), np.int64(199), np.int64(200), np.int64(204), np.int64(205), np.int64(207), np.int64(208), np.int64(210), np.int64(212), np.int64(214), np.int64(215), np.int64(217), np.int64(221), np.int64(222), np.int64(226), np.int64(227), np.int64(228), np.int64(230), np.int64(231), np.int64(237), np.int64(242), np.int64(246), np.int64(247), np.int64(249), np.int64(250), np.int64(255), np.int64(256), np.int64(260), np.int64(261), np.int64(264), np.int64(271), np.int64(273), np.int64(275), np.int64(277), np.int64(279), np.int64(280), np.int64(282), np.int64(286), np.int64(291), np.int64(292), np.int64(296), np.int64(297), np.int64(298), np.int64(300), np.int64(301), np.int64(303), np.int64(304), np.int64(308), np.int64(309), np.int64(312), np.int64(314), np.int64(325), np.int64(327), np.int64(329), np.int64(333), np.int64(336), np.int64(338), np.int64(340), np.int64(341), np.int64(345), np.int64(346), np.int64(350), np.int64(353), np.int64(356), np.int64(364), np.int64(366), np.int64(367), np.int64(368), np.int64(370), np.int64(377), np.int64(381), np.int64(382), np.int64(384), np.int64(389), np.int64(402), np.int64(415), np.int64(426), np.int64(427), np.int64(428), np.int64(433), np.int64(434), np.int64(436), np.int64(438), np.int64(441), np.int64(444), np.int64(446), np.int64(447), np.int64(449), np.int64(451), np.int64(453), np.int64(456), np.int64(458), np.int64(462), np.int64(466), np.int64(470), np.int64(472), np.int64(474), np.int64(475), np.int64(482), np.int64(484), np.int64(490), np.int64(494), np.int64(496), np.int64(498), np.int64(500), np.int64(509), np.int64(512), np.int64(515), np.int64(516), np.int64(521), np.int64(522), np.int64(523), np.int64(528), np.int64(529), np.int64(530), np.int64(531), np.int64(533), np.int64(535), np.int64(537), np.int64(540), np.int64(546), np.int64(550), np.int64(552), np.int64(558), np.int64(561), np.int64(562), np.int64(563), np.int64(566), np.int64(568), np.int64(569), np.int64(570), np.int64(575), np.int64(576), np.int64(577), np.int64(581), np.int64(583), np.int64(598), np.int64(604), np.int64(607), np.int64(608), np.int64(609), np.int64(613), np.int64(617), np.int64(624), np.int64(626), np.int64(627), np.int64(628), np.int64(629), np.int64(630), np.int64(632), np.int64(633), np.int64(637), np.int64(643), np.int64(645), np.int64(649), np.int64(650), np.int64(651), np.int64(658), np.int64(664), np.int64(665), np.int64(669), np.int64(670), np.int64(671), np.int64(672), np.int64(676), np.int64(686), np.int64(688), np.int64(690), np.int64(695), np.int64(696), np.int64(697), np.int64(698), np.int64(699), np.int64(700), np.int64(701), np.int64(702), np.int64(706), np.int64(707), np.int64(709), np.int64(712), np.int64(714), np.int64(718), np.int64(720), np.int64(721), np.int64(725), np.int64(727), np.int64(728), np.int64(733), np.int64(744), np.int64(748), np.int64(750), np.int64(752), np.int64(753), np.int64(755), np.int64(756), np.int64(758), np.int64(760), np.int64(761), np.int64(762), np.int64(767), np.int64(769), np.int64(772), np.int64(773), np.int64(774), np.int64(779), np.int64(784), np.int64(786), np.int64(788), np.int64(789), np.int64(793), np.int64(795), np.int64(797), np.int64(798), np.int64(799), np.int64(802), np.int64(803), np.int64(804), np.int64(809), np.int64(814), np.int64(816), np.int64(818), np.int64(827), np.int64(829), np.int64(833)], array([1.        , 0.49107143, 0.66666667,        nan, 0.32051282,
+       0.66666667, 0.        , 0.75510204, 0.36521739,        nan,
+       0.61904762, 0.625     ,        nan, 0.16666667, 0.42226891,
+       0.49206349, 0.46241319, 0.375     , 0.63839286,        nan,
+       0.66666667, 0.        , 0.44444444, 0.67368421, 0.46388889,
+       0.5       , 0.4       , 1.        ,        nan, 0.5       ,
+       0.48295455, 0.28571429,        nan, 0.86666667, 0.875     ,
+       0.33333333, 0.63888889, 0.25      , 1.        , 0.4375    ,
+       0.75      , 0.42496807, 0.31150794,        nan,        nan,
+       0.36759582, 0.875     , 0.5       , 1.        , 1.        ,
+       0.49576923, 0.5       , 1.        ,        nan, 0.25      ,
+       0.        , 0.5       ,        nan, 1.        ,        nan,
+              nan, 0.5       , 1.        , 0.51190476, 0.5       ,
+       0.59259259, 0.45      , 0.83333333, 0.625     , 0.26785714,
+              nan, 0.375     , 0.49489796, 0.14285714, 0.7       ,
+       0.45625   , 0.44099379, 0.54945055, 0.5       , 0.75      ,
+       0.66666667, 0.5       , 0.40869565, 0.45454545, 0.33333333,
+              nan, 0.5       , 0.51560758, 0.56568627, 0.875     ,
+       0.37698413, 0.53684211, 0.4742236 , 0.5       ,        nan,
+       0.16666667, 0.71851852, 0.85714286, 0.39417989, 0.28472222,
+       0.48594771, 0.609375  , 0.40196078,        nan,        nan,
+       0.65789474, 0.36470588, 0.6302521 , 0.50793651, 0.6       ,
+       0.375     , 0.5       , 0.39583333,        nan, 0.        ,
+       0.        , 1.        , 0.375     , 0.54166667, 0.        ,
+       0.19047619, 0.        , 0.        , 0.41557734,        nan,
+       0.7265625 , 0.83333333, 0.6       , 0.        , 0.34      ,
+       0.41666667, 0.33333333, 0.47368421, 0.93333333, 1.        ,
+       0.52777778, 0.66666667, 1.        , 0.33333333, 0.55061605,
+       0.42857143,        nan, 0.56470588, 1.        , 0.49122807,
+              nan, 0.35714286, 0.16666667, 0.        ,        nan,
+       0.42180205, 0.4673913 , 1.        , 0.58333333, 1.        ,
+       0.8       , 0.38888889, 1.        , 0.5       , 1.        ,
+       0.66315789, 1.        , 0.31428571, 1.        ,        nan,
+       0.        ,        nan, 0.56944444, 1.        , 0.63265306,
+              nan,        nan, 0.4       , 0.35555556, 0.71657754,
+              nan,        nan,        nan,        nan,        nan,
+       0.33333333,        nan, 0.41666667, 0.        , 0.75      ,
+       0.58888889, 0.        , 0.41880342, 0.55333333,        nan,
+       0.5625    , 0.25      , 1.        , 1.        , 0.16666667,
+       1.        , 0.        , 0.7627451 , 0.37728938, 0.21428571,
+       0.5       , 1.        , 0.56666667, 0.55147059, 0.22727273,
+       0.11111111, 0.41966427, 0.32727273, 0.11111111, 0.5       ,
+              nan, 0.60360853, 0.        , 0.        , 0.        ,
+              nan, 0.5       , 0.66666667, 0.44444444, 0.95454545,
+       0.75      , 0.45833333, 0.5       , 0.9       , 0.5       ,
+              nan, 0.33333333, 0.5       , 0.27272727, 0.        ,
+       0.44      , 0.        , 0.66666667, 0.33333333, 0.44444444,
+       0.52279589, 0.56      , 0.51461988, 0.53739496, 0.16666667,
+       0.52941176, 0.25      ,        nan, 0.30555556, 0.        ,
+       0.33333333, 0.40384615,        nan, 0.        ,        nan,
+       0.66666667, 0.53333333,        nan,        nan, 0.90625   ,
+       1.        , 1.        , 0.48571429, 0.        , 1.        ,
+       1.        , 0.57948718, 0.65306122, 0.75757576, 0.75      ,
+       1.        , 0.38888889, 0.5       , 0.28571429, 1.        ,
+       0.5       , 0.61111111, 0.25      , 0.43889971, 0.        ,
+       0.72727273, 0.4       , 0.67226891,        nan, 0.46666667,
+              nan,        nan, 0.65719697]))
+rank_0 auc: 0.49701761870094363
+2026-08-13 09:45:39,080 [INFO] Saving checkpoint at epoch 0 to /kaggle/working/collm-stage1/20260813092/checkpoint_best.pth (model state 16.8 MB, 128 keys).
+2026-08-13 09:45:39,249 [INFO] Start training
+2026-08-13 09:45:39,274 [INFO] Start training epoch 1, 50 iters per inner epoch.
+/kaggle/working/CoLLM-thesis/minigpt4/tasks/base_task.py:219: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with torch.cuda.amp.autocast(enabled=use_amp):
+/kaggle/working/CoLLM-thesis/minigpt4/models/rec_model.py:48: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  return torch.cuda.amp.autocast(dtype=dtype)
+/usr/local/lib/python3.12/dist-packages/torch/_dynamo/eval_frame.py:1181: UserWarning: torch.utils.checkpoint: the use_reentrant parameter should be passed explicitly. Starting in PyTorch 2.9, calling checkpoint without use_reentrant will raise an exception. use_reentrant=False is recommended, but if you need to preserve the current default behavior, you can pass use_reentrant=True. Refer to docs for more details on the differences between the two variants.
+  return fn(*args, **kwargs)
+Train: data epoch: [1]  [ 0/50]  eta: 0:01:55  lr: 0.000010  loss: 0.8649  time: 2.3061  data: 0.0000  max mem: 13888
+Train: data epoch: [1]  [49/50]  eta: 0:00:02  lr: 0.000253  loss: 0.5813  time: 2.1741  data: 0.0000  max mem: 13888
+Train: data epoch: [1] Total time: 0:01:47 (2.1419 s / it)
+2026-08-13 09:47:26,372 [INFO] Averaged stats: lr: 0.000131  loss: 0.820166
+2026-08-13 09:47:26,392 [INFO] Saving checkpoint at epoch 1 to /kaggle/working/collm-stage1/20260813092/checkpoint_1.pth (model state 16.8 MB, 128 keys).
+2026-08-13 09:47:26,542 [INFO] Start training
+2026-08-13 09:47:26,567 [INFO] Start training epoch 2, 50 iters per inner epoch.
+Train: data epoch: [2]  [ 0/50]  eta: 0:01:40  lr: 0.000010  loss: 0.8519  time: 2.0138  data: 0.0000  max mem: 13888
+Train: data epoch: [2]  [49/50]  eta: 0:00:02  lr: 0.000253  loss: 0.8926  time: 2.1310  data: 0.0000  max mem: 13888
+Train: data epoch: [2] Total time: 0:01:46 (2.1370 s / it)
+2026-08-13 09:49:13,417 [INFO] Averaged stats: lr: 0.000131  loss: 0.785012
+2026-08-13 09:49:13,419 [INFO] Evaluating on valid.
+Evaluation  [   0/1300]  eta: 0:20:45  loss: 0.8621  acc: 0.5000  time: 0.9577  data: 0.1786  max mem: 13888
+Evaluation  [ 260/1300]  eta: 0:12:56  loss: 1.1508  acc: 0.2500  time: 0.7252  data: 0.0008  max mem: 13888
+Evaluation  [ 520/1300]  eta: 0:09:42  loss: 0.7101  acc: 0.5000  time: 0.7611  data: 0.0008  max mem: 13888
+Evaluation  [ 780/1300]  eta: 0:06:28  loss: 0.8818  acc: 0.5000  time: 0.7385  data: 0.0008  max mem: 13888
+Evaluation  [1040/1300]  eta: 0:03:14  loss: 0.9466  acc: 0.5000  time: 0.7448  data: 0.0008  max mem: 13888
+Evaluation  [1299/1300]  eta: 0:00:00  loss: 0.6505  acc: 0.5000  time: 0.7481  data: 0.0041  max mem: 13888
+Evaluation Total time: 0:16:11 (0.7477 s / it)
+only one interaction users: 48
+computed user: 283 can not users: 0
+uauc for validation Cost: 0.27550673484802246 uauc: nan
+2026-08-13 10:05:25,685 [INFO] Averaged stats: loss: 0.856020  acc: 0.514423 ***auc: 0.5291934229178679 ***uauc:(np.float64(nan), [np.int64(20), np.int64(26), np.int64(33), np.int64(34), np.int64(36), np.int64(37), np.int64(39), np.int64(40), np.int64(41), np.int64(48), np.int64(49), np.int64(57), np.int64(71), np.int64(72), np.int64(73), np.int64(79), np.int64(83), np.int64(85), np.int64(87), np.int64(91), np.int64(93), np.int64(95), np.int64(104), np.int64(107), np.int64(108), np.int64(109), np.int64(110), np.int64(112), np.int64(115), np.int64(119), np.int64(121), np.int64(124), np.int64(126), np.int64(139), np.int64(142), np.int64(145), np.int64(147), np.int64(149), np.int64(153), np.int64(155), np.int64(159), np.int64(164), np.int64(165), np.int64(167), np.int64(169), np.int64(170), np.int64(171), np.int64(173), np.int64(174), np.int64(175), np.int64(177), np.int64(178), np.int64(180), np.int64(184), np.int64(185), np.int64(186), np.int64(193), np.int64(195), np.int64(197), np.int64(198), np.int64(199), np.int64(200), np.int64(204), np.int64(205), np.int64(207), np.int64(208), np.int64(210), np.int64(212), np.int64(214), np.int64(215), np.int64(217), np.int64(221), np.int64(222), np.int64(226), np.int64(227), np.int64(228), np.int64(230), np.int64(231), np.int64(237), np.int64(242), np.int64(246), np.int64(247), np.int64(249), np.int64(250), np.int64(255), np.int64(256), np.int64(260), np.int64(261), np.int64(264), np.int64(271), np.int64(273), np.int64(275), np.int64(277), np.int64(279), np.int64(280), np.int64(282), np.int64(286), np.int64(291), np.int64(292), np.int64(296), np.int64(297), np.int64(298), np.int64(300), np.int64(301), np.int64(303), np.int64(304), np.int64(308), np.int64(309), np.int64(312), np.int64(314), np.int64(325), np.int64(327), np.int64(329), np.int64(333), np.int64(336), np.int64(338), np.int64(340), np.int64(341), np.int64(345), np.int64(346), np.int64(350), np.int64(353), np.int64(356), np.int64(364), np.int64(366), np.int64(367), np.int64(368), np.int64(370), np.int64(377), np.int64(381), np.int64(382), np.int64(384), np.int64(389), np.int64(402), np.int64(415), np.int64(426), np.int64(427), np.int64(428), np.int64(433), np.int64(434), np.int64(436), np.int64(438), np.int64(441), np.int64(444), np.int64(446), np.int64(447), np.int64(449), np.int64(451), np.int64(453), np.int64(456), np.int64(458), np.int64(462), np.int64(466), np.int64(470), np.int64(472), np.int64(474), np.int64(475), np.int64(482), np.int64(484), np.int64(490), np.int64(494), np.int64(496), np.int64(498), np.int64(500), np.int64(509), np.int64(512), np.int64(515), np.int64(516), np.int64(521), np.int64(522), np.int64(523), np.int64(528), np.int64(529), np.int64(530), np.int64(531), np.int64(533), np.int64(535), np.int64(537), np.int64(540), np.int64(546), np.int64(550), np.int64(552), np.int64(558), np.int64(561), np.int64(562), np.int64(563), np.int64(566), np.int64(568), np.int64(569), np.int64(570), np.int64(575), np.int64(576), np.int64(577), np.int64(581), np.int64(583), np.int64(598), np.int64(604), np.int64(607), np.int64(608), np.int64(609), np.int64(613), np.int64(617), np.int64(624), np.int64(626), np.int64(627), np.int64(628), np.int64(629), np.int64(630), np.int64(632), np.int64(633), np.int64(637), np.int64(643), np.int64(645), np.int64(649), np.int64(650), np.int64(651), np.int64(658), np.int64(664), np.int64(665), np.int64(669), np.int64(670), np.int64(671), np.int64(672), np.int64(676), np.int64(686), np.int64(688), np.int64(690), np.int64(695), np.int64(696), np.int64(697), np.int64(698), np.int64(699), np.int64(700), np.int64(701), np.int64(702), np.int64(706), np.int64(707), np.int64(709), np.int64(712), np.int64(714), np.int64(718), np.int64(720), np.int64(721), np.int64(725), np.int64(727), np.int64(728), np.int64(733), np.int64(744), np.int64(748), np.int64(750), np.int64(752), np.int64(753), np.int64(755), np.int64(756), np.int64(758), np.int64(760), np.int64(761), np.int64(762), np.int64(767), np.int64(769), np.int64(772), np.int64(773), np.int64(774), np.int64(779), np.int64(784), np.int64(786), np.int64(788), np.int64(789), np.int64(793), np.int64(795), np.int64(797), np.int64(798), np.int64(799), np.int64(802), np.int64(803), np.int64(804), np.int64(809), np.int64(814), np.int64(816), np.int64(818), np.int64(827), np.int64(829), np.int64(833)], array([0.5       , 0.50892857, 0.5       ,        nan, 0.21794872,
+       0.66666667, 0.8       , 0.64285714, 0.26521739,        nan,
+       0.54761905, 0.25      ,        nan, 0.39583333, 0.54621849,
+       0.52380952, 0.56414931, 0.375     , 0.64136905,        nan,
+       0.33333333, 0.25      , 0.44444444, 0.85263158, 0.46111111,
+       0.5       , 0.26666667, 1.        ,        nan, 0.5       ,
+       0.48074495, 0.33333333,        nan, 0.8       , 0.875     ,
+       0.46666667, 0.47222222, 0.83333333, 1.        , 0.625     ,
+       1.        , 0.49137931, 0.55952381,        nan,        nan,
+       0.38501742, 0.56944444, 1.        , 0.625     , 0.66666667,
+       0.50692308, 0.5       , 0.7       ,        nan, 0.5       ,
+       0.        , 0.34027778,        nan, 1.        ,        nan,
+              nan, 1.        , 1.        , 0.61309524, 0.25      ,
+       0.48148148, 0.45      , 0.16666667, 0.25      , 0.14285714,
+              nan, 0.55555556, 0.49489796, 0.35714286, 0.5       ,
+       0.60083333, 0.40993789, 0.71428571, 0.        , 1.        ,
+       1.        , 0.5       , 0.64782609, 0.43939394, 0.        ,
+              nan, 0.375     , 0.57107023, 0.59509804, 0.5625    ,
+       0.77380952, 0.41052632, 0.57546584, 0.41666667,        nan,
+       0.16666667, 0.74814815, 0.64285714, 0.42768959, 0.5       ,
+       0.63202614, 0.58984375, 0.44117647,        nan,        nan,
+       0.72807018, 0.62352941, 0.48739496, 0.58730159, 0.7       ,
+       0.        , 1.        , 0.52083333,        nan, 0.        ,
+       0.        , 1.        , 0.25      , 0.59722222, 0.5       ,
+       0.14285714, 0.        , 0.        , 0.33333333,        nan,
+       0.296875  , 0.83333333, 0.75      , 0.        , 0.35      ,
+       0.61111111, 0.5       , 0.5466893 , 0.26666667, 0.        ,
+       0.47222222, 0.66666667, 0.        , 0.33333333, 0.56243756,
+       0.42857143,        nan, 0.54509804, 0.        , 0.25614035,
+              nan, 0.67857143, 0.5       , 0.66666667,        nan,
+       0.53197946, 0.5326087 , 0.        , 0.39583333, 0.66666667,
+       0.4       , 0.45138889, 0.5       , 0.5       , 1.        ,
+       0.74736842, 0.        , 0.37142857, 1.        ,        nan,
+       0.125     ,        nan, 0.64409722, 1.        , 0.59183673,
+              nan,        nan, 0.6       , 0.48888889, 0.43048128,
+              nan,        nan,        nan,        nan,        nan,
+       0.16666667,        nan, 0.34722222, 0.        , 0.25      ,
+       0.33333333, 1.        , 0.48717949, 0.57857143,        nan,
+       0.625     , 0.25      , 0.66666667, 1.        , 0.25      ,
+       0.6875    , 0.        , 0.60784314, 0.43711844, 0.17857143,
+       0.47619048, 1.        , 0.53333333, 0.69852941, 0.16161616,
+       0.33333333, 0.40054272, 0.29090909, 0.18518519, 0.25      ,
+              nan, 0.57955167, 0.25      , 0.75      , 1.        ,
+              nan, 0.66666667, 0.33333333, 0.44444444, 0.40909091,
+       0.5       , 0.41666667, 0.75      , 0.6       , 0.58      ,
+              nan, 0.33333333, 0.        , 0.27272727, 0.        ,
+       0.452     , 0.        , 0.        , 0.66666667, 0.88888889,
+       0.54800725, 0.72      , 0.28070175, 0.50882353, 0.42857143,
+       0.55882353, 0.47916667,        nan, 0.54166667, 0.75      ,
+       1.        , 0.21153846,        nan, 0.        ,        nan,
+       0.5       , 0.53333333,        nan,        nan, 0.96875   ,
+       1.        , 1.        , 0.25714286, 0.        , 1.        ,
+       1.        , 0.65      , 0.5       , 0.6969697 , 0.825     ,
+       1.        , 0.44444444, 0.33333333, 0.57142857, 0.        ,
+       0.57692308, 0.59722222, 0.08333333, 0.42315807, 0.66666667,
+       0.60606061, 0.43333333, 0.58823529,        nan, 0.13333333,
+              nan,        nan, 0.61268939]))
+rank_0 auc: 0.5291934229178679
+2026-08-13 10:05:25,708 [INFO] Saving checkpoint at epoch 2 to /kaggle/working/collm-stage1/20260813092/checkpoint_best.pth (model state 16.8 MB, 128 keys).
+2026-08-13 10:05:25,865 [INFO] Start training
+2026-08-13 10:05:25,891 [INFO] Start training epoch 3, 50 iters per inner epoch.
+/kaggle/working/CoLLM-thesis/minigpt4/tasks/base_task.py:219: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with torch.cuda.amp.autocast(enabled=use_amp):
+/kaggle/working/CoLLM-thesis/minigpt4/models/rec_model.py:48: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  return torch.cuda.amp.autocast(dtype=dtype)
+/usr/local/lib/python3.12/dist-packages/torch/_dynamo/eval_frame.py:1181: UserWarning: torch.utils.checkpoint: the use_reentrant parameter should be passed explicitly. Starting in PyTorch 2.9, calling checkpoint without use_reentrant will raise an exception. use_reentrant=False is recommended, but if you need to preserve the current default behavior, you can pass use_reentrant=True. Refer to docs for more details on the differences between the two variants.
+  return fn(*args, **kwargs)
+Train: data epoch: [3]  [ 0/50]  eta: 0:01:55  lr: 0.000010  loss: 1.2181  time: 2.3009  data: 0.0000  max mem: 13888
+Train: data epoch: [3]  [49/50]  eta: 0:00:02  lr: 0.000253  loss: 0.8159  time: 2.1065  data: 0.0000  max mem: 13888
+Train: data epoch: [3] Total time: 0:01:46 (2.1309 s / it)
+2026-08-13 10:07:12,435 [INFO] Averaged stats: lr: 0.000131  loss: 0.758130
+2026-08-13 10:07:12,455 [INFO] Saving checkpoint at epoch 3 to /kaggle/working/collm-stage1/20260813092/checkpoint_3.pth (model state 16.8 MB, 128 keys).
+2026-08-13 10:07:12,618 [INFO] Start training
+2026-08-13 10:07:12,643 [INFO] Start training epoch 4, 50 iters per inner epoch.
+Train: data epoch: [4]  [ 0/50]  eta: 0:01:45  lr: 0.000994  loss: 0.4461  time: 2.1023  data: 0.0000  max mem: 13888
+Train: data epoch: [4]  [49/50]  eta: 0:00:02  lr: 0.000991  loss: 0.6523  time: 2.1415  data: 0.0000  max mem: 13888
+Train: data epoch: [4] Total time: 0:01:46 (2.1323 s / it)
+2026-08-13 10:08:59,257 [INFO] Averaged stats: lr: 0.000993  loss: 1.065352
+2026-08-13 10:08:59,258 [INFO] Evaluating on valid.
+Evaluation  [   0/1300]  eta: 0:20:44  loss: 0.8674  acc: 0.0000  time: 0.9574  data: 0.1748  max mem: 13888
+Evaluation  [ 260/1300]  eta: 0:12:55  loss: 0.5341  acc: 0.0000  time: 0.7281  data: 0.0009  max mem: 13888
+Evaluation  [ 520/1300]  eta: 0:09:42  loss: 0.7952  acc: 0.0000  time: 0.7575  data: 0.0008  max mem: 13888
+Evaluation  [ 780/1300]  eta: 0:06:28  loss: 0.8291  acc: 0.0000  time: 0.7402  data: 0.0008  max mem: 13888
+Evaluation  [1040/1300]  eta: 0:03:14  loss: 0.8179  acc: 0.0000  time: 0.7411  data: 0.0008  max mem: 13888
+Evaluation  [1299/1300]  eta: 0:00:00  loss: 0.8748  acc: 0.0000  time: 0.7452  data: 0.0042  max mem: 13888
+Evaluation Total time: 0:16:10 (0.7464 s / it)
+only one interaction users: 48
+computed user: 283 can not users: 0
+uauc for validation Cost: 0.2869999408721924 uauc: nan
+2026-08-13 10:25:09,938 [INFO] Averaged stats: loss: 0.848892  acc: 0.000000 ***auc: 0.5897906802050686 ***uauc:(np.float64(nan), [np.int64(20), np.int64(26), np.int64(33), np.int64(34), np.int64(36), np.int64(37), np.int64(39), np.int64(40), np.int64(41), np.int64(48), np.int64(49), np.int64(57), np.int64(71), np.int64(72), np.int64(73), np.int64(79), np.int64(83), np.int64(85), np.int64(87), np.int64(91), np.int64(93), np.int64(95), np.int64(104), np.int64(107), np.int64(108), np.int64(109), np.int64(110), np.int64(112), np.int64(115), np.int64(119), np.int64(121), np.int64(124), np.int64(126), np.int64(139), np.int64(142), np.int64(145), np.int64(147), np.int64(149), np.int64(153), np.int64(155), np.int64(159), np.int64(164), np.int64(165), np.int64(167), np.int64(169), np.int64(170), np.int64(171), np.int64(173), np.int64(174), np.int64(175), np.int64(177), np.int64(178), np.int64(180), np.int64(184), np.int64(185), np.int64(186), np.int64(193), np.int64(195), np.int64(197), np.int64(198), np.int64(199), np.int64(200), np.int64(204), np.int64(205), np.int64(207), np.int64(208), np.int64(210), np.int64(212), np.int64(214), np.int64(215), np.int64(217), np.int64(221), np.int64(222), np.int64(226), np.int64(227), np.int64(228), np.int64(230), np.int64(231), np.int64(237), np.int64(242), np.int64(246), np.int64(247), np.int64(249), np.int64(250), np.int64(255), np.int64(256), np.int64(260), np.int64(261), np.int64(264), np.int64(271), np.int64(273), np.int64(275), np.int64(277), np.int64(279), np.int64(280), np.int64(282), np.int64(286), np.int64(291), np.int64(292), np.int64(296), np.int64(297), np.int64(298), np.int64(300), np.int64(301), np.int64(303), np.int64(304), np.int64(308), np.int64(309), np.int64(312), np.int64(314), np.int64(325), np.int64(327), np.int64(329), np.int64(333), np.int64(336), np.int64(338), np.int64(340), np.int64(341), np.int64(345), np.int64(346), np.int64(350), np.int64(353), np.int64(356), np.int64(364), np.int64(366), np.int64(367), np.int64(368), np.int64(370), np.int64(377), np.int64(381), np.int64(382), np.int64(384), np.int64(389), np.int64(402), np.int64(415), np.int64(426), np.int64(427), np.int64(428), np.int64(433), np.int64(434), np.int64(436), np.int64(438), np.int64(441), np.int64(444), np.int64(446), np.int64(447), np.int64(449), np.int64(451), np.int64(453), np.int64(456), np.int64(458), np.int64(462), np.int64(466), np.int64(470), np.int64(472), np.int64(474), np.int64(475), np.int64(482), np.int64(484), np.int64(490), np.int64(494), np.int64(496), np.int64(498), np.int64(500), np.int64(509), np.int64(512), np.int64(515), np.int64(516), np.int64(521), np.int64(522), np.int64(523), np.int64(528), np.int64(529), np.int64(530), np.int64(531), np.int64(533), np.int64(535), np.int64(537), np.int64(540), np.int64(546), np.int64(550), np.int64(552), np.int64(558), np.int64(561), np.int64(562), np.int64(563), np.int64(566), np.int64(568), np.int64(569), np.int64(570), np.int64(575), np.int64(576), np.int64(577), np.int64(581), np.int64(583), np.int64(598), np.int64(604), np.int64(607), np.int64(608), np.int64(609), np.int64(613), np.int64(617), np.int64(624), np.int64(626), np.int64(627), np.int64(628), np.int64(629), np.int64(630), np.int64(632), np.int64(633), np.int64(637), np.int64(643), np.int64(645), np.int64(649), np.int64(650), np.int64(651), np.int64(658), np.int64(664), np.int64(665), np.int64(669), np.int64(670), np.int64(671), np.int64(672), np.int64(676), np.int64(686), np.int64(688), np.int64(690), np.int64(695), np.int64(696), np.int64(697), np.int64(698), np.int64(699), np.int64(700), np.int64(701), np.int64(702), np.int64(706), np.int64(707), np.int64(709), np.int64(712), np.int64(714), np.int64(718), np.int64(720), np.int64(721), np.int64(725), np.int64(727), np.int64(728), np.int64(733), np.int64(744), np.int64(748), np.int64(750), np.int64(752), np.int64(753), np.int64(755), np.int64(756), np.int64(758), np.int64(760), np.int64(761), np.int64(762), np.int64(767), np.int64(769), np.int64(772), np.int64(773), np.int64(774), np.int64(779), np.int64(784), np.int64(786), np.int64(788), np.int64(789), np.int64(793), np.int64(795), np.int64(797), np.int64(798), np.int64(799), np.int64(802), np.int64(803), np.int64(804), np.int64(809), np.int64(814), np.int64(816), np.int64(818), np.int64(827), np.int64(829), np.int64(833)], array([0.        , 0.60714286, 0.5       ,        nan, 0.71153846,
+       0.16666667, 0.2       , 0.46938776, 0.73913043,        nan,
+       0.45238095, 0.6875    ,        nan, 0.72916667, 0.7710084 ,
+       0.52380952, 0.66614583, 0.        , 0.74032738,        nan,
+       0.        , 0.33333333, 0.53333333, 0.8       , 0.65555556,
+       0.5       , 0.6       , 1.        ,        nan, 0.75      ,
+       0.50410354, 0.71428571,        nan, 0.8       , 0.875     ,
+       0.26666667, 0.39583333, 0.83333333, 1.        , 0.6015625 ,
+       0.25      , 0.52905492, 0.58134921,        nan,        nan,
+       0.68292683, 0.58333333, 1.        , 0.25      , 0.66666667,
+       0.51307692, 1.        , 0.4       ,        nan, 0.25      ,
+       0.        , 0.54166667,        nan, 0.        ,        nan,
+              nan, 0.        , 1.        , 0.625     , 0.41666667,
+       0.64197531, 0.625     , 1.        , 0.75      , 0.73214286,
+              nan, 0.56944444, 0.51530612, 0.46428571, 0.8       ,
+       0.47041667, 0.46583851, 0.64010989, 1.        , 0.25      ,
+       0.        , 1.        , 0.3173913 , 0.63636364, 0.33333333,
+              nan, 1.        , 0.48690078, 0.54901961, 0.6875    ,
+       0.50694444, 0.58947368, 0.5742236 , 0.83333333,        nan,
+       0.61111111, 0.96666667, 0.21428571, 0.76719577, 0.68055556,
+       0.47614379, 0.55273438, 0.28431373,        nan,        nan,
+       0.78070175, 0.61176471, 0.82773109, 0.23809524, 0.775     ,
+       1.        , 1.        , 0.58333333,        nan, 0.        ,
+       0.        , 1.        , 0.5       , 0.68055556, 0.        ,
+       0.28571429, 0.88888889, 0.        , 0.50108932,        nan,
+       0.6875    , 0.83333333, 0.5       , 1.        , 0.42      ,
+       0.72222222, 0.16666667, 0.50254669, 0.66666667, 0.5       ,
+       0.55555556, 0.66666667, 0.        , 0.46666667, 0.59107559,
+       0.52380952,        nan, 0.65294118, 0.        , 0.42105263,
+              nan, 0.78571429, 0.5       , 0.83333333,        nan,
+       0.45424837, 0.64130435, 0.        , 0.46875   , 0.66666667,
+       0.6       , 0.5       , 1.        , 1.        , 0.875     ,
+       0.51578947, 1.        , 0.34285714, 1.        ,        nan,
+       0.375     ,        nan, 0.78125   , 0.16666667, 0.65306122,
+              nan,        nan, 0.5       , 0.66666667, 0.75935829,
+              nan,        nan,        nan,        nan,        nan,
+       0.5       ,        nan, 0.44444444, 0.        , 0.75      ,
+       0.46666667, 1.        , 0.45299145, 0.47047619,        nan,
+       0.5625    , 1.        , 1.        , 0.5       , 0.875     ,
+       0.5       , 0.5       , 0.78823529, 0.49328449, 0.39285714,
+       0.5       , 0.88888889, 0.6       , 0.71323529, 0.58585859,
+       0.5       , 0.50561656, 0.23636364, 0.2962963 , 0.5       ,
+              nan, 0.52405686, 0.5       , 0.75      , 0.        ,
+              nan, 0.41666667, 0.        , 0.4       , 0.77272727,
+       1.        , 0.49305556, 0.75      , 0.4       , 0.38      ,
+              nan, 0.66666667, 1.        , 0.18181818, 0.        ,
+       0.496     , 0.33333333, 1.        , 1.        , 0.77777778,
+       0.66002415, 0.6       , 0.55701754, 0.52016807, 0.45238095,
+       0.5       , 0.83333333,        nan, 0.5       , 0.25      ,
+       0.33333333, 0.71153846,        nan, 0.5       ,        nan,
+       0.5       , 0.86666667,        nan,        nan, 0.625     ,
+       0.5       , 0.        , 0.51428571, 0.        , 1.        ,
+       1.        , 0.55641026, 0.44897959, 0.6969697 , 0.8       ,
+       0.        , 0.55555556, 0.66666667, 0.28571429, 1.        ,
+       0.52564103, 0.52777778, 0.25      , 0.49399546, 0.33333333,
+       0.54545455, 0.8       , 0.60504202,        nan, 0.33333333,
+              nan,        nan, 0.71590909]))
+rank_0 auc: 0.5897906802050686
+2026-08-13 10:25:09,961 [INFO] Saving checkpoint at epoch 4 to /kaggle/working/collm-stage1/20260813092/checkpoint_best.pth (model state 16.8 MB, 128 keys).
+2026-08-13 10:25:10,127 [INFO] Start training
+2026-08-13 10:25:10,151 [INFO] Start training epoch 5, 50 iters per inner epoch.
+/kaggle/working/CoLLM-thesis/minigpt4/tasks/base_task.py:219: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with torch.cuda.amp.autocast(enabled=use_amp):
+/kaggle/working/CoLLM-thesis/minigpt4/models/rec_model.py:48: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  return torch.cuda.amp.autocast(dtype=dtype)
+/usr/local/lib/python3.12/dist-packages/torch/_dynamo/eval_frame.py:1181: UserWarning: torch.utils.checkpoint: the use_reentrant parameter should be passed explicitly. Starting in PyTorch 2.9, calling checkpoint without use_reentrant will raise an exception. use_reentrant=False is recommended, but if you need to preserve the current default behavior, you can pass use_reentrant=True. Refer to docs for more details on the differences between the two variants.
+  return fn(*args, **kwargs)
+Train: data epoch: [5]  [ 0/50]  eta: 0:01:48  lr: 0.000991  loss: 0.9976  time: 2.1705  data: 0.0000  max mem: 13888
+Train: data epoch: [5]  [49/50]  eta: 0:00:02  lr: 0.000987  loss: 0.6032  time: 2.1294  data: 0.0000  max mem: 13888
+Train: data epoch: [5] Total time: 0:01:47 (2.1453 s / it)
+2026-08-13 10:26:57,415 [INFO] Averaged stats: lr: 0.000989  loss: 0.867436
+2026-08-13 10:26:57,443 [INFO] Saving checkpoint at epoch 5 to /kaggle/working/collm-stage1/20260813092/checkpoint_5.pth (model state 16.8 MB, 128 keys).
+2026-08-13 10:26:57,609 [INFO] Start training
+2026-08-13 10:26:57,634 [INFO] Start training epoch 6, 50 iters per inner epoch.
+Train: data epoch: [6]  [ 0/50]  eta: 0:01:48  lr: 0.000987  loss: 0.9479  time: 2.1776  data: 0.0000  max mem: 13888
+Train: data epoch: [6]  [49/50]  eta: 0:00:02  lr: 0.000983  loss: 0.9522  time: 2.1730  data: 0.0000  max mem: 13888
+Train: data epoch: [6] Total time: 0:01:47 (2.1530 s / it)
+2026-08-13 10:28:45,283 [INFO] Averaged stats: lr: 0.000985  loss: 0.777196
+2026-08-13 10:28:45,284 [INFO] Evaluating on valid.
+Evaluation  [   0/1300]  eta: 0:20:44  loss: 0.8486  acc: 0.0000  time: 0.9573  data: 0.1765  max mem: 13888
+Evaluation  [ 260/1300]  eta: 0:12:54  loss: 0.7336  acc: 0.2500  time: 0.7240  data: 0.0008  max mem: 13888
+Evaluation  [ 520/1300]  eta: 0:09:40  loss: 0.6719  acc: 0.5000  time: 0.7572  data: 0.0008  max mem: 13888
+Evaluation  [ 780/1300]  eta: 0:06:27  loss: 0.7320  acc: 0.2500  time: 0.7411  data: 0.0007  max mem: 13888
+Evaluation  [1040/1300]  eta: 0:03:14  loss: 0.7779  acc: 0.0000  time: 0.7464  data: 0.0008  max mem: 13888
+Evaluation  [1299/1300]  eta: 0:00:00  loss: 0.5370  acc: 0.2500  time: 0.7447  data: 0.0045  max mem: 13888
+Evaluation Total time: 0:16:10 (0.7465 s / it)
+only one interaction users: 48
+computed user: 283 can not users: 0
+uauc for validation Cost: 0.2733633518218994 uauc: nan
+2026-08-13 10:44:56,097 [INFO] Averaged stats: loss: 0.679010  acc: 0.303846 ***auc: 0.6490220304663045 ***uauc:(np.float64(nan), [np.int64(20), np.int64(26), np.int64(33), np.int64(34), np.int64(36), np.int64(37), np.int64(39), np.int64(40), np.int64(41), np.int64(48), np.int64(49), np.int64(57), np.int64(71), np.int64(72), np.int64(73), np.int64(79), np.int64(83), np.int64(85), np.int64(87), np.int64(91), np.int64(93), np.int64(95), np.int64(104), np.int64(107), np.int64(108), np.int64(109), np.int64(110), np.int64(112), np.int64(115), np.int64(119), np.int64(121), np.int64(124), np.int64(126), np.int64(139), np.int64(142), np.int64(145), np.int64(147), np.int64(149), np.int64(153), np.int64(155), np.int64(159), np.int64(164), np.int64(165), np.int64(167), np.int64(169), np.int64(170), np.int64(171), np.int64(173), np.int64(174), np.int64(175), np.int64(177), np.int64(178), np.int64(180), np.int64(184), np.int64(185), np.int64(186), np.int64(193), np.int64(195), np.int64(197), np.int64(198), np.int64(199), np.int64(200), np.int64(204), np.int64(205), np.int64(207), np.int64(208), np.int64(210), np.int64(212), np.int64(214), np.int64(215), np.int64(217), np.int64(221), np.int64(222), np.int64(226), np.int64(227), np.int64(228), np.int64(230), np.int64(231), np.int64(237), np.int64(242), np.int64(246), np.int64(247), np.int64(249), np.int64(250), np.int64(255), np.int64(256), np.int64(260), np.int64(261), np.int64(264), np.int64(271), np.int64(273), np.int64(275), np.int64(277), np.int64(279), np.int64(280), np.int64(282), np.int64(286), np.int64(291), np.int64(292), np.int64(296), np.int64(297), np.int64(298), np.int64(300), np.int64(301), np.int64(303), np.int64(304), np.int64(308), np.int64(309), np.int64(312), np.int64(314), np.int64(325), np.int64(327), np.int64(329), np.int64(333), np.int64(336), np.int64(338), np.int64(340), np.int64(341), np.int64(345), np.int64(346), np.int64(350), np.int64(353), np.int64(356), np.int64(364), np.int64(366), np.int64(367), np.int64(368), np.int64(370), np.int64(377), np.int64(381), np.int64(382), np.int64(384), np.int64(389), np.int64(402), np.int64(415), np.int64(426), np.int64(427), np.int64(428), np.int64(433), np.int64(434), np.int64(436), np.int64(438), np.int64(441), np.int64(444), np.int64(446), np.int64(447), np.int64(449), np.int64(451), np.int64(453), np.int64(456), np.int64(458), np.int64(462), np.int64(466), np.int64(470), np.int64(472), np.int64(474), np.int64(475), np.int64(482), np.int64(484), np.int64(490), np.int64(494), np.int64(496), np.int64(498), np.int64(500), np.int64(509), np.int64(512), np.int64(515), np.int64(516), np.int64(521), np.int64(522), np.int64(523), np.int64(528), np.int64(529), np.int64(530), np.int64(531), np.int64(533), np.int64(535), np.int64(537), np.int64(540), np.int64(546), np.int64(550), np.int64(552), np.int64(558), np.int64(561), np.int64(562), np.int64(563), np.int64(566), np.int64(568), np.int64(569), np.int64(570), np.int64(575), np.int64(576), np.int64(577), np.int64(581), np.int64(583), np.int64(598), np.int64(604), np.int64(607), np.int64(608), np.int64(609), np.int64(613), np.int64(617), np.int64(624), np.int64(626), np.int64(627), np.int64(628), np.int64(629), np.int64(630), np.int64(632), np.int64(633), np.int64(637), np.int64(643), np.int64(645), np.int64(649), np.int64(650), np.int64(651), np.int64(658), np.int64(664), np.int64(665), np.int64(669), np.int64(670), np.int64(671), np.int64(672), np.int64(676), np.int64(686), np.int64(688), np.int64(690), np.int64(695), np.int64(696), np.int64(697), np.int64(698), np.int64(699), np.int64(700), np.int64(701), np.int64(702), np.int64(706), np.int64(707), np.int64(709), np.int64(712), np.int64(714), np.int64(718), np.int64(720), np.int64(721), np.int64(725), np.int64(727), np.int64(728), np.int64(733), np.int64(744), np.int64(748), np.int64(750), np.int64(752), np.int64(753), np.int64(755), np.int64(756), np.int64(758), np.int64(760), np.int64(761), np.int64(762), np.int64(767), np.int64(769), np.int64(772), np.int64(773), np.int64(774), np.int64(779), np.int64(784), np.int64(786), np.int64(788), np.int64(789), np.int64(793), np.int64(795), np.int64(797), np.int64(798), np.int64(799), np.int64(802), np.int64(803), np.int64(804), np.int64(809), np.int64(814), np.int64(816), np.int64(818), np.int64(827), np.int64(829), np.int64(833)], array([0.        , 0.69642857, 0.5       ,        nan, 0.67307692,
+       1.        , 1.        , 0.6122449 , 0.96521739,        nan,
+       0.46428571, 0.625     ,        nan, 0.54166667, 0.79411765,
+       0.58730159, 0.8265625 , 0.        , 0.71577381,        nan,
+       1.        , 0.66666667, 0.7       , 0.78947368, 0.75      ,
+       0.        , 0.66666667, 0.        ,        nan, 0.5       ,
+       0.59974747, 0.85714286,        nan, 0.8       , 0.375     ,
+       0.6       , 0.63888889, 1.        , 1.        , 0.734375  ,
+       0.75      , 0.76436782, 0.77380952,        nan,        nan,
+       0.60452962, 0.44444444, 1.        , 0.625     , 0.        ,
+       0.60923077, 1.        , 0.8       ,        nan, 1.        ,
+       1.        , 0.61111111,        nan, 1.        ,        nan,
+              nan, 0.        , 0.        , 0.81547619, 0.58333333,
+       0.89506173, 0.85      , 1.        , 0.5       , 0.71428571,
+              nan, 0.51388889, 0.63265306, 0.42857143, 1.        ,
+       0.81708333, 0.57142857, 0.79395604, 0.5       , 0.        ,
+       0.66666667, 1.        , 0.57826087, 0.46969697, 0.        ,
+              nan, 0.625     , 0.60367893, 0.51176471, 0.5625    ,
+       0.8452381 , 0.36842105, 0.73291925, 0.75      ,        nan,
+       0.77777778, 0.57777778, 0.5       , 0.8968254 , 0.67361111,
+       0.55816993, 0.59244792, 0.59313725,        nan,        nan,
+       0.87719298, 0.95294118, 0.83193277, 0.46031746, 0.825     ,
+       0.75      , 1.        , 0.66666667,        nan, 0.        ,
+       0.6       , 0.        , 0.75      , 0.63888889, 0.5       ,
+       0.57142857, 0.55555556, 1.        , 0.59694989,        nan,
+       0.875     , 0.83333333, 0.2       , 1.        , 0.44      ,
+       0.76851852, 0.5       , 0.53989813, 0.53333333, 1.        ,
+       0.36111111, 1.        , 1.        , 0.46666667, 0.6033966 ,
+       0.85714286,        nan, 0.57254902, 1.        , 0.80350877,
+              nan, 0.85714286, 0.66666667, 0.66666667,        nan,
+       0.54598506, 0.82608696, 1.        , 0.66666667, 0.33333333,
+       1.        , 0.64583333, 1.        , 0.5       , 0.625     ,
+       0.70526316, 1.        , 0.54285714, 0.        ,        nan,
+       0.5       ,        nan, 0.73090278, 0.5       , 0.65306122,
+              nan,        nan, 0.5       , 0.35555556, 0.62032086,
+              nan,        nan,        nan,        nan,        nan,
+       1.        ,        nan, 0.43055556, 1.        , 0.25      ,
+       0.72222222, 1.        , 0.46153846, 0.32857143,        nan,
+       0.625     , 0.58333333, 1.        , 1.        , 0.875     ,
+       0.625     , 1.        , 0.79215686, 0.46825397, 0.48214286,
+       0.5       , 0.33333333, 0.3       , 0.58088235, 0.57575758,
+       0.38888889, 0.69386596, 0.36363636, 0.55555556, 0.5       ,
+              nan, 0.53362493, 0.75      , 1.        , 0.5       ,
+              nan, 0.5       , 0.66666667, 0.57777778, 0.72727273,
+       0.25      , 0.36111111, 1.        , 0.4       , 0.5       ,
+              nan, 0.33333333, 0.        , 1.        , 1.        ,
+       0.516     , 0.66666667, 0.66666667, 0.33333333, 0.22222222,
+       0.71225845, 0.6       , 0.43567251, 0.36890756, 0.5952381 ,
+       0.52941176, 0.77083333,        nan, 0.66666667, 1.        ,
+       0.66666667, 0.63461538,        nan, 0.        ,        nan,
+       0.83333333, 0.26666667,        nan,        nan, 0.59375   ,
+       0.        , 0.        , 0.67142857, 1.        , 0.        ,
+       1.        , 0.7025641 , 0.81632653, 0.78787879, 0.9       ,
+       0.        , 0.77777778, 0.33333333, 0.85714286, 0.        ,
+       0.76923077, 0.73611111, 1.        , 0.60483609, 1.        ,
+       0.36363636, 0.66666667, 0.6302521 ,        nan, 0.86666667,
+              nan,        nan, 0.7594697 ]))
+rank_0 auc: 0.6490220304663045
+2026-08-13 10:44:56,121 [INFO] Saving checkpoint at epoch 6 to /kaggle/working/collm-stage1/20260813092/checkpoint_best.pth (model state 16.8 MB, 128 keys).
+2026-08-13 10:44:56,275 [INFO] Start training
+2026-08-13 10:44:56,299 [INFO] Start training epoch 7, 50 iters per inner epoch.
+/kaggle/working/CoLLM-thesis/minigpt4/tasks/base_task.py:219: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with torch.cuda.amp.autocast(enabled=use_amp):
+/kaggle/working/CoLLM-thesis/minigpt4/models/rec_model.py:48: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  return torch.cuda.amp.autocast(dtype=dtype)
+/usr/local/lib/python3.12/dist-packages/torch/_dynamo/eval_frame.py:1181: UserWarning: torch.utils.checkpoint: the use_reentrant parameter should be passed explicitly. Starting in PyTorch 2.9, calling checkpoint without use_reentrant will raise an exception. use_reentrant=False is recommended, but if you need to preserve the current default behavior, you can pass use_reentrant=True. Refer to docs for more details on the differences between the two variants.
+  return fn(*args, **kwargs)
+Train: data epoch: [7]  [ 0/50]  eta: 0:01:51  lr: 0.000983  loss: 0.6850  time: 2.2333  data: 0.0000  max mem: 13888
+Train: data epoch: [7]  [49/50]  eta: 0:00:02  lr: 0.000978  loss: 0.4551  time: 2.1221  data: 0.0000  max mem: 13888
+Train: data epoch: [7] Total time: 0:01:46 (2.1396 s / it)
+2026-08-13 10:46:43,279 [INFO] Averaged stats: lr: 0.000980  loss: 0.740020
+2026-08-13 10:46:43,300 [INFO] Saving checkpoint at epoch 7 to /kaggle/working/collm-stage1/20260813092/checkpoint_7.pth (model state 16.8 MB, 128 keys).
+2026-08-13 10:46:43,457 [INFO] Start training
+2026-08-13 10:46:43,483 [INFO] Start training epoch 8, 50 iters per inner epoch.
+Train: data epoch: [8]  [ 0/50]  eta: 0:01:39  lr: 0.000977  loss: 0.8324  time: 1.9974  data: 0.0000  max mem: 13888
+Train: data epoch: [8]  [49/50]  eta: 0:00:02  lr: 0.000972  loss: 0.5095  time: 2.1437  data: 0.0000  max mem: 13888
+Train: data epoch: [8] Total time: 0:01:46 (2.1390 s / it)
+2026-08-13 10:48:30,433 [INFO] Averaged stats: lr: 0.000975  loss: 0.724369
+2026-08-13 10:48:30,434 [INFO] Evaluating on valid.
+Evaluation  [   0/1300]  eta: 0:21:05  loss: 0.6675  acc: 0.0000  time: 0.9733  data: 0.1872  max mem: 13888
+Evaluation  [ 260/1300]  eta: 0:12:53  loss: 0.5889  acc: 0.0000  time: 0.7259  data: 0.0008  max mem: 13888
+Evaluation  [ 520/1300]  eta: 0:09:40  loss: 0.7296  acc: 0.0000  time: 0.7541  data: 0.0008  max mem: 13888
+Evaluation  [ 780/1300]  eta: 0:06:27  loss: 0.7189  acc: 0.0000  time: 0.7386  data: 0.0007  max mem: 13888
+Evaluation  [1040/1300]  eta: 0:03:13  loss: 0.6896  acc: 0.0000  time: 0.7436  data: 0.0008  max mem: 13888
+Evaluation  [1299/1300]  eta: 0:00:00  loss: 0.7466  acc: 0.0000  time: 0.7451  data: 0.0042  max mem: 13888
+Evaluation Total time: 0:16:09 (0.7457 s / it)
+only one interaction users: 48
+computed user: 283 can not users: 0
+uauc for validation Cost: 0.2757253646850586 uauc: nan
+2026-08-13 11:04:40,194 [INFO] Averaged stats: loss: 0.693720  acc: 0.009231 ***auc: 0.6375906700784397 ***uauc:(np.float64(nan), [np.int64(20), np.int64(26), np.int64(33), np.int64(34), np.int64(36), np.int64(37), np.int64(39), np.int64(40), np.int64(41), np.int64(48), np.int64(49), np.int64(57), np.int64(71), np.int64(72), np.int64(73), np.int64(79), np.int64(83), np.int64(85), np.int64(87), np.int64(91), np.int64(93), np.int64(95), np.int64(104), np.int64(107), np.int64(108), np.int64(109), np.int64(110), np.int64(112), np.int64(115), np.int64(119), np.int64(121), np.int64(124), np.int64(126), np.int64(139), np.int64(142), np.int64(145), np.int64(147), np.int64(149), np.int64(153), np.int64(155), np.int64(159), np.int64(164), np.int64(165), np.int64(167), np.int64(169), np.int64(170), np.int64(171), np.int64(173), np.int64(174), np.int64(175), np.int64(177), np.int64(178), np.int64(180), np.int64(184), np.int64(185), np.int64(186), np.int64(193), np.int64(195), np.int64(197), np.int64(198), np.int64(199), np.int64(200), np.int64(204), np.int64(205), np.int64(207), np.int64(208), np.int64(210), np.int64(212), np.int64(214), np.int64(215), np.int64(217), np.int64(221), np.int64(222), np.int64(226), np.int64(227), np.int64(228), np.int64(230), np.int64(231), np.int64(237), np.int64(242), np.int64(246), np.int64(247), np.int64(249), np.int64(250), np.int64(255), np.int64(256), np.int64(260), np.int64(261), np.int64(264), np.int64(271), np.int64(273), np.int64(275), np.int64(277), np.int64(279), np.int64(280), np.int64(282), np.int64(286), np.int64(291), np.int64(292), np.int64(296), np.int64(297), np.int64(298), np.int64(300), np.int64(301), np.int64(303), np.int64(304), np.int64(308), np.int64(309), np.int64(312), np.int64(314), np.int64(325), np.int64(327), np.int64(329), np.int64(333), np.int64(336), np.int64(338), np.int64(340), np.int64(341), np.int64(345), np.int64(346), np.int64(350), np.int64(353), np.int64(356), np.int64(364), np.int64(366), np.int64(367), np.int64(368), np.int64(370), np.int64(377), np.int64(381), np.int64(382), np.int64(384), np.int64(389), np.int64(402), np.int64(415), np.int64(426), np.int64(427), np.int64(428), np.int64(433), np.int64(434), np.int64(436), np.int64(438), np.int64(441), np.int64(444), np.int64(446), np.int64(447), np.int64(449), np.int64(451), np.int64(453), np.int64(456), np.int64(458), np.int64(462), np.int64(466), np.int64(470), np.int64(472), np.int64(474), np.int64(475), np.int64(482), np.int64(484), np.int64(490), np.int64(494), np.int64(496), np.int64(498), np.int64(500), np.int64(509), np.int64(512), np.int64(515), np.int64(516), np.int64(521), np.int64(522), np.int64(523), np.int64(528), np.int64(529), np.int64(530), np.int64(531), np.int64(533), np.int64(535), np.int64(537), np.int64(540), np.int64(546), np.int64(550), np.int64(552), np.int64(558), np.int64(561), np.int64(562), np.int64(563), np.int64(566), np.int64(568), np.int64(569), np.int64(570), np.int64(575), np.int64(576), np.int64(577), np.int64(581), np.int64(583), np.int64(598), np.int64(604), np.int64(607), np.int64(608), np.int64(609), np.int64(613), np.int64(617), np.int64(624), np.int64(626), np.int64(627), np.int64(628), np.int64(629), np.int64(630), np.int64(632), np.int64(633), np.int64(637), np.int64(643), np.int64(645), np.int64(649), np.int64(650), np.int64(651), np.int64(658), np.int64(664), np.int64(665), np.int64(669), np.int64(670), np.int64(671), np.int64(672), np.int64(676), np.int64(686), np.int64(688), np.int64(690), np.int64(695), np.int64(696), np.int64(697), np.int64(698), np.int64(699), np.int64(700), np.int64(701), np.int64(702), np.int64(706), np.int64(707), np.int64(709), np.int64(712), np.int64(714), np.int64(718), np.int64(720), np.int64(721), np.int64(725), np.int64(727), np.int64(728), np.int64(733), np.int64(744), np.int64(748), np.int64(750), np.int64(752), np.int64(753), np.int64(755), np.int64(756), np.int64(758), np.int64(760), np.int64(761), np.int64(762), np.int64(767), np.int64(769), np.int64(772), np.int64(773), np.int64(774), np.int64(779), np.int64(784), np.int64(786), np.int64(788), np.int64(789), np.int64(793), np.int64(795), np.int64(797), np.int64(798), np.int64(799), np.int64(802), np.int64(803), np.int64(804), np.int64(809), np.int64(814), np.int64(816), np.int64(818), np.int64(827), np.int64(829), np.int64(833)], array([0.        , 0.65178571, 0.33333333,        nan, 0.74358974,
+       0.83333333, 1.        , 0.53061224, 0.87826087,        nan,
+       0.33333333, 0.625     ,        nan, 0.5625    , 0.81512605,
+       0.61904762, 0.80529514, 0.5       , 0.52232143,        nan,
+       1.        , 0.58333333, 0.6       , 0.68421053, 0.76388889,
+       0.75      , 0.93333333, 0.        ,        nan, 0.5       ,
+       0.55366162, 0.66666667,        nan, 0.86666667, 0.625     ,
+       0.46666667, 0.55555556, 0.58333333, 1.        , 0.75      ,
+       1.        , 0.71583653, 0.68253968,        nan,        nan,
+       0.64285714, 0.5       , 1.        , 0.625     , 0.33333333,
+       0.57076923, 1.        , 0.7       ,        nan, 1.        ,
+       0.        , 0.60416667,        nan, 1.        ,        nan,
+              nan, 0.        , 0.        , 0.66666667, 0.33333333,
+       0.95987654, 0.825     , 0.83333333, 0.375     , 0.67857143,
+              nan, 0.59722222, 0.54081633, 0.57142857, 1.        ,
+       0.74625   , 0.6242236 , 0.80494505, 0.5       , 0.5       ,
+       0.83333333, 1.        , 0.55652174, 0.53030303, 0.33333333,
+              nan, 0.875     , 0.53623188, 0.49215686, 0.125     ,
+       0.77380952, 0.41052632, 0.72732919, 0.70833333,        nan,
+       0.72222222, 0.58148148, 0.42857143, 0.95326279, 0.39583333,
+       0.54379085, 0.57291667, 0.55392157,        nan,        nan,
+       0.87719298, 0.88235294, 0.81512605, 0.38095238, 0.9       ,
+       0.75      , 1.        , 0.72916667,        nan, 0.        ,
+       0.6       , 0.66666667, 0.625     , 0.63888889, 1.        ,
+       0.66666667, 0.77777778, 1.        , 0.60893246,        nan,
+       0.84375   , 1.        , 0.35      , 1.        , 0.48      ,
+       0.7037037 , 0.33333333, 0.53989813, 0.46666667, 0.75      ,
+       0.41666667, 0.66666667, 1.        , 0.33333333, 0.59407259,
+       0.85714286,        nan, 0.51470588, 0.        , 0.65087719,
+              nan, 0.85714286, 0.66666667, 0.33333333,        nan,
+       0.52894491, 0.77173913, 1.        , 0.5       , 1.        ,
+       0.8       , 0.56944444, 1.        , 0.        , 1.        ,
+       0.77894737, 1.        , 0.48571429, 0.5       ,        nan,
+       0.5       ,        nan, 0.58680556, 0.33333333, 0.69387755,
+              nan,        nan, 0.5       , 0.44444444, 0.78074866,
+              nan,        nan,        nan,        nan,        nan,
+       0.5       ,        nan, 0.52777778, 1.        , 0.25      ,
+       0.61111111, 1.        , 0.39316239, 0.46095238,        nan,
+       0.875     , 0.41666667, 1.        , 1.        , 0.83333333,
+       0.8125    , 0.        , 0.78823529, 0.47496947, 0.58928571,
+       0.3452381 , 0.44444444, 0.4       , 0.57352941, 0.55555556,
+       0.5       , 0.66319576, 0.45454545, 0.55555556, 0.25      ,
+              nan, 0.44423182, 0.75      , 1.        , 0.        ,
+              nan, 0.33333333, 0.66666667, 0.6962963 , 0.63636364,
+       0.75      , 0.36111111, 1.        , 0.8       , 0.5       ,
+              nan, 0.33333333, 1.        , 0.81818182, 0.5       ,
+       0.504     , 0.        , 0.66666667, 1.        , 0.22222222,
+       0.7089372 , 0.4       , 0.49122807, 0.31932773, 0.33333333,
+       0.44117647, 0.66666667,        nan, 0.72222222, 1.        ,
+       0.66666667, 0.53846154,        nan, 0.        ,        nan,
+       1.        , 0.53333333,        nan,        nan, 0.3125    ,
+       0.        , 0.        , 0.68571429, 0.        , 1.        ,
+       1.        , 0.68717949, 0.83673469, 0.78787879, 0.85      ,
+       0.        , 0.83333333, 0.33333333, 0.14285714, 1.        ,
+       0.65384615, 0.64930556, 0.66666667, 0.58292762, 1.        ,
+       0.39393939, 0.86666667, 0.63865546,        nan, 0.53333333,
+              nan,        nan, 0.75189394]))
+rank_0 auc: 0.6375906700784397
+2026-08-13 11:04:40,218 [INFO] Start training
+2026-08-13 11:04:40,244 [INFO] Start training epoch 9, 50 iters per inner epoch.
+/kaggle/working/CoLLM-thesis/minigpt4/tasks/base_task.py:219: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with torch.cuda.amp.autocast(enabled=use_amp):
+/kaggle/working/CoLLM-thesis/minigpt4/models/rec_model.py:48: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  return torch.cuda.amp.autocast(dtype=dtype)
+/usr/local/lib/python3.12/dist-packages/torch/_dynamo/eval_frame.py:1181: UserWarning: torch.utils.checkpoint: the use_reentrant parameter should be passed explicitly. Starting in PyTorch 2.9, calling checkpoint without use_reentrant will raise an exception. use_reentrant=False is recommended, but if you need to preserve the current default behavior, you can pass use_reentrant=True. Refer to docs for more details on the differences between the two variants.
+  return fn(*args, **kwargs)
+Train: data epoch: [9]  [ 0/50]  eta: 0:01:40  lr: 0.000972  loss: 0.7518  time: 2.0097  data: 0.0000  max mem: 13888
+Train: data epoch: [9]  [49/50]  eta: 0:00:02  lr: 0.000965  loss: 0.7406  time: 2.1340  data: 0.0000  max mem: 13888
+Train: data epoch: [9] Total time: 0:01:46 (2.1382 s / it)
+2026-08-13 11:06:27,153 [INFO] Averaged stats: lr: 0.000968  loss: 0.679176
+2026-08-13 11:06:27,174 [INFO] Saving checkpoint at epoch 9 to /kaggle/working/collm-stage1/20260813092/checkpoint_9.pth (model state 16.8 MB, 128 keys).
+2026-08-13 11:06:27,290 [INFO] Start training
+2026-08-13 11:06:27,315 [INFO] Start training epoch 10, 50 iters per inner epoch.
+Train: data epoch: [10]  [ 0/50]  eta: 0:01:40  lr: 0.000965  loss: 0.8694  time: 2.0043  data: 0.0000  max mem: 13888
+Train: data epoch: [10]  [49/50]  eta: 0:00:02  lr: 0.000958  loss: 0.6257  time: 2.1012  data: 0.0000  max mem: 13888
+Train: data epoch: [10] Total time: 0:01:46 (2.1239 s / it)
+2026-08-13 11:08:13,509 [INFO] Averaged stats: lr: 0.000961  loss: 0.705679
+2026-08-13 11:08:13,510 [INFO] Evaluating on valid.
+Evaluation  [   0/1300]  eta: 0:21:06  loss: 0.6668  acc: 0.0000  time: 0.9744  data: 0.1833  max mem: 13888
+Evaluation  [ 260/1300]  eta: 0:12:55  loss: 0.6402  acc: 0.0000  time: 0.7239  data: 0.0008  max mem: 13888
+Evaluation  [ 520/1300]  eta: 0:09:41  loss: 0.6061  acc: 0.0000  time: 0.7599  data: 0.0008  max mem: 13888
+Evaluation  [ 780/1300]  eta: 0:06:27  loss: 0.7226  acc: 0.2500  time: 0.7377  data: 0.0008  max mem: 13888
+Evaluation  [1040/1300]  eta: 0:03:14  loss: 0.5699  acc: 0.0000  time: 0.7463  data: 0.0008  max mem: 13888
+Evaluation  [1299/1300]  eta: 0:00:00  loss: 0.7172  acc: 0.0000  time: 0.7458  data: 0.0042  max mem: 13888
+Evaluation Total time: 0:16:10 (0.7464 s / it)
+only one interaction users: 48
+computed user: 283 can not users: 0
+uauc for validation Cost: 0.27983951568603516 uauc: nan
+2026-08-13 11:24:24,101 [INFO] Averaged stats: loss: 0.653035  acc: 0.153462 ***auc: 0.6620027502261046 ***uauc:(np.float64(nan), [np.int64(20), np.int64(26), np.int64(33), np.int64(34), np.int64(36), np.int64(37), np.int64(39), np.int64(40), np.int64(41), np.int64(48), np.int64(49), np.int64(57), np.int64(71), np.int64(72), np.int64(73), np.int64(79), np.int64(83), np.int64(85), np.int64(87), np.int64(91), np.int64(93), np.int64(95), np.int64(104), np.int64(107), np.int64(108), np.int64(109), np.int64(110), np.int64(112), np.int64(115), np.int64(119), np.int64(121), np.int64(124), np.int64(126), np.int64(139), np.int64(142), np.int64(145), np.int64(147), np.int64(149), np.int64(153), np.int64(155), np.int64(159), np.int64(164), np.int64(165), np.int64(167), np.int64(169), np.int64(170), np.int64(171), np.int64(173), np.int64(174), np.int64(175), np.int64(177), np.int64(178), np.int64(180), np.int64(184), np.int64(185), np.int64(186), np.int64(193), np.int64(195), np.int64(197), np.int64(198), np.int64(199), np.int64(200), np.int64(204), np.int64(205), np.int64(207), np.int64(208), np.int64(210), np.int64(212), np.int64(214), np.int64(215), np.int64(217), np.int64(221), np.int64(222), np.int64(226), np.int64(227), np.int64(228), np.int64(230), np.int64(231), np.int64(237), np.int64(242), np.int64(246), np.int64(247), np.int64(249), np.int64(250), np.int64(255), np.int64(256), np.int64(260), np.int64(261), np.int64(264), np.int64(271), np.int64(273), np.int64(275), np.int64(277), np.int64(279), np.int64(280), np.int64(282), np.int64(286), np.int64(291), np.int64(292), np.int64(296), np.int64(297), np.int64(298), np.int64(300), np.int64(301), np.int64(303), np.int64(304), np.int64(308), np.int64(309), np.int64(312), np.int64(314), np.int64(325), np.int64(327), np.int64(329), np.int64(333), np.int64(336), np.int64(338), np.int64(340), np.int64(341), np.int64(345), np.int64(346), np.int64(350), np.int64(353), np.int64(356), np.int64(364), np.int64(366), np.int64(367), np.int64(368), np.int64(370), np.int64(377), np.int64(381), np.int64(382), np.int64(384), np.int64(389), np.int64(402), np.int64(415), np.int64(426), np.int64(427), np.int64(428), np.int64(433), np.int64(434), np.int64(436), np.int64(438), np.int64(441), np.int64(444), np.int64(446), np.int64(447), np.int64(449), np.int64(451), np.int64(453), np.int64(456), np.int64(458), np.int64(462), np.int64(466), np.int64(470), np.int64(472), np.int64(474), np.int64(475), np.int64(482), np.int64(484), np.int64(490), np.int64(494), np.int64(496), np.int64(498), np.int64(500), np.int64(509), np.int64(512), np.int64(515), np.int64(516), np.int64(521), np.int64(522), np.int64(523), np.int64(528), np.int64(529), np.int64(530), np.int64(531), np.int64(533), np.int64(535), np.int64(537), np.int64(540), np.int64(546), np.int64(550), np.int64(552), np.int64(558), np.int64(561), np.int64(562), np.int64(563), np.int64(566), np.int64(568), np.int64(569), np.int64(570), np.int64(575), np.int64(576), np.int64(577), np.int64(581), np.int64(583), np.int64(598), np.int64(604), np.int64(607), np.int64(608), np.int64(609), np.int64(613), np.int64(617), np.int64(624), np.int64(626), np.int64(627), np.int64(628), np.int64(629), np.int64(630), np.int64(632), np.int64(633), np.int64(637), np.int64(643), np.int64(645), np.int64(649), np.int64(650), np.int64(651), np.int64(658), np.int64(664), np.int64(665), np.int64(669), np.int64(670), np.int64(671), np.int64(672), np.int64(676), np.int64(686), np.int64(688), np.int64(690), np.int64(695), np.int64(696), np.int64(697), np.int64(698), np.int64(699), np.int64(700), np.int64(701), np.int64(702), np.int64(706), np.int64(707), np.int64(709), np.int64(712), np.int64(714), np.int64(718), np.int64(720), np.int64(721), np.int64(725), np.int64(727), np.int64(728), np.int64(733), np.int64(744), np.int64(748), np.int64(750), np.int64(752), np.int64(753), np.int64(755), np.int64(756), np.int64(758), np.int64(760), np.int64(761), np.int64(762), np.int64(767), np.int64(769), np.int64(772), np.int64(773), np.int64(774), np.int64(779), np.int64(784), np.int64(786), np.int64(788), np.int64(789), np.int64(793), np.int64(795), np.int64(797), np.int64(798), np.int64(799), np.int64(802), np.int64(803), np.int64(804), np.int64(809), np.int64(814), np.int64(816), np.int64(818), np.int64(827), np.int64(829), np.int64(833)], array([0.        , 0.66964286, 0.5       ,        nan, 0.65384615,
+       1.        , 1.        , 0.53061224, 0.93043478,        nan,
+       0.54761905, 0.75      ,        nan, 0.5       , 0.85294118,
+       0.57142857, 0.82725694, 0.375     , 0.61904762,        nan,
+       1.        , 0.25      , 0.64444444, 0.76842105, 0.825     ,
+       0.75      , 0.73333333, 0.        ,        nan, 0.        ,
+       0.63194444, 0.78571429,        nan, 0.93333333, 0.6875    ,
+       0.53333333, 0.72222222, 0.83333333, 1.        , 0.765625  ,
+       1.        , 0.78927203, 0.76190476,        nan,        nan,
+       0.55923345, 0.56944444, 1.        , 0.75      , 0.        ,
+       0.57      , 1.        , 1.        ,        nan, 1.        ,
+       0.33333333, 0.61805556,        nan, 0.5       ,        nan,
+              nan, 0.        , 0.        , 0.81547619, 0.58333333,
+       0.91358025, 0.95      , 0.83333333, 0.375     , 0.83928571,
+              nan, 0.48611111, 0.61734694, 0.53571429, 1.        ,
+       0.75416667, 0.66770186, 0.82967033, 0.5       , 0.25      ,
+       0.83333333, 1.        , 0.55652174, 0.62121212, 0.33333333,
+              nan, 0.875     , 0.66945373, 0.54509804, 0.125     ,
+       0.80357143, 0.41578947, 0.75962733, 0.70833333,        nan,
+       0.5       , 0.57407407, 0.57142857, 0.97883598, 0.64583333,
+       0.60849673, 0.55208333, 0.44117647,        nan,        nan,
+       0.83333333, 0.88235294, 0.89915966, 0.41269841, 0.95      ,
+       0.875     , 1.        , 0.70833333,        nan, 0.        ,
+       0.5       , 0.66666667, 0.75      , 0.69444444, 0.5       ,
+       0.66666667, 0.55555556, 1.        , 0.58496732,        nan,
+       0.765625  , 0.83333333, 0.3       , 1.        , 0.54      ,
+       0.82407407, 0.5       , 0.53650255, 0.66666667, 1.        ,
+       0.36111111, 0.66666667, 1.        , 0.46666667, 0.64835165,
+       1.        ,        nan, 0.54803922, 1.        , 0.73684211,
+              nan, 0.92857143, 1.        , 0.33333333,        nan,
+       0.5550887 , 0.80434783, 0.        , 0.375     , 1.        ,
+       1.        , 0.58333333, 1.        , 0.        , 0.875     ,
+       0.75789474, 0.        , 0.42857143, 0.        ,        nan,
+       0.375     ,        nan, 0.70659722, 1.        , 0.75510204,
+              nan,        nan, 0.2       , 0.48888889, 0.70588235,
+              nan,        nan,        nan,        nan,        nan,
+       1.        ,        nan, 0.51388889, 1.        , 0.        ,
+       0.63333333, 0.        , 0.54700855, 0.47333333,        nan,
+       0.8125    , 0.41666667, 1.        , 1.        , 0.875     ,
+       0.75      , 0.5       , 0.82352941, 0.52380952, 0.46428571,
+       0.3452381 , 0.44444444, 0.4       , 0.63235294, 0.60606061,
+       0.5       , 0.67916193, 0.25454545, 0.59259259, 0.25      ,
+              nan, 0.51940951, 0.5       , 0.75      , 0.5       ,
+              nan, 0.41666667, 1.        , 0.51851852, 0.68181818,
+       1.        , 0.44444444, 1.        , 0.9       , 0.7       ,
+              nan, 0.66666667, 0.        , 0.90909091, 0.5       ,
+       0.484     , 0.66666667, 0.66666667, 1.        , 0.44444444,
+       0.7406401 , 0.48      , 0.46783626, 0.38235294, 0.30952381,
+       0.61764706, 0.6875    ,        nan, 0.75      , 0.75      ,
+       0.33333333, 0.73076923,        nan, 0.        ,        nan,
+       1.        , 0.53333333,        nan,        nan, 0.40625   ,
+       0.        , 0.        , 0.62857143, 1.        , 0.        ,
+       1.        , 0.73333333, 0.85714286, 0.87878788, 0.9       ,
+       1.        , 0.83333333, 0.33333333, 0.14285714, 1.        ,
+       0.79487179, 0.76041667, 1.        , 0.60986693, 1.        ,
+       0.39393939, 0.9       , 0.84033613,        nan, 0.73333333,
+              nan,        nan, 0.75      ]))
+rank_0 auc: 0.6620027502261046
+2026-08-13 11:24:24,123 [INFO] Saving checkpoint at epoch 10 to /kaggle/working/collm-stage1/20260813092/checkpoint_best.pth (model state 16.8 MB, 128 keys).
+2026-08-13 11:24:24,277 [INFO] Start training
+2026-08-13 11:24:24,302 [INFO] Start training epoch 11, 50 iters per inner epoch.
+/kaggle/working/CoLLM-thesis/minigpt4/tasks/base_task.py:219: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with torch.cuda.amp.autocast(enabled=use_amp):
+/kaggle/working/CoLLM-thesis/minigpt4/models/rec_model.py:48: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  return torch.cuda.amp.autocast(dtype=dtype)
+/usr/local/lib/python3.12/dist-packages/torch/_dynamo/eval_frame.py:1181: UserWarning: torch.utils.checkpoint: the use_reentrant parameter should be passed explicitly. Starting in PyTorch 2.9, calling checkpoint without use_reentrant will raise an exception. use_reentrant=False is recommended, but if you need to preserve the current default behavior, you can pass use_reentrant=True. Refer to docs for more details on the differences between the two variants.
+  return fn(*args, **kwargs)
+Train: data epoch: [11]  [ 0/50]  eta: 0:01:42  lr: 0.000958  loss: 0.5592  time: 2.0587  data: 0.0000  max mem: 13888
+Train: data epoch: [11]  [49/50]  eta: 0:00:02  lr: 0.000950  loss: 0.6359  time: 2.1273  data: 0.0000  max mem: 13888
+Train: data epoch: [11] Total time: 0:01:47 (2.1408 s / it)
+2026-08-13 11:26:11,341 [INFO] Averaged stats: lr: 0.000954  loss: 0.706556
+2026-08-13 11:26:11,362 [INFO] Saving checkpoint at epoch 11 to /kaggle/working/collm-stage1/20260813092/checkpoint_11.pth (model state 16.8 MB, 128 keys).
+2026-08-13 11:26:11,478 [INFO] Start training
+2026-08-13 11:26:11,503 [INFO] Start training epoch 12, 50 iters per inner epoch.
+Train: data epoch: [12]  [ 0/50]  eta: 0:01:56  lr: 0.000950  loss: 0.6377  time: 2.3290  data: 0.0001  max mem: 13888
+Train: data epoch: [12]  [49/50]  eta: 0:00:02  lr: 0.000942  loss: 0.6457  time: 2.1386  data: 0.0000  max mem: 13888
+Train: data epoch: [12] Total time: 0:01:46 (2.1250 s / it)
+2026-08-13 11:27:57,753 [INFO] Averaged stats: lr: 0.000946  loss: 0.647054
+2026-08-13 11:27:57,754 [INFO] Evaluating on valid.
+Evaluation  [   0/1300]  eta: 0:21:03  loss: 0.7463  acc: 0.0000  time: 0.9717  data: 0.1839  max mem: 13888
+Evaluation  [ 260/1300]  eta: 0:12:54  loss: 0.5977  acc: 0.2500  time: 0.7244  data: 0.0008  max mem: 13888
+Evaluation  [ 520/1300]  eta: 0:09:40  loss: 0.7676  acc: 0.2500  time: 0.7539  data: 0.0008  max mem: 13888
+Evaluation  [ 780/1300]  eta: 0:06:27  loss: 0.9677  acc: 0.2500  time: 0.7339  data: 0.0008  max mem: 13888
+Evaluation  [1040/1300]  eta: 0:03:13  loss: 0.4540  acc: 0.5000  time: 0.7424  data: 0.0007  max mem: 13888
+Evaluation  [1299/1300]  eta: 0:00:00  loss: 0.6590  acc: 0.0000  time: 0.7448  data: 0.0040  max mem: 13888
+Evaluation Total time: 0:16:08 (0.7450 s / it)
+only one interaction users: 48
+computed user: 283 can not users: 0
+uauc for validation Cost: 0.2987842559814453 uauc: nan
+2026-08-13 11:44:06,637 [INFO] Averaged stats: loss: 0.662077  acc: 0.214423 ***auc: 0.6504085025670707 ***uauc:(np.float64(nan), [np.int64(20), np.int64(26), np.int64(33), np.int64(34), np.int64(36), np.int64(37), np.int64(39), np.int64(40), np.int64(41), np.int64(48), np.int64(49), np.int64(57), np.int64(71), np.int64(72), np.int64(73), np.int64(79), np.int64(83), np.int64(85), np.int64(87), np.int64(91), np.int64(93), np.int64(95), np.int64(104), np.int64(107), np.int64(108), np.int64(109), np.int64(110), np.int64(112), np.int64(115), np.int64(119), np.int64(121), np.int64(124), np.int64(126), np.int64(139), np.int64(142), np.int64(145), np.int64(147), np.int64(149), np.int64(153), np.int64(155), np.int64(159), np.int64(164), np.int64(165), np.int64(167), np.int64(169), np.int64(170), np.int64(171), np.int64(173), np.int64(174), np.int64(175), np.int64(177), np.int64(178), np.int64(180), np.int64(184), np.int64(185), np.int64(186), np.int64(193), np.int64(195), np.int64(197), np.int64(198), np.int64(199), np.int64(200), np.int64(204), np.int64(205), np.int64(207), np.int64(208), np.int64(210), np.int64(212), np.int64(214), np.int64(215), np.int64(217), np.int64(221), np.int64(222), np.int64(226), np.int64(227), np.int64(228), np.int64(230), np.int64(231), np.int64(237), np.int64(242), np.int64(246), np.int64(247), np.int64(249), np.int64(250), np.int64(255), np.int64(256), np.int64(260), np.int64(261), np.int64(264), np.int64(271), np.int64(273), np.int64(275), np.int64(277), np.int64(279), np.int64(280), np.int64(282), np.int64(286), np.int64(291), np.int64(292), np.int64(296), np.int64(297), np.int64(298), np.int64(300), np.int64(301), np.int64(303), np.int64(304), np.int64(308), np.int64(309), np.int64(312), np.int64(314), np.int64(325), np.int64(327), np.int64(329), np.int64(333), np.int64(336), np.int64(338), np.int64(340), np.int64(341), np.int64(345), np.int64(346), np.int64(350), np.int64(353), np.int64(356), np.int64(364), np.int64(366), np.int64(367), np.int64(368), np.int64(370), np.int64(377), np.int64(381), np.int64(382), np.int64(384), np.int64(389), np.int64(402), np.int64(415), np.int64(426), np.int64(427), np.int64(428), np.int64(433), np.int64(434), np.int64(436), np.int64(438), np.int64(441), np.int64(444), np.int64(446), np.int64(447), np.int64(449), np.int64(451), np.int64(453), np.int64(456), np.int64(458), np.int64(462), np.int64(466), np.int64(470), np.int64(472), np.int64(474), np.int64(475), np.int64(482), np.int64(484), np.int64(490), np.int64(494), np.int64(496), np.int64(498), np.int64(500), np.int64(509), np.int64(512), np.int64(515), np.int64(516), np.int64(521), np.int64(522), np.int64(523), np.int64(528), np.int64(529), np.int64(530), np.int64(531), np.int64(533), np.int64(535), np.int64(537), np.int64(540), np.int64(546), np.int64(550), np.int64(552), np.int64(558), np.int64(561), np.int64(562), np.int64(563), np.int64(566), np.int64(568), np.int64(569), np.int64(570), np.int64(575), np.int64(576), np.int64(577), np.int64(581), np.int64(583), np.int64(598), np.int64(604), np.int64(607), np.int64(608), np.int64(609), np.int64(613), np.int64(617), np.int64(624), np.int64(626), np.int64(627), np.int64(628), np.int64(629), np.int64(630), np.int64(632), np.int64(633), np.int64(637), np.int64(643), np.int64(645), np.int64(649), np.int64(650), np.int64(651), np.int64(658), np.int64(664), np.int64(665), np.int64(669), np.int64(670), np.int64(671), np.int64(672), np.int64(676), np.int64(686), np.int64(688), np.int64(690), np.int64(695), np.int64(696), np.int64(697), np.int64(698), np.int64(699), np.int64(700), np.int64(701), np.int64(702), np.int64(706), np.int64(707), np.int64(709), np.int64(712), np.int64(714), np.int64(718), np.int64(720), np.int64(721), np.int64(725), np.int64(727), np.int64(728), np.int64(733), np.int64(744), np.int64(748), np.int64(750), np.int64(752), np.int64(753), np.int64(755), np.int64(756), np.int64(758), np.int64(760), np.int64(761), np.int64(762), np.int64(767), np.int64(769), np.int64(772), np.int64(773), np.int64(774), np.int64(779), np.int64(784), np.int64(786), np.int64(788), np.int64(789), np.int64(793), np.int64(795), np.int64(797), np.int64(798), np.int64(799), np.int64(802), np.int64(803), np.int64(804), np.int64(809), np.int64(814), np.int64(816), np.int64(818), np.int64(827), np.int64(829), np.int64(833)], array([0.        , 0.66071429, 0.66666667,        nan, 0.56410256,
+       1.        , 1.        , 0.57142857, 0.94782609,        nan,
+       0.48809524, 0.875     ,        nan, 0.60416667, 0.86134454,
+       0.52380952, 0.82821181, 0.25      , 0.57886905,        nan,
+       1.        , 0.16666667, 0.61111111, 0.76842105, 0.76666667,
+       1.        , 0.73333333, 1.        ,        nan, 0.5       ,
+       0.63573232, 0.78571429,        nan, 0.86666667, 0.625     ,
+       0.46666667, 0.69444444, 0.5       , 0.        , 0.75      ,
+       0.75      , 0.70625798, 0.69444444,        nan,        nan,
+       0.53310105, 0.56944444, 1.        , 0.375     , 0.        ,
+       0.58923077, 1.        , 0.8       ,        nan, 1.        ,
+       0.        , 0.54861111,        nan, 1.        ,        nan,
+              nan, 0.        , 0.        , 0.72619048, 0.66666667,
+       0.75925926, 0.775     , 0.66666667, 0.5       , 0.66071429,
+              nan, 0.41666667, 0.59693878, 0.57142857, 1.        ,
+       0.73166667, 0.62732919, 0.84340659, 0.5       , 0.75      ,
+       0.66666667, 1.        , 0.6173913 , 0.78787879, 0.33333333,
+              nan, 0.75      , 0.64604236, 0.43137255, 0.25      ,
+       0.83531746, 0.4       , 0.74285714, 0.54166667,        nan,
+       0.44444444, 0.63333333, 0.35714286, 0.9691358 , 0.54861111,
+       0.61699346, 0.55729167, 0.4754902 ,        nan,        nan,
+       0.71052632, 0.76470588, 0.96638655, 0.53968254, 0.925     ,
+       0.875     , 1.        , 0.80208333,        nan, 0.        ,
+       0.8       , 0.33333333, 0.5       , 0.56944444, 1.        ,
+       0.61904762, 0.33333333, 1.        , 0.52832244,        nan,
+       0.796875  , 1.        , 0.5       , 1.        , 0.54      ,
+       0.81481481, 0.33333333, 0.55857385, 0.33333333, 1.        ,
+       0.36111111, 1.        , 1.        , 0.46666667, 0.69230769,
+       0.85714286,        nan, 0.58823529, 0.        , 0.73684211,
+              nan, 0.96428571, 0.83333333, 0.5       ,        nan,
+       0.5235761 , 0.92391304, 0.        , 0.39583333, 1.        ,
+       1.        , 0.60416667, 1.        , 0.        , 0.5       ,
+       0.75789474, 0.        , 0.4       , 0.        ,        nan,
+       0.375     ,        nan, 0.71006944, 1.        , 0.7755102 ,
+              nan,        nan, 0.5       , 0.46666667, 0.72192513,
+              nan,        nan,        nan,        nan,        nan,
+       0.66666667,        nan, 0.38888889, 1.        , 0.        ,
+       0.63333333, 1.        , 0.41880342, 0.56190476,        nan,
+       0.75      , 0.33333333, 1.        , 1.        , 0.95833333,
+       0.875     , 0.5       , 0.74117647, 0.46642247, 0.17857143,
+       0.22619048, 0.33333333, 0.46666667, 0.59558824, 0.56565657,
+       0.5       , 0.62665657, 0.36363636, 0.7037037 , 0.25      ,
+              nan, 0.62766539, 0.375     , 0.5       , 0.5       ,
+              nan, 0.66666667, 1.        , 0.68888889, 0.54545455,
+       1.        , 0.47222222, 0.5       , 0.8       , 0.76      ,
+              nan, 1.        , 0.        , 1.        , 0.        ,
+       0.436     , 0.        , 0.66666667, 1.        , 0.11111111,
+       0.75150966, 0.4       , 0.48830409, 0.37310924, 0.45238095,
+       0.47058824, 0.5625    ,        nan, 0.69444444, 0.75      ,
+       0.33333333, 0.63461538,        nan, 0.        ,        nan,
+       0.66666667, 0.2       ,        nan,        nan, 0.53125   ,
+       0.        , 0.        , 0.55714286, 1.        , 1.        ,
+       1.        , 0.71538462, 0.81632653, 0.87878788, 0.975     ,
+       1.        , 1.        , 0.5       , 0.14285714, 1.        ,
+       0.61538462, 0.77430556, 1.        , 0.58308991, 1.        ,
+       0.36363636, 1.        , 0.72268908,        nan, 0.6       ,
+              nan,        nan, 0.70454545]))
+rank_0 auc: 0.6504085025670707
+2026-08-13 11:44:06,665 [INFO] Start training
+2026-08-13 11:44:06,693 [INFO] Start training epoch 13, 50 iters per inner epoch.
+/kaggle/working/CoLLM-thesis/minigpt4/tasks/base_task.py:219: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with torch.cuda.amp.autocast(enabled=use_amp):
+/kaggle/working/CoLLM-thesis/minigpt4/models/rec_model.py:48: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  return torch.cuda.amp.autocast(dtype=dtype)
+/usr/local/lib/python3.12/dist-packages/torch/_dynamo/eval_frame.py:1181: UserWarning: torch.utils.checkpoint: the use_reentrant parameter should be passed explicitly. Starting in PyTorch 2.9, calling checkpoint without use_reentrant will raise an exception. use_reentrant=False is recommended, but if you need to preserve the current default behavior, you can pass use_reentrant=True. Refer to docs for more details on the differences between the two variants.
+  return fn(*args, **kwargs)
+Train: data epoch: [13]  [ 0/50]  eta: 0:01:57  lr: 0.000941  loss: 0.9355  time: 2.3571  data: 0.0000  max mem: 13888
+Train: data epoch: [13]  [49/50]  eta: 0:00:02  lr: 0.000932  loss: 0.8424  time: 2.1367  data: 0.0000  max mem: 13888
+Train: data epoch: [13] Total time: 0:01:46 (2.1299 s / it)
+2026-08-13 11:45:53,189 [INFO] Averaged stats: lr: 0.000937  loss: 0.699717
+2026-08-13 11:45:53,211 [INFO] Saving checkpoint at epoch 13 to /kaggle/working/collm-stage1/20260813092/checkpoint_13.pth (model state 16.8 MB, 128 keys).
+2026-08-13 11:45:53,326 [INFO] Start training
+2026-08-13 11:45:53,351 [INFO] Start training epoch 14, 50 iters per inner epoch.
+Train: data epoch: [14]  [ 0/50]  eta: 0:01:50  lr: 0.000932  loss: 0.8318  time: 2.2174  data: 0.0000  max mem: 13888
+Train: data epoch: [14]  [49/50]  eta: 0:00:02  lr: 0.000923  loss: 1.1146  time: 2.1292  data: 0.0000  max mem: 13888
+Train: data epoch: [14] Total time: 0:01:47 (2.1575 s / it)
+2026-08-13 11:47:41,228 [INFO] Averaged stats: lr: 0.000927  loss: 0.665901
+2026-08-13 11:47:41,228 [INFO] Evaluating on valid.
+Evaluation  [   0/1300]  eta: 0:20:54  loss: 0.8667  acc: 0.0000  time: 0.9651  data: 0.1813  max mem: 13888
+Evaluation  [ 260/1300]  eta: 0:12:52  loss: 0.9235  acc: 0.2500  time: 0.7222  data: 0.0007  max mem: 13888
+Evaluation  [ 520/1300]  eta: 0:09:39  loss: 0.6051  acc: 0.5000  time: 0.7564  data: 0.0007  max mem: 13888
+Evaluation  [ 780/1300]  eta: 0:06:26  loss: 0.6770  acc: 0.5000  time: 0.7365  data: 0.0007  max mem: 13888
+Evaluation  [1040/1300]  eta: 0:03:13  loss: 0.4908  acc: 0.5000  time: 0.7415  data: 0.0007  max mem: 13888
+Evaluation  [1299/1300]  eta: 0:00:00  loss: 0.6456  acc: 0.2500  time: 0.7465  data: 0.0041  max mem: 13888
+Evaluation Total time: 0:16:08 (0.7448 s / it)
+only one interaction users: 48
+computed user: 283 can not users: 0
+uauc for validation Cost: 0.2756643295288086 uauc: nan
+2026-08-13 12:03:49,765 [INFO] Averaged stats: loss: 0.727204  acc: 0.435962 ***auc: 0.5738722729188849 ***uauc:(np.float64(nan), [np.int64(20), np.int64(26), np.int64(33), np.int64(34), np.int64(36), np.int64(37), np.int64(39), np.int64(40), np.int64(41), np.int64(48), np.int64(49), np.int64(57), np.int64(71), np.int64(72), np.int64(73), np.int64(79), np.int64(83), np.int64(85), np.int64(87), np.int64(91), np.int64(93), np.int64(95), np.int64(104), np.int64(107), np.int64(108), np.int64(109), np.int64(110), np.int64(112), np.int64(115), np.int64(119), np.int64(121), np.int64(124), np.int64(126), np.int64(139), np.int64(142), np.int64(145), np.int64(147), np.int64(149), np.int64(153), np.int64(155), np.int64(159), np.int64(164), np.int64(165), np.int64(167), np.int64(169), np.int64(170), np.int64(171), np.int64(173), np.int64(174), np.int64(175), np.int64(177), np.int64(178), np.int64(180), np.int64(184), np.int64(185), np.int64(186), np.int64(193), np.int64(195), np.int64(197), np.int64(198), np.int64(199), np.int64(200), np.int64(204), np.int64(205), np.int64(207), np.int64(208), np.int64(210), np.int64(212), np.int64(214), np.int64(215), np.int64(217), np.int64(221), np.int64(222), np.int64(226), np.int64(227), np.int64(228), np.int64(230), np.int64(231), np.int64(237), np.int64(242), np.int64(246), np.int64(247), np.int64(249), np.int64(250), np.int64(255), np.int64(256), np.int64(260), np.int64(261), np.int64(264), np.int64(271), np.int64(273), np.int64(275), np.int64(277), np.int64(279), np.int64(280), np.int64(282), np.int64(286), np.int64(291), np.int64(292), np.int64(296), np.int64(297), np.int64(298), np.int64(300), np.int64(301), np.int64(303), np.int64(304), np.int64(308), np.int64(309), np.int64(312), np.int64(314), np.int64(325), np.int64(327), np.int64(329), np.int64(333), np.int64(336), np.int64(338), np.int64(340), np.int64(341), np.int64(345), np.int64(346), np.int64(350), np.int64(353), np.int64(356), np.int64(364), np.int64(366), np.int64(367), np.int64(368), np.int64(370), np.int64(377), np.int64(381), np.int64(382), np.int64(384), np.int64(389), np.int64(402), np.int64(415), np.int64(426), np.int64(427), np.int64(428), np.int64(433), np.int64(434), np.int64(436), np.int64(438), np.int64(441), np.int64(444), np.int64(446), np.int64(447), np.int64(449), np.int64(451), np.int64(453), np.int64(456), np.int64(458), np.int64(462), np.int64(466), np.int64(470), np.int64(472), np.int64(474), np.int64(475), np.int64(482), np.int64(484), np.int64(490), np.int64(494), np.int64(496), np.int64(498), np.int64(500), np.int64(509), np.int64(512), np.int64(515), np.int64(516), np.int64(521), np.int64(522), np.int64(523), np.int64(528), np.int64(529), np.int64(530), np.int64(531), np.int64(533), np.int64(535), np.int64(537), np.int64(540), np.int64(546), np.int64(550), np.int64(552), np.int64(558), np.int64(561), np.int64(562), np.int64(563), np.int64(566), np.int64(568), np.int64(569), np.int64(570), np.int64(575), np.int64(576), np.int64(577), np.int64(581), np.int64(583), np.int64(598), np.int64(604), np.int64(607), np.int64(608), np.int64(609), np.int64(613), np.int64(617), np.int64(624), np.int64(626), np.int64(627), np.int64(628), np.int64(629), np.int64(630), np.int64(632), np.int64(633), np.int64(637), np.int64(643), np.int64(645), np.int64(649), np.int64(650), np.int64(651), np.int64(658), np.int64(664), np.int64(665), np.int64(669), np.int64(670), np.int64(671), np.int64(672), np.int64(676), np.int64(686), np.int64(688), np.int64(690), np.int64(695), np.int64(696), np.int64(697), np.int64(698), np.int64(699), np.int64(700), np.int64(701), np.int64(702), np.int64(706), np.int64(707), np.int64(709), np.int64(712), np.int64(714), np.int64(718), np.int64(720), np.int64(721), np.int64(725), np.int64(727), np.int64(728), np.int64(733), np.int64(744), np.int64(748), np.int64(750), np.int64(752), np.int64(753), np.int64(755), np.int64(756), np.int64(758), np.int64(760), np.int64(761), np.int64(762), np.int64(767), np.int64(769), np.int64(772), np.int64(773), np.int64(774), np.int64(779), np.int64(784), np.int64(786), np.int64(788), np.int64(789), np.int64(793), np.int64(795), np.int64(797), np.int64(798), np.int64(799), np.int64(802), np.int64(803), np.int64(804), np.int64(809), np.int64(814), np.int64(816), np.int64(818), np.int64(827), np.int64(829), np.int64(833)], array([0.        , 0.59821429, 0.33333333,        nan, 0.52564103,
+       0.66666667, 0.2       , 0.55102041, 0.72173913,        nan,
+       0.83333333, 0.        ,        nan, 0.5       , 0.79411765,
+       0.3968254 , 0.71744792, 0.5       , 0.48809524,        nan,
+       0.33333333, 0.        , 0.35555556, 0.58947368, 0.61388889,
+       1.        , 0.73333333, 1.        ,        nan, 0.        ,
+       0.58238636, 0.85714286,        nan, 1.        , 0.625     ,
+       0.33333333, 0.625     , 0.83333333, 0.        , 0.625     ,
+       0.75      , 0.65932312, 0.51587302,        nan,        nan,
+       0.50522648, 0.48611111, 1.        , 0.125     , 0.33333333,
+       0.42192308, 1.        , 0.6       ,        nan, 1.        ,
+       0.        , 0.54166667,        nan, 0.5       ,        nan,
+              nan, 0.25      , 1.        , 0.36904762, 0.58333333,
+       0.75308642, 0.7       , 0.83333333, 0.5       , 0.83928571,
+              nan, 0.41666667, 0.38265306, 0.28571429, 1.        ,
+       0.62625   , 0.50931677, 0.67307692, 0.5       , 1.        ,
+       0.33333333, 1.        , 0.4826087 , 0.63636364, 0.        ,
+              nan, 1.        , 0.60061315, 0.54313725, 0.0625    ,
+       0.49007937, 0.33157895, 0.54534161, 0.75      ,        nan,
+       0.5       , 0.41111111, 0.5       , 0.79453263, 0.29861111,
+       0.50653595, 0.38606771, 0.5245098 ,        nan,        nan,
+       0.61403509, 0.42352941, 0.84033613, 0.31746032, 0.425     ,
+       0.875     , 1.        , 0.70833333,        nan, 0.        ,
+       1.        , 0.66666667, 0.375     , 0.55555556, 1.        ,
+       0.52380952, 1.        , 0.5       , 0.62254902,        nan,
+       0.453125  , 0.66666667, 0.8       , 1.        , 0.42      ,
+       0.72685185, 0.        , 0.51697793, 0.86666667, 0.5       ,
+       0.16666667, 0.33333333, 1.        , 0.6       , 0.57575758,
+       0.38095238,        nan, 0.62941176, 0.        , 0.55438596,
+              nan, 0.92857143, 0.5       , 0.        ,        nan,
+       0.43510738, 0.86956522, 0.        , 0.625     , 0.33333333,
+       0.2       , 0.68055556, 0.5       , 0.5       , 0.375     ,
+       0.43684211, 0.        , 0.31428571, 0.        ,        nan,
+       0.25      ,        nan, 0.59809028, 0.16666667, 0.59183673,
+              nan,        nan, 0.1       , 0.33333333, 0.7486631 ,
+              nan,        nan,        nan,        nan,        nan,
+       0.83333333,        nan, 0.69444444, 0.        , 0.5       ,
+       0.67777778, 0.        , 0.69230769, 0.48952381,        nan,
+       0.5       , 0.33333333, 1.        , 0.5       , 0.5       ,
+       0.6875    , 1.        , 0.72156863, 0.45848596, 0.55357143,
+       0.64285714, 0.44444444, 0.43333333, 0.50735294, 0.47474747,
+       0.5       , 0.4736211 , 0.09090909, 0.11111111, 0.5       ,
+              nan, 0.44395845, 0.625     , 0.25      , 1.        ,
+              nan, 0.41666667, 1.        , 0.42962963, 0.34090909,
+       1.        , 0.40277778, 1.        , 0.5       , 0.62      ,
+              nan, 1.        , 0.        , 0.81818182, 0.        ,
+       0.18      , 0.        , 0.66666667, 0.66666667, 0.33333333,
+       0.62092391, 0.64      , 0.52631579, 0.46554622, 0.52380952,
+       0.58823529, 0.47916667,        nan, 0.69444444, 0.75      ,
+       0.33333333, 0.53846154,        nan, 1.        ,        nan,
+       0.5       , 0.6       ,        nan,        nan, 0.53125   ,
+       0.25      , 0.5       , 0.37142857, 0.        , 1.        ,
+       1.        , 0.57948718, 0.69387755, 0.6969697 , 0.775     ,
+       1.        , 0.38888889, 1.        , 0.42857143, 0.        ,
+       0.85897436, 0.76736111, 0.41666667, 0.59355729, 1.        ,
+       0.5       , 0.7       , 0.60504202,        nan, 0.6       ,
+              nan,        nan, 0.65719697]))
+rank_0 auc: 0.5738722729188849
+2026-08-13 12:03:49,790 [INFO] Start training
+2026-08-13 12:03:49,817 [INFO] Start training epoch 15, 50 iters per inner epoch.
+/kaggle/working/CoLLM-thesis/minigpt4/tasks/base_task.py:219: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with torch.cuda.amp.autocast(enabled=use_amp):
+/kaggle/working/CoLLM-thesis/minigpt4/models/rec_model.py:48: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  return torch.cuda.amp.autocast(dtype=dtype)
+/usr/local/lib/python3.12/dist-packages/torch/_dynamo/eval_frame.py:1181: UserWarning: torch.utils.checkpoint: the use_reentrant parameter should be passed explicitly. Starting in PyTorch 2.9, calling checkpoint without use_reentrant will raise an exception. use_reentrant=False is recommended, but if you need to preserve the current default behavior, you can pass use_reentrant=True. Refer to docs for more details on the differences between the two variants.
+  return fn(*args, **kwargs)
+Train: data epoch: [15]  [ 0/50]  eta: 0:01:44  lr: 0.000922  loss: 0.6165  time: 2.0866  data: 0.0000  max mem: 13888
+Train: data epoch: [15]  [49/50]  eta: 0:00:02  lr: 0.000912  loss: 0.5718  time: 2.1325  data: 0.0000  max mem: 13888
+Train: data epoch: [15] Total time: 0:01:46 (2.1253 s / it)
+2026-08-13 12:05:36,083 [INFO] Averaged stats: lr: 0.000917  loss: 0.762813
+2026-08-13 12:05:36,104 [INFO] Saving checkpoint at epoch 15 to /kaggle/working/collm-stage1/20260813092/checkpoint_15.pth (model state 16.8 MB, 128 keys).
+2026-08-13 12:05:36,222 [INFO] Start training
+2026-08-13 12:05:36,247 [INFO] Start training epoch 16, 50 iters per inner epoch.
+Train: data epoch: [16]  [ 0/50]  eta: 0:01:39  lr: 0.000912  loss: 0.7725  time: 1.9933  data: 0.0000  max mem: 13888
+Train: data epoch: [16]  [49/50]  eta: 0:00:02  lr: 0.000901  loss: 0.3013  time: 2.1068  data: 0.0000  max mem: 13888
+Train: data epoch: [16] Total time: 0:01:45 (2.1126 s / it)
+2026-08-13 12:07:21,876 [INFO] Averaged stats: lr: 0.000907  loss: 0.746379
+2026-08-13 12:07:21,878 [INFO] Evaluating on valid.
+Evaluation  [   0/1300]  eta: 0:20:30  loss: 2.9315  acc: 0.5000  time: 0.9469  data: 0.1776  max mem: 13888
+Evaluation  [ 260/1300]  eta: 0:12:45  loss: 4.3964  acc: 0.2500  time: 0.7192  data: 0.0007  max mem: 13888
+Evaluation  [ 520/1300]  eta: 0:09:33  loss: 2.8478  acc: 0.5000  time: 0.7449  data: 0.0007  max mem: 13888
+Evaluation  [ 780/1300]  eta: 0:06:22  loss: 2.8286  acc: 0.5000  time: 0.7296  data: 0.0007  max mem: 13888
+Evaluation  [1040/1300]  eta: 0:03:11  loss: 2.7648  acc: 0.5000  time: 0.7351  data: 0.0008  max mem: 13888
+Evaluation  [1299/1300]  eta: 0:00:00  loss: 2.8180  acc: 0.5000  time: 0.7356  data: 0.0042  max mem: 13888
+Evaluation Total time: 0:15:56 (0.7355 s / it)
+only one interaction users: 48
+computed user: 283 can not users: 0
+uauc for validation Cost: 0.27834343910217285 uauc: nan
+2026-08-13 12:23:18,297 [INFO] Averaged stats: loss: 2.689977  acc: 0.530577 ***auc: 0.5272637210253316 ***uauc:(np.float64(nan), [np.int64(20), np.int64(26), np.int64(33), np.int64(34), np.int64(36), np.int64(37), np.int64(39), np.int64(40), np.int64(41), np.int64(48), np.int64(49), np.int64(57), np.int64(71), np.int64(72), np.int64(73), np.int64(79), np.int64(83), np.int64(85), np.int64(87), np.int64(91), np.int64(93), np.int64(95), np.int64(104), np.int64(107), np.int64(108), np.int64(109), np.int64(110), np.int64(112), np.int64(115), np.int64(119), np.int64(121), np.int64(124), np.int64(126), np.int64(139), np.int64(142), np.int64(145), np.int64(147), np.int64(149), np.int64(153), np.int64(155), np.int64(159), np.int64(164), np.int64(165), np.int64(167), np.int64(169), np.int64(170), np.int64(171), np.int64(173), np.int64(174), np.int64(175), np.int64(177), np.int64(178), np.int64(180), np.int64(184), np.int64(185), np.int64(186), np.int64(193), np.int64(195), np.int64(197), np.int64(198), np.int64(199), np.int64(200), np.int64(204), np.int64(205), np.int64(207), np.int64(208), np.int64(210), np.int64(212), np.int64(214), np.int64(215), np.int64(217), np.int64(221), np.int64(222), np.int64(226), np.int64(227), np.int64(228), np.int64(230), np.int64(231), np.int64(237), np.int64(242), np.int64(246), np.int64(247), np.int64(249), np.int64(250), np.int64(255), np.int64(256), np.int64(260), np.int64(261), np.int64(264), np.int64(271), np.int64(273), np.int64(275), np.int64(277), np.int64(279), np.int64(280), np.int64(282), np.int64(286), np.int64(291), np.int64(292), np.int64(296), np.int64(297), np.int64(298), np.int64(300), np.int64(301), np.int64(303), np.int64(304), np.int64(308), np.int64(309), np.int64(312), np.int64(314), np.int64(325), np.int64(327), np.int64(329), np.int64(333), np.int64(336), np.int64(338), np.int64(340), np.int64(341), np.int64(345), np.int64(346), np.int64(350), np.int64(353), np.int64(356), np.int64(364), np.int64(366), np.int64(367), np.int64(368), np.int64(370), np.int64(377), np.int64(381), np.int64(382), np.int64(384), np.int64(389), np.int64(402), np.int64(415), np.int64(426), np.int64(427), np.int64(428), np.int64(433), np.int64(434), np.int64(436), np.int64(438), np.int64(441), np.int64(444), np.int64(446), np.int64(447), np.int64(449), np.int64(451), np.int64(453), np.int64(456), np.int64(458), np.int64(462), np.int64(466), np.int64(470), np.int64(472), np.int64(474), np.int64(475), np.int64(482), np.int64(484), np.int64(490), np.int64(494), np.int64(496), np.int64(498), np.int64(500), np.int64(509), np.int64(512), np.int64(515), np.int64(516), np.int64(521), np.int64(522), np.int64(523), np.int64(528), np.int64(529), np.int64(530), np.int64(531), np.int64(533), np.int64(535), np.int64(537), np.int64(540), np.int64(546), np.int64(550), np.int64(552), np.int64(558), np.int64(561), np.int64(562), np.int64(563), np.int64(566), np.int64(568), np.int64(569), np.int64(570), np.int64(575), np.int64(576), np.int64(577), np.int64(581), np.int64(583), np.int64(598), np.int64(604), np.int64(607), np.int64(608), np.int64(609), np.int64(613), np.int64(617), np.int64(624), np.int64(626), np.int64(627), np.int64(628), np.int64(629), np.int64(630), np.int64(632), np.int64(633), np.int64(637), np.int64(643), np.int64(645), np.int64(649), np.int64(650), np.int64(651), np.int64(658), np.int64(664), np.int64(665), np.int64(669), np.int64(670), np.int64(671), np.int64(672), np.int64(676), np.int64(686), np.int64(688), np.int64(690), np.int64(695), np.int64(696), np.int64(697), np.int64(698), np.int64(699), np.int64(700), np.int64(701), np.int64(702), np.int64(706), np.int64(707), np.int64(709), np.int64(712), np.int64(714), np.int64(718), np.int64(720), np.int64(721), np.int64(725), np.int64(727), np.int64(728), np.int64(733), np.int64(744), np.int64(748), np.int64(750), np.int64(752), np.int64(753), np.int64(755), np.int64(756), np.int64(758), np.int64(760), np.int64(761), np.int64(762), np.int64(767), np.int64(769), np.int64(772), np.int64(773), np.int64(774), np.int64(779), np.int64(784), np.int64(786), np.int64(788), np.int64(789), np.int64(793), np.int64(795), np.int64(797), np.int64(798), np.int64(799), np.int64(802), np.int64(803), np.int64(804), np.int64(809), np.int64(814), np.int64(816), np.int64(818), np.int64(827), np.int64(829), np.int64(833)], array([0.5       , 0.55803571, 0.5       ,        nan, 0.58012821,
+       0.16666667, 0.6       , 0.35714286, 0.42608696,        nan,
+       0.27380952, 0.375     ,        nan, 0.61458333, 0.31722689,
+       0.46825397, 0.48819444, 0.75      , 0.48214286,        nan,
+       0.        , 0.33333333, 0.55555556, 0.38421053, 0.48194444,
+       0.        , 0.06666667, 0.        ,        nan, 0.75      ,
+       0.51073232, 0.71428571,        nan, 0.93333333, 0.875     ,
+       0.8       , 0.51388889, 0.75      , 0.        , 0.453125  ,
+       0.75      , 0.47126437, 0.49007937,        nan,        nan,
+       0.4738676 , 0.45833333, 0.5       , 0.375     , 1.        ,
+       0.53653846, 0.5       , 0.6       ,        nan, 0.25      ,
+       1.        , 0.54166667,        nan, 0.25      ,        nan,
+              nan, 0.        , 1.        , 0.54464286, 0.41666667,
+       0.62345679, 0.3875    , 0.        , 0.        , 0.73214286,
+              nan, 0.50694444, 0.76020408, 0.5       , 0.5       ,
+       0.67916667, 0.46583851, 0.48901099, 0.5       , 0.25      ,
+       1.        , 0.5       , 0.52173913, 0.23484848, 1.        ,
+              nan, 1.        , 0.64548495, 0.42058824, 0.75      ,
+       0.5922619 , 0.40789474, 0.54254658, 0.        ,        nan,
+       0.77777778, 0.74814815, 0.78571429, 0.67239859, 0.61111111,
+       0.60163399, 0.42317708, 0.20588235,        nan,        nan,
+       0.47807018, 0.61764706, 0.39495798, 0.47619048, 0.5125    ,
+       1.        , 0.5       , 0.35416667,        nan, 0.        ,
+       0.1       , 0.66666667, 0.25      , 0.35416667, 0.        ,
+       0.33333333, 0.38888889, 1.        , 0.42755991,        nan,
+       0.25      , 1.        , 0.5       , 1.        , 0.4       ,
+       0.48611111, 0.33333333, 0.47877759, 0.26666667, 0.25      ,
+       0.61111111, 0.66666667, 0.        , 0.5       , 0.50616051,
+       0.28571429,        nan, 0.58235294, 0.        , 0.43859649,
+              nan, 0.46428571, 0.66666667, 0.        ,        nan,
+       0.60084034, 0.60326087, 0.        , 0.46875   , 0.        ,
+       1.        , 0.34722222, 0.        , 1.        , 1.        ,
+       0.52631579, 0.        , 0.22857143, 1.        ,        nan,
+       0.75      ,        nan, 0.6015625 , 0.83333333, 0.71428571,
+              nan,        nan, 0.        , 0.64444444, 0.50802139,
+              nan,        nan,        nan,        nan,        nan,
+       0.58333333,        nan, 0.45138889, 0.        , 1.        ,
+       0.38333333, 1.        , 0.35897436, 0.4752381 ,        nan,
+       0.75      , 0.66666667, 0.66666667, 0.        , 0.54166667,
+       0.5       , 1.        , 0.53137255, 0.44810745, 0.25      ,
+       0.61904762, 1.        , 0.96666667, 0.69117647, 0.56060606,
+       0.75      , 0.41120788, 0.58181818, 0.35185185, 0.5       ,
+              nan, 0.46774194, 0.625     , 0.5       , 1.        ,
+              nan, 0.58333333, 0.        , 0.53703704, 0.48863636,
+       1.        , 0.49305556, 0.125     , 0.6       , 0.6       ,
+              nan, 0.66666667, 1.        , 0.18181818, 0.        ,
+       0.518     , 1.        , 0.33333333, 0.        , 0.77777778,
+       0.59737319, 0.44      , 0.43128655, 0.26764706, 0.85714286,
+       0.85294118, 0.59375   ,        nan, 0.36111111, 0.        ,
+       0.        , 0.32692308,        nan, 0.5       ,        nan,
+       0.66666667, 0.73333333,        nan,        nan, 0.75      ,
+       0.5       , 0.        , 0.34285714, 1.        , 1.        ,
+       1.        , 0.57820513, 0.73469388, 0.18181818, 0.55      ,
+       1.        , 0.61111111, 0.83333333, 0.14285714, 1.        ,
+       0.55128205, 0.453125  , 1.        , 0.39281078, 0.33333333,
+       0.78030303, 0.23333333, 0.49579832,        nan, 0.53333333,
+              nan,        nan, 0.65151515]))
+rank_0 auc: 0.5272637210253316
+2026-08-13 12:23:18,323 [INFO] Start training
+2026-08-13 12:23:18,347 [INFO] Start training epoch 17, 50 iters per inner epoch.
+/kaggle/working/CoLLM-thesis/minigpt4/tasks/base_task.py:219: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with torch.cuda.amp.autocast(enabled=use_amp):
+/kaggle/working/CoLLM-thesis/minigpt4/models/rec_model.py:48: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  return torch.cuda.amp.autocast(dtype=dtype)
+/usr/local/lib/python3.12/dist-packages/torch/_dynamo/eval_frame.py:1181: UserWarning: torch.utils.checkpoint: the use_reentrant parameter should be passed explicitly. Starting in PyTorch 2.9, calling checkpoint without use_reentrant will raise an exception. use_reentrant=False is recommended, but if you need to preserve the current default behavior, you can pass use_reentrant=True. Refer to docs for more details on the differences between the two variants.
+  return fn(*args, **kwargs)
+Train: data epoch: [17]  [ 0/50]  eta: 0:01:42  lr: 0.000901  loss: 2.8844  time: 2.0474  data: 0.0000  max mem: 13888
+Train: data epoch: [17]  [49/50]  eta: 0:00:02  lr: 0.000890  loss: 0.2744  time: 2.0565  data: 0.0000  max mem: 13888
+Train: data epoch: [17] Total time: 0:01:41 (2.0389 s / it)
+2026-08-13 12:25:00,291 [INFO] Averaged stats: lr: 0.000896  loss: 1.360932
+2026-08-13 12:25:00,312 [INFO] Saving checkpoint at epoch 17 to /kaggle/working/collm-stage1/20260813092/checkpoint_17.pth (model state 16.8 MB, 128 keys).
+2026-08-13 12:25:00,426 [INFO] Start training
+2026-08-13 12:25:00,451 [INFO] Start training epoch 18, 50 iters per inner epoch.
+Train: data epoch: [18]  [ 0/50]  eta: 0:01:45  lr: 0.000890  loss: 0.5355  time: 2.1100  data: 0.0000  max mem: 13888
+Train: data epoch: [18]  [49/50]  eta: 0:00:02  lr: 0.000878  loss: 0.6833  time: 2.0332  data: 0.0000  max mem: 13888
+Train: data epoch: [18] Total time: 0:01:42 (2.0524 s / it)
+2026-08-13 12:26:43,070 [INFO] Averaged stats: lr: 0.000884  loss: 0.788457
+2026-08-13 12:26:43,071 [INFO] Evaluating on valid.
+Evaluation  [   0/1300]  eta: 0:20:17  loss: 0.7028  acc: 0.0000  time: 0.9367  data: 0.1788  max mem: 13888
+Evaluation  [ 260/1300]  eta: 0:12:33  loss: 0.6483  acc: 0.0000  time: 0.7078  data: 0.0008  max mem: 13888
+Evaluation  [ 520/1300]  eta: 0:09:24  loss: 0.7065  acc: 0.0000  time: 0.7321  data: 0.0008  max mem: 13888
+Evaluation  [ 780/1300]  eta: 0:06:16  loss: 0.6915  acc: 0.0000  time: 0.7151  data: 0.0007  max mem: 13888
+Evaluation  [1040/1300]  eta: 0:03:08  loss: 0.6562  acc: 0.0000  time: 0.7209  data: 0.0007  max mem: 13888
+Evaluation  [1299/1300]  eta: 0:00:00  loss: 0.6990  acc: 0.0000  time: 0.7292  data: 0.0044  max mem: 13888
+Evaluation Total time: 0:15:41 (0.7244 s / it)
+only one interaction users: 48
+computed user: 283 can not users: 0
+uauc for validation Cost: 0.2714865207672119 uauc: nan
+2026-08-13 12:42:25,111 [INFO] Averaged stats: loss: 0.702433  acc: 0.000000 ***auc: 0.5205249840416504 ***uauc:(np.float64(nan), [np.int64(20), np.int64(26), np.int64(33), np.int64(34), np.int64(36), np.int64(37), np.int64(39), np.int64(40), np.int64(41), np.int64(48), np.int64(49), np.int64(57), np.int64(71), np.int64(72), np.int64(73), np.int64(79), np.int64(83), np.int64(85), np.int64(87), np.int64(91), np.int64(93), np.int64(95), np.int64(104), np.int64(107), np.int64(108), np.int64(109), np.int64(110), np.int64(112), np.int64(115), np.int64(119), np.int64(121), np.int64(124), np.int64(126), np.int64(139), np.int64(142), np.int64(145), np.int64(147), np.int64(149), np.int64(153), np.int64(155), np.int64(159), np.int64(164), np.int64(165), np.int64(167), np.int64(169), np.int64(170), np.int64(171), np.int64(173), np.int64(174), np.int64(175), np.int64(177), np.int64(178), np.int64(180), np.int64(184), np.int64(185), np.int64(186), np.int64(193), np.int64(195), np.int64(197), np.int64(198), np.int64(199), np.int64(200), np.int64(204), np.int64(205), np.int64(207), np.int64(208), np.int64(210), np.int64(212), np.int64(214), np.int64(215), np.int64(217), np.int64(221), np.int64(222), np.int64(226), np.int64(227), np.int64(228), np.int64(230), np.int64(231), np.int64(237), np.int64(242), np.int64(246), np.int64(247), np.int64(249), np.int64(250), np.int64(255), np.int64(256), np.int64(260), np.int64(261), np.int64(264), np.int64(271), np.int64(273), np.int64(275), np.int64(277), np.int64(279), np.int64(280), np.int64(282), np.int64(286), np.int64(291), np.int64(292), np.int64(296), np.int64(297), np.int64(298), np.int64(300), np.int64(301), np.int64(303), np.int64(304), np.int64(308), np.int64(309), np.int64(312), np.int64(314), np.int64(325), np.int64(327), np.int64(329), np.int64(333), np.int64(336), np.int64(338), np.int64(340), np.int64(341), np.int64(345), np.int64(346), np.int64(350), np.int64(353), np.int64(356), np.int64(364), np.int64(366), np.int64(367), np.int64(368), np.int64(370), np.int64(377), np.int64(381), np.int64(382), np.int64(384), np.int64(389), np.int64(402), np.int64(415), np.int64(426), np.int64(427), np.int64(428), np.int64(433), np.int64(434), np.int64(436), np.int64(438), np.int64(441), np.int64(444), np.int64(446), np.int64(447), np.int64(449), np.int64(451), np.int64(453), np.int64(456), np.int64(458), np.int64(462), np.int64(466), np.int64(470), np.int64(472), np.int64(474), np.int64(475), np.int64(482), np.int64(484), np.int64(490), np.int64(494), np.int64(496), np.int64(498), np.int64(500), np.int64(509), np.int64(512), np.int64(515), np.int64(516), np.int64(521), np.int64(522), np.int64(523), np.int64(528), np.int64(529), np.int64(530), np.int64(531), np.int64(533), np.int64(535), np.int64(537), np.int64(540), np.int64(546), np.int64(550), np.int64(552), np.int64(558), np.int64(561), np.int64(562), np.int64(563), np.int64(566), np.int64(568), np.int64(569), np.int64(570), np.int64(575), np.int64(576), np.int64(577), np.int64(581), np.int64(583), np.int64(598), np.int64(604), np.int64(607), np.int64(608), np.int64(609), np.int64(613), np.int64(617), np.int64(624), np.int64(626), np.int64(627), np.int64(628), np.int64(629), np.int64(630), np.int64(632), np.int64(633), np.int64(637), np.int64(643), np.int64(645), np.int64(649), np.int64(650), np.int64(651), np.int64(658), np.int64(664), np.int64(665), np.int64(669), np.int64(670), np.int64(671), np.int64(672), np.int64(676), np.int64(686), np.int64(688), np.int64(690), np.int64(695), np.int64(696), np.int64(697), np.int64(698), np.int64(699), np.int64(700), np.int64(701), np.int64(702), np.int64(706), np.int64(707), np.int64(709), np.int64(712), np.int64(714), np.int64(718), np.int64(720), np.int64(721), np.int64(725), np.int64(727), np.int64(728), np.int64(733), np.int64(744), np.int64(748), np.int64(750), np.int64(752), np.int64(753), np.int64(755), np.int64(756), np.int64(758), np.int64(760), np.int64(761), np.int64(762), np.int64(767), np.int64(769), np.int64(772), np.int64(773), np.int64(774), np.int64(779), np.int64(784), np.int64(786), np.int64(788), np.int64(789), np.int64(793), np.int64(795), np.int64(797), np.int64(798), np.int64(799), np.int64(802), np.int64(803), np.int64(804), np.int64(809), np.int64(814), np.int64(816), np.int64(818), np.int64(827), np.int64(829), np.int64(833)], array([0.5       , 0.48214286, 0.        ,        nan, 0.36858974,
+       0.        , 0.2       , 0.18367347, 0.51304348,        nan,
+       0.75      , 0.5       ,        nan, 0.375     , 0.63655462,
+       0.52380952, 0.41944444, 0.5       , 0.3921131 ,        nan,
+       0.        , 0.83333333, 0.65      , 0.87368421, 0.41944444,
+       1.        , 0.53333333, 0.        ,        nan, 0.25      ,
+       0.49147727, 0.83333333,        nan, 0.66666667, 0.6875    ,
+       0.66666667, 0.61111111, 0.08333333, 1.        , 0.53125   ,
+       0.25      , 0.50510856, 0.5218254 ,        nan,        nan,
+       0.4912892 , 0.52777778, 0.        , 0.5       , 0.        ,
+       0.46384615, 0.        , 0.2       ,        nan, 0.75      ,
+       0.33333333, 0.56944444,        nan, 0.5       ,        nan,
+              nan, 0.25      , 1.        , 0.43452381, 0.33333333,
+       0.40432099, 0.5       , 0.        , 0.5       , 0.25      ,
+              nan, 0.44444444, 0.62755102, 0.5       , 0.25      ,
+       0.56166667, 0.43478261, 0.64148352, 0.        , 0.        ,
+       0.5       , 0.5       , 0.4       , 0.46212121, 0.33333333,
+              nan, 0.875     , 0.30936455, 0.43529412, 0.1875    ,
+       0.44047619, 0.33684211, 0.5552795 , 0.58333333,        nan,
+       0.33333333, 0.58518519, 0.60714286, 0.72089947, 0.54166667,
+       0.39215686, 0.40234375, 0.39215686,        nan,        nan,
+       0.34210526, 0.61176471, 0.66386555, 0.33333333, 0.55      ,
+       0.75      , 1.        , 0.47916667,        nan, 0.        ,
+       1.        , 0.        , 0.625     , 0.41666667, 1.        ,
+       0.61904762, 0.55555556, 0.        , 0.4711329 ,        nan,
+       0.640625  , 0.33333333, 0.7       , 0.        , 0.62      ,
+       0.43518519, 0.        , 0.47453311, 0.26666667, 0.        ,
+       0.41666667, 0.33333333, 0.        , 0.        , 0.52197802,
+       0.5952381 ,        nan, 0.35490196, 1.        , 0.35614035,
+              nan, 0.71428571, 0.33333333, 0.5       ,        nan,
+       0.48576097, 0.7173913 , 1.        , 0.5       , 0.33333333,
+       0.8       , 0.5625    , 0.5       , 1.        , 0.125     ,
+       0.30526316, 0.        , 0.48571429, 0.5       ,        nan,
+       0.5       ,        nan, 0.359375  , 0.16666667, 0.42857143,
+              nan,        nan, 0.1       , 0.42222222, 0.74331551,
+              nan,        nan,        nan,        nan,        nan,
+       0.66666667,        nan, 0.58333333, 0.        , 1.        ,
+       0.26666667, 0.        , 0.70512821, 0.3752381 ,        nan,
+       0.25      , 0.5       , 1.        , 0.        , 0.70833333,
+       0.4375    , 1.        , 0.52352941, 0.44688645, 0.75      ,
+       0.58928571, 0.55555556, 0.3       , 0.61029412, 0.62626263,
+       0.66666667, 0.46409188, 0.76363636, 0.33333333, 1.        ,
+              nan, 0.42755604, 0.1875    , 0.75      , 0.        ,
+              nan, 0.5       , 0.66666667, 0.5037037 , 0.09090909,
+       0.25      , 0.69444444, 0.25      , 0.3       , 0.5       ,
+              nan, 0.        , 0.        , 0.72727273, 0.5       ,
+       0.456     , 1.        , 0.66666667, 0.66666667, 0.        ,
+       0.54755435, 0.64      , 0.38888889, 0.49537815, 0.73809524,
+       0.44117647, 0.85416667,        nan, 0.11111111, 1.        ,
+       0.33333333, 0.30769231,        nan, 1.        ,        nan,
+       0.33333333, 0.73333333,        nan,        nan, 0.71875   ,
+       0.25      , 1.        , 0.45714286, 0.        , 0.        ,
+       1.        , 0.51538462, 0.63265306, 0.60606061, 0.475     ,
+       0.        , 0.38888889, 0.33333333, 0.71428571, 0.        ,
+       0.70512821, 0.375     , 0.08333333, 0.57002597, 0.33333333,
+       0.61363636, 0.66666667, 0.57983193,        nan, 0.4       ,
+              nan,        nan, 0.64867424]))
+rank_0 auc: 0.5205249840416504
+2026-08-13 12:42:25,137 [INFO] Start training
+2026-08-13 12:42:25,161 [INFO] Start training epoch 19, 50 iters per inner epoch.
+/kaggle/working/CoLLM-thesis/minigpt4/tasks/base_task.py:219: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with torch.cuda.amp.autocast(enabled=use_amp):
+/kaggle/working/CoLLM-thesis/minigpt4/models/rec_model.py:48: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  return torch.cuda.amp.autocast(dtype=dtype)
+/usr/local/lib/python3.12/dist-packages/torch/_dynamo/eval_frame.py:1181: UserWarning: torch.utils.checkpoint: the use_reentrant parameter should be passed explicitly. Starting in PyTorch 2.9, calling checkpoint without use_reentrant will raise an exception. use_reentrant=False is recommended, but if you need to preserve the current default behavior, you can pass use_reentrant=True. Refer to docs for more details on the differences between the two variants.
+  return fn(*args, **kwargs)
+Train: data epoch: [19]  [ 0/50]  eta: 0:01:37  lr: 0.000878  loss: 0.7606  time: 1.9589  data: 0.0000  max mem: 13888
+Train: data epoch: [19]  [49/50]  eta: 0:00:02  lr: 0.000866  loss: 0.6433  time: 2.0421  data: 0.0000  max mem: 13888
+Train: data epoch: [19] Total time: 0:01:42 (2.0554 s / it)
+2026-08-13 12:44:07,931 [INFO] Averaged stats: lr: 0.000872  loss: 0.732677
+2026-08-13 12:44:07,952 [INFO] Saving checkpoint at epoch 19 to /kaggle/working/collm-stage1/20260813092/checkpoint_19.pth (model state 16.8 MB, 128 keys).
+2026-08-13 12:44:08,070 [INFO] Saving checkpoint at epoch 19 to /kaggle/working/collm-stage1/20260813092/checkpoint_19.pth (model state 16.8 MB, 128 keys).
+2026-08-13 12:44:08,216 [INFO] Start training
+2026-08-13 12:44:08,240 [INFO] Start training epoch 20, 50 iters per inner epoch.
+Train: data epoch: [20]  [ 0/50]  eta: 0:01:37  lr: 0.000865  loss: 0.5652  time: 1.9449  data: 0.0000  max mem: 13888
+Train: data epoch: [20]  [49/50]  eta: 0:00:02  lr: 0.000853  loss: 0.7051  time: 2.0343  data: 0.0000  max mem: 13888
+Train: data epoch: [20] Total time: 0:01:41 (2.0375 s / it)
+2026-08-13 12:45:50,117 [INFO] Averaged stats: lr: 0.000859  loss: 0.700425
+2026-08-13 12:45:50,118 [INFO] Evaluating on valid.
+Evaluation  [   0/1300]  eta: 0:19:44  loss: 0.7014  acc: 0.0000  time: 0.9109  data: 0.1743  max mem: 13888
+Evaluation  [ 260/1300]  eta: 0:12:25  loss: 0.6451  acc: 0.0000  time: 0.7023  data: 0.0007  max mem: 13888
+Evaluation  [ 520/1300]  eta: 0:09:19  loss: 0.6913  acc: 0.0000  time: 0.7258  data: 0.0008  max mem: 13888
+Evaluation  [ 780/1300]  eta: 0:06:13  loss: 0.6992  acc: 0.0000  time: 0.7124  data: 0.0008  max mem: 13888
+Evaluation  [1040/1300]  eta: 0:03:06  loss: 0.7434  acc: 0.0000  time: 0.7194  data: 0.0007  max mem: 13888
+Evaluation  [1299/1300]  eta: 0:00:00  loss: 0.7025  acc: 0.0000  time: 0.7146  data: 0.0041  max mem: 13888
+Evaluation Total time: 0:15:34 (0.7186 s / it)
+only one interaction users: 48
+computed user: 283 can not users: 0
+uauc for validation Cost: 0.27570509910583496 uauc: nan
+2026-08-13 13:01:24,550 [INFO] Averaged stats: loss: 0.707406  acc: 0.000000 ***auc: 0.4937026325819979 ***uauc:(np.float64(nan), [np.int64(20), np.int64(26), np.int64(33), np.int64(34), np.int64(36), np.int64(37), np.int64(39), np.int64(40), np.int64(41), np.int64(48), np.int64(49), np.int64(57), np.int64(71), np.int64(72), np.int64(73), np.int64(79), np.int64(83), np.int64(85), np.int64(87), np.int64(91), np.int64(93), np.int64(95), np.int64(104), np.int64(107), np.int64(108), np.int64(109), np.int64(110), np.int64(112), np.int64(115), np.int64(119), np.int64(121), np.int64(124), np.int64(126), np.int64(139), np.int64(142), np.int64(145), np.int64(147), np.int64(149), np.int64(153), np.int64(155), np.int64(159), np.int64(164), np.int64(165), np.int64(167), np.int64(169), np.int64(170), np.int64(171), np.int64(173), np.int64(174), np.int64(175), np.int64(177), np.int64(178), np.int64(180), np.int64(184), np.int64(185), np.int64(186), np.int64(193), np.int64(195), np.int64(197), np.int64(198), np.int64(199), np.int64(200), np.int64(204), np.int64(205), np.int64(207), np.int64(208), np.int64(210), np.int64(212), np.int64(214), np.int64(215), np.int64(217), np.int64(221), np.int64(222), np.int64(226), np.int64(227), np.int64(228), np.int64(230), np.int64(231), np.int64(237), np.int64(242), np.int64(246), np.int64(247), np.int64(249), np.int64(250), np.int64(255), np.int64(256), np.int64(260), np.int64(261), np.int64(264), np.int64(271), np.int64(273), np.int64(275), np.int64(277), np.int64(279), np.int64(280), np.int64(282), np.int64(286), np.int64(291), np.int64(292), np.int64(296), np.int64(297), np.int64(298), np.int64(300), np.int64(301), np.int64(303), np.int64(304), np.int64(308), np.int64(309), np.int64(312), np.int64(314), np.int64(325), np.int64(327), np.int64(329), np.int64(333), np.int64(336), np.int64(338), np.int64(340), np.int64(341), np.int64(345), np.int64(346), np.int64(350), np.int64(353), np.int64(356), np.int64(364), np.int64(366), np.int64(367), np.int64(368), np.int64(370), np.int64(377), np.int64(381), np.int64(382), np.int64(384), np.int64(389), np.int64(402), np.int64(415), np.int64(426), np.int64(427), np.int64(428), np.int64(433), np.int64(434), np.int64(436), np.int64(438), np.int64(441), np.int64(444), np.int64(446), np.int64(447), np.int64(449), np.int64(451), np.int64(453), np.int64(456), np.int64(458), np.int64(462), np.int64(466), np.int64(470), np.int64(472), np.int64(474), np.int64(475), np.int64(482), np.int64(484), np.int64(490), np.int64(494), np.int64(496), np.int64(498), np.int64(500), np.int64(509), np.int64(512), np.int64(515), np.int64(516), np.int64(521), np.int64(522), np.int64(523), np.int64(528), np.int64(529), np.int64(530), np.int64(531), np.int64(533), np.int64(535), np.int64(537), np.int64(540), np.int64(546), np.int64(550), np.int64(552), np.int64(558), np.int64(561), np.int64(562), np.int64(563), np.int64(566), np.int64(568), np.int64(569), np.int64(570), np.int64(575), np.int64(576), np.int64(577), np.int64(581), np.int64(583), np.int64(598), np.int64(604), np.int64(607), np.int64(608), np.int64(609), np.int64(613), np.int64(617), np.int64(624), np.int64(626), np.int64(627), np.int64(628), np.int64(629), np.int64(630), np.int64(632), np.int64(633), np.int64(637), np.int64(643), np.int64(645), np.int64(649), np.int64(650), np.int64(651), np.int64(658), np.int64(664), np.int64(665), np.int64(669), np.int64(670), np.int64(671), np.int64(672), np.int64(676), np.int64(686), np.int64(688), np.int64(690), np.int64(695), np.int64(696), np.int64(697), np.int64(698), np.int64(699), np.int64(700), np.int64(701), np.int64(702), np.int64(706), np.int64(707), np.int64(709), np.int64(712), np.int64(714), np.int64(718), np.int64(720), np.int64(721), np.int64(725), np.int64(727), np.int64(728), np.int64(733), np.int64(744), np.int64(748), np.int64(750), np.int64(752), np.int64(753), np.int64(755), np.int64(756), np.int64(758), np.int64(760), np.int64(761), np.int64(762), np.int64(767), np.int64(769), np.int64(772), np.int64(773), np.int64(774), np.int64(779), np.int64(784), np.int64(786), np.int64(788), np.int64(789), np.int64(793), np.int64(795), np.int64(797), np.int64(798), np.int64(799), np.int64(802), np.int64(803), np.int64(804), np.int64(809), np.int64(814), np.int64(816), np.int64(818), np.int64(827), np.int64(829), np.int64(833)], array([0.        , 0.45535714, 1.        ,        nan, 0.73397436,
+       1.        , 0.4       , 0.79591837, 0.76956522,        nan,
+       0.625     , 0.5       ,        nan, 0.79166667, 0.4012605 ,
+       0.57142857, 0.596875  , 0.25      , 0.61160714,        nan,
+       1.        , 0.66666667, 0.7       , 0.62105263, 0.64583333,
+       0.5       , 0.6       , 0.5       ,        nan, 0.75      ,
+       0.4614899 , 0.4047619 ,        nan, 0.13333333, 0.3125    ,
+       0.26666667, 0.6875    , 0.16666667, 1.        , 0.4140625 ,
+       0.75      , 0.48180077, 0.25      ,        nan,        nan,
+       0.5087108 , 0.47222222, 0.        , 0.375     , 1.        ,
+       0.60576923, 1.        , 1.        ,        nan, 0.75      ,
+       0.33333333, 0.46875   ,        nan, 0.25      ,        nan,
+              nan, 0.5       , 0.        , 0.49702381, 0.58333333,
+       0.63271605, 0.325     , 1.        , 0.75      , 0.25892857,
+              nan, 0.69444444, 0.53826531, 0.60714286, 0.8       ,
+       0.52791667, 0.42236025, 0.58791209, 1.        , 0.75      ,
+       0.33333333, 0.5       , 0.54347826, 0.64393939, 0.66666667,
+              nan, 0.        , 0.56047938, 0.57352941, 0.375     ,
+       0.54563492, 0.38421053, 0.47763975, 0.375     ,        nan,
+       0.55555556, 0.92222222, 0.07142857, 0.32363316, 0.65972222,
+       0.34346405, 0.5390625 , 0.12254902,        nan,        nan,
+       0.64035088, 0.41176471, 0.37815126, 0.69047619, 0.5625    ,
+       0.375     , 0.        , 0.34375   ,        nan, 1.        ,
+       0.        , 1.        , 1.        , 0.61111111, 0.5       ,
+       0.33333333, 0.66666667, 1.        , 0.52015251,        nan,
+       0.515625  , 0.66666667, 0.85      , 0.        , 0.36      ,
+       0.75925926, 0.66666667, 0.41850594, 0.76666667, 1.        ,
+       0.47222222, 0.66666667, 1.        , 0.66666667, 0.51298701,
+       0.47619048,        nan, 0.59901961, 1.        , 0.49473684,
+              nan, 0.64285714, 1.        , 0.5       ,        nan,
+       0.37231559, 0.43478261, 0.        , 0.33333333, 0.66666667,
+       0.8       , 0.24305556, 0.75      , 0.5       , 0.875     ,
+       0.70526316, 1.        , 0.57142857, 1.        ,        nan,
+       0.625     ,        nan, 0.640625  , 0.75      , 0.69387755,
+              nan,        nan, 0.8       , 0.55555556, 0.45454545,
+              nan,        nan,        nan,        nan,        nan,
+       0.5       ,        nan, 0.5       , 1.        , 0.        ,
+       0.41666667, 1.        , 0.43162393, 0.53428571,        nan,
+       0.375     , 0.75      , 0.66666667, 0.5       , 0.625     ,
+       0.5       , 0.        , 0.52156863, 0.38461538, 0.30357143,
+       0.27380952, 0.22222222, 0.63333333, 0.5       , 0.50505051,
+       0.5       , 0.44276158, 0.27272727, 0.92592593, 0.75      ,
+              nan, 0.51640241, 0.375     , 1.        , 0.        ,
+              nan, 0.875     , 0.        , 0.42962963, 0.90909091,
+       0.5       , 0.29166667, 0.5       , 0.9       , 0.44      ,
+              nan, 1.        , 1.        , 0.90909091, 0.        ,
+       0.722     , 0.66666667, 0.66666667, 0.33333333, 0.66666667,
+       0.53517512, 0.5       , 0.43567251, 0.49957983, 0.97619048,
+       0.55882353, 0.875     ,        nan, 0.40277778, 0.        ,
+       0.66666667, 0.68269231,        nan, 0.        ,        nan,
+       0.66666667, 0.4       ,        nan,        nan, 0.46875   ,
+       0.75      , 1.        , 0.59285714, 1.        , 1.        ,
+       0.        , 0.49102564, 0.5       , 0.28787879, 0.375     ,
+       1.        , 0.36111111, 0.66666667, 0.85714286, 1.        ,
+       0.55128205, 0.73090278, 0.08333333, 0.47736125, 0.66666667,
+       0.60606061, 0.28333333, 0.32352941,        nan, 1.        ,
+              nan,        nan, 0.67045455]))
+rank_0 auc: 0.4937026325819979
+2026-08-13 13:01:24,575 [INFO] Start training
+2026-08-13 13:01:24,600 [INFO] Start training epoch 21, 50 iters per inner epoch.
+/kaggle/working/CoLLM-thesis/minigpt4/tasks/base_task.py:219: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with torch.cuda.amp.autocast(enabled=use_amp):
+/kaggle/working/CoLLM-thesis/minigpt4/models/rec_model.py:48: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  return torch.cuda.amp.autocast(dtype=dtype)
+/usr/local/lib/python3.12/dist-packages/torch/_dynamo/eval_frame.py:1181: UserWarning: torch.utils.checkpoint: the use_reentrant parameter should be passed explicitly. Starting in PyTorch 2.9, calling checkpoint without use_reentrant will raise an exception. use_reentrant=False is recommended, but if you need to preserve the current default behavior, you can pass use_reentrant=True. Refer to docs for more details on the differences between the two variants.
+  return fn(*args, **kwargs)
+Train: data epoch: [21]  [ 0/50]  eta: 0:01:37  lr: 0.000852  loss: 0.7105  time: 1.9449  data: 0.0000  max mem: 13888
+Train: data epoch: [21]  [49/50]  eta: 0:00:02  lr: 0.000839  loss: 0.6392  time: 2.0100  data: 0.0000  max mem: 13888
+Train: data epoch: [21] Total time: 0:01:40 (2.0131 s / it)
+2026-08-13 13:03:05,252 [INFO] Averaged stats: lr: 0.000846  loss: 0.697233
+2026-08-13 13:03:05,274 [INFO] Saving checkpoint at epoch 21 to /kaggle/working/collm-stage1/20260813092/checkpoint_21.pth (model state 16.8 MB, 128 keys).
+2026-08-13 13:03:05,390 [INFO] Start training
+2026-08-13 13:03:05,415 [INFO] Start training epoch 22, 50 iters per inner epoch.
+Train: data epoch: [22]  [ 0/50]  eta: 0:01:32  lr: 0.000839  loss: 0.6764  time: 1.8527  data: 0.0000  max mem: 13888
+Train: data epoch: [22]  [49/50]  eta: 0:00:02  lr: 0.000825  loss: 0.6390  time: 2.0312  data: 0.0000  max mem: 13888
+Train: data epoch: [22] Total time: 0:01:41 (2.0219 s / it)
+2026-08-13 13:04:46,509 [INFO] Averaged stats: lr: 0.000832  loss: 0.691909
+2026-08-13 13:04:46,510 [INFO] Evaluating on valid.
+Evaluation  [   0/1300]  eta: 0:20:01  loss: 0.6945  acc: 0.0000  time: 0.9242  data: 0.1800  max mem: 13888
+Evaluation  [ 260/1300]  eta: 0:12:26  loss: 0.7230  acc: 0.0000  time: 0.7019  data: 0.0008  max mem: 13888
+Evaluation  [ 520/1300]  eta: 0:09:19  loss: 0.6911  acc: 0.0000  time: 0.7295  data: 0.0007  max mem: 13888
+Evaluation  [ 780/1300]  eta: 0:06:13  loss: 0.6934  acc: 0.0000  time: 0.7121  data: 0.0008  max mem: 13888
+Evaluation  [1040/1300]  eta: 0:03:06  loss: 0.7229  acc: 0.0000  time: 0.7107  data: 0.0008  max mem: 13888
+Evaluation  [1299/1300]  eta: 0:00:00  loss: 0.6954  acc: 0.0000  time: 0.7183  data: 0.0043  max mem: 13888
+Evaluation Total time: 0:15:33 (0.7180 s / it)
+only one interaction users: 48
+computed user: 283 can not users: 0
+uauc for validation Cost: 0.33411741256713867 uauc: nan
+2026-08-13 13:20:20,268 [INFO] Averaged stats: loss: 0.691253  acc: 0.000000 ***auc: 0.49101877895722146 ***uauc:(np.float64(nan), [np.int64(20), np.int64(26), np.int64(33), np.int64(34), np.int64(36), np.int64(37), np.int64(39), np.int64(40), np.int64(41), np.int64(48), np.int64(49), np.int64(57), np.int64(71), np.int64(72), np.int64(73), np.int64(79), np.int64(83), np.int64(85), np.int64(87), np.int64(91), np.int64(93), np.int64(95), np.int64(104), np.int64(107), np.int64(108), np.int64(109), np.int64(110), np.int64(112), np.int64(115), np.int64(119), np.int64(121), np.int64(124), np.int64(126), np.int64(139), np.int64(142), np.int64(145), np.int64(147), np.int64(149), np.int64(153), np.int64(155), np.int64(159), np.int64(164), np.int64(165), np.int64(167), np.int64(169), np.int64(170), np.int64(171), np.int64(173), np.int64(174), np.int64(175), np.int64(177), np.int64(178), np.int64(180), np.int64(184), np.int64(185), np.int64(186), np.int64(193), np.int64(195), np.int64(197), np.int64(198), np.int64(199), np.int64(200), np.int64(204), np.int64(205), np.int64(207), np.int64(208), np.int64(210), np.int64(212), np.int64(214), np.int64(215), np.int64(217), np.int64(221), np.int64(222), np.int64(226), np.int64(227), np.int64(228), np.int64(230), np.int64(231), np.int64(237), np.int64(242), np.int64(246), np.int64(247), np.int64(249), np.int64(250), np.int64(255), np.int64(256), np.int64(260), np.int64(261), np.int64(264), np.int64(271), np.int64(273), np.int64(275), np.int64(277), np.int64(279), np.int64(280), np.int64(282), np.int64(286), np.int64(291), np.int64(292), np.int64(296), np.int64(297), np.int64(298), np.int64(300), np.int64(301), np.int64(303), np.int64(304), np.int64(308), np.int64(309), np.int64(312), np.int64(314), np.int64(325), np.int64(327), np.int64(329), np.int64(333), np.int64(336), np.int64(338), np.int64(340), np.int64(341), np.int64(345), np.int64(346), np.int64(350), np.int64(353), np.int64(356), np.int64(364), np.int64(366), np.int64(367), np.int64(368), np.int64(370), np.int64(377), np.int64(381), np.int64(382), np.int64(384), np.int64(389), np.int64(402), np.int64(415), np.int64(426), np.int64(427), np.int64(428), np.int64(433), np.int64(434), np.int64(436), np.int64(438), np.int64(441), np.int64(444), np.int64(446), np.int64(447), np.int64(449), np.int64(451), np.int64(453), np.int64(456), np.int64(458), np.int64(462), np.int64(466), np.int64(470), np.int64(472), np.int64(474), np.int64(475), np.int64(482), np.int64(484), np.int64(490), np.int64(494), np.int64(496), np.int64(498), np.int64(500), np.int64(509), np.int64(512), np.int64(515), np.int64(516), np.int64(521), np.int64(522), np.int64(523), np.int64(528), np.int64(529), np.int64(530), np.int64(531), np.int64(533), np.int64(535), np.int64(537), np.int64(540), np.int64(546), np.int64(550), np.int64(552), np.int64(558), np.int64(561), np.int64(562), np.int64(563), np.int64(566), np.int64(568), np.int64(569), np.int64(570), np.int64(575), np.int64(576), np.int64(577), np.int64(581), np.int64(583), np.int64(598), np.int64(604), np.int64(607), np.int64(608), np.int64(609), np.int64(613), np.int64(617), np.int64(624), np.int64(626), np.int64(627), np.int64(628), np.int64(629), np.int64(630), np.int64(632), np.int64(633), np.int64(637), np.int64(643), np.int64(645), np.int64(649), np.int64(650), np.int64(651), np.int64(658), np.int64(664), np.int64(665), np.int64(669), np.int64(670), np.int64(671), np.int64(672), np.int64(676), np.int64(686), np.int64(688), np.int64(690), np.int64(695), np.int64(696), np.int64(697), np.int64(698), np.int64(699), np.int64(700), np.int64(701), np.int64(702), np.int64(706), np.int64(707), np.int64(709), np.int64(712), np.int64(714), np.int64(718), np.int64(720), np.int64(721), np.int64(725), np.int64(727), np.int64(728), np.int64(733), np.int64(744), np.int64(748), np.int64(750), np.int64(752), np.int64(753), np.int64(755), np.int64(756), np.int64(758), np.int64(760), np.int64(761), np.int64(762), np.int64(767), np.int64(769), np.int64(772), np.int64(773), np.int64(774), np.int64(779), np.int64(784), np.int64(786), np.int64(788), np.int64(789), np.int64(793), np.int64(795), np.int64(797), np.int64(798), np.int64(799), np.int64(802), np.int64(803), np.int64(804), np.int64(809), np.int64(814), np.int64(816), np.int64(818), np.int64(827), np.int64(829), np.int64(833)], array([0.5       , 0.375     , 1.        ,        nan, 0.78525641,
+       0.83333333, 0.6       , 0.79591837, 0.76956522,        nan,
+       0.13095238, 0.5       ,        nan, 0.89583333, 0.4012605 ,
+       0.50793651, 0.60720486, 0.375     , 0.63244048,        nan,
+       1.        , 0.33333333, 0.65555556, 0.65789474, 0.59027778,
+       0.75      , 0.63333333, 1.        ,        nan, 0.75      ,
+       0.46938131, 0.42857143,        nan, 0.06666667, 0.25      ,
+       0.26666667, 0.68055556, 0.75      , 1.        , 0.578125  ,
+       1.        , 0.51500639, 0.37698413,        nan,        nan,
+       0.61062718, 0.43055556, 0.5       , 0.75      , 1.        ,
+       0.60076923, 0.5       , 1.        ,        nan, 0.75      ,
+       0.66666667, 0.45138889,        nan, 0.        ,        nan,
+              nan, 0.5       , 0.        , 0.53571429, 0.58333333,
+       0.7037037 , 0.275     , 1.        , 0.75      , 0.40178571,
+              nan, 0.65277778, 0.45663265, 0.60714286, 0.75      ,
+       0.51166667, 0.44720497, 0.60989011, 1.        , 0.5       ,
+       0.16666667, 0.        , 0.50652174, 0.54545455, 1.        ,
+              nan, 0.0625    , 0.5206243 , 0.52156863, 0.59375   ,
+       0.51785714, 0.42368421, 0.43385093, 0.375     ,        nan,
+       0.55555556, 0.89814815, 0.07142857, 0.30687831, 0.80555556,
+       0.36732026, 0.53450521, 0.30882353,        nan,        nan,
+       0.5745614 , 0.51764706, 0.33613445, 0.74603175, 0.525     ,
+       0.5       , 0.        , 0.25      ,        nan, 1.        ,
+       0.        , 1.        , 0.875     , 0.59722222, 0.        ,
+       0.38095238, 0.77777778, 0.5       , 0.55337691,        nan,
+       0.3125    , 0.5       , 0.7       , 0.        , 0.36      ,
+       0.62962963, 0.66666667, 0.48132428, 0.73333333, 1.        ,
+       0.41666667, 0.66666667, 1.        , 0.86666667, 0.4020979 ,
+       0.23809524,        nan, 0.66372549, 1.        , 0.55263158,
+              nan, 0.89285714, 0.83333333, 0.5       ,        nan,
+       0.39915966, 0.35869565, 0.        , 0.51041667, 0.83333333,
+       0.8       , 0.26388889, 0.5       , 0.5       , 0.875     ,
+       0.64210526, 1.        , 0.54285714, 1.        ,        nan,
+       0.75      ,        nan, 0.49826389, 0.75      , 0.53061224,
+              nan,        nan, 0.9       , 0.53333333, 0.43850267,
+              nan,        nan,        nan,        nan,        nan,
+       0.66666667,        nan, 0.48611111, 1.        , 0.        ,
+       0.72222222, 1.        , 0.53418803, 0.5547619 ,        nan,
+       0.46875   , 0.75      , 0.        , 0.        , 0.54166667,
+       0.65625   , 0.        , 0.57254902, 0.4029304 , 0.33928571,
+       0.32738095, 0.        , 0.66666667, 0.43014706, 0.54040404,
+       0.22222222, 0.48731541, 0.27272727, 0.96296296, 0.5       ,
+              nan, 0.48414434, 0.5       , 1.        , 1.        ,
+              nan, 0.58333333, 0.        , 0.44444444, 0.90909091,
+       0.5       , 0.36111111, 0.75      , 0.9       , 0.44      ,
+              nan, 1.        , 1.        , 0.36363636, 0.        ,
+       0.644     , 0.        , 0.33333333, 0.33333333, 0.72222222,
+       0.571407  , 0.58      , 0.46637427, 0.53907563, 0.64285714,
+       0.61764706, 0.52083333,        nan, 0.52777778, 0.75      ,
+       0.66666667, 0.71153846,        nan, 0.        ,        nan,
+       0.66666667, 0.4       ,        nan,        nan, 0.40625   ,
+       0.75      , 0.        , 0.47142857, 1.        , 1.        ,
+       0.        , 0.48974359, 0.41326531, 0.34848485, 0.175     ,
+       1.        , 0.44444444, 0.66666667, 0.85714286, 1.        ,
+       0.41025641, 0.69791667, 0.08333333, 0.45959104, 0.66666667,
+       0.57575758, 0.16666667, 0.35294118,        nan, 0.93333333,
+              nan,        nan, 0.6875    ]))
+rank_0 auc: 0.49101877895722146
+2026-08-13 13:20:20,299 [INFO] Start training
+2026-08-13 13:20:20,328 [INFO] Start training epoch 23, 50 iters per inner epoch.
+/kaggle/working/CoLLM-thesis/minigpt4/tasks/base_task.py:219: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with torch.cuda.amp.autocast(enabled=use_amp):
+/kaggle/working/CoLLM-thesis/minigpt4/models/rec_model.py:48: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  return torch.cuda.amp.autocast(dtype=dtype)
+/usr/local/lib/python3.12/dist-packages/torch/_dynamo/eval_frame.py:1181: UserWarning: torch.utils.checkpoint: the use_reentrant parameter should be passed explicitly. Starting in PyTorch 2.9, calling checkpoint without use_reentrant will raise an exception. use_reentrant=False is recommended, but if you need to preserve the current default behavior, you can pass use_reentrant=True. Refer to docs for more details on the differences between the two variants.
+  return fn(*args, **kwargs)
+Train: data epoch: [23]  [ 0/50]  eta: 0:01:45  lr: 0.000825  loss: 0.6697  time: 2.1190  data: 0.0000  max mem: 13888
+Train: data epoch: [23]  [49/50]  eta: 0:00:02  lr: 0.000811  loss: 0.7175  time: 2.0303  data: 0.0000  max mem: 13888
+Train: data epoch: [23] Total time: 0:01:40 (2.0151 s / it)
+2026-08-13 13:22:01,084 [INFO] Averaged stats: lr: 0.000818  loss: 0.695249
+2026-08-13 13:22:01,106 [INFO] Saving checkpoint at epoch 23 to /kaggle/working/collm-stage1/20260813092/checkpoint_23.pth (model state 16.8 MB, 128 keys).
+2026-08-13 13:22:01,223 [INFO] Start training
+2026-08-13 13:22:01,248 [INFO] Start training epoch 24, 50 iters per inner epoch.
+Train: data epoch: [24]  [ 0/50]  eta: 0:01:36  lr: 0.000810  loss: 0.6142  time: 1.9349  data: 0.0000  max mem: 13888
+Train: data epoch: [24]  [49/50]  eta: 0:00:02  lr: 0.000796  loss: 0.6530  time: 2.0022  data: 0.0000  max mem: 13888
+Train: data epoch: [24] Total time: 0:01:40 (2.0157 s / it)
+2026-08-13 13:23:42,036 [INFO] Averaged stats: lr: 0.000803  loss: 0.680560
+2026-08-13 13:23:42,037 [INFO] Evaluating on valid.
+Evaluation  [   0/1300]  eta: 0:20:26  loss: 0.6978  acc: 0.0000  time: 0.9433  data: 0.1906  max mem: 13888
+Evaluation  [ 260/1300]  eta: 0:12:25  loss: 0.7481  acc: 0.0000  time: 0.6980  data: 0.0008  max mem: 13888
+Evaluation  [ 520/1300]  eta: 0:09:19  loss: 0.7006  acc: 0.0000  time: 0.7235  data: 0.0008  max mem: 13888
+Evaluation  [ 780/1300]  eta: 0:06:13  loss: 0.6982  acc: 0.0000  time: 0.7110  data: 0.0008  max mem: 13888
+Evaluation  [1040/1300]  eta: 0:03:06  loss: 0.7148  acc: 0.0000  time: 0.7160  data: 0.0008  max mem: 13888
+Evaluation  [1299/1300]  eta: 0:00:00  loss: 0.6980  acc: 0.0000  time: 0.7193  data: 0.0043  max mem: 13888
+Evaluation Total time: 0:15:33 (0.7184 s / it)
+only one interaction users: 48
+computed user: 283 can not users: 0
+uauc for validation Cost: 0.29232120513916016 uauc: nan
+2026-08-13 13:39:16,224 [INFO] Averaged stats: loss: 0.692002  acc: 0.000000 ***auc: 0.49400791629168195 ***uauc:(np.float64(nan), [np.int64(20), np.int64(26), np.int64(33), np.int64(34), np.int64(36), np.int64(37), np.int64(39), np.int64(40), np.int64(41), np.int64(48), np.int64(49), np.int64(57), np.int64(71), np.int64(72), np.int64(73), np.int64(79), np.int64(83), np.int64(85), np.int64(87), np.int64(91), np.int64(93), np.int64(95), np.int64(104), np.int64(107), np.int64(108), np.int64(109), np.int64(110), np.int64(112), np.int64(115), np.int64(119), np.int64(121), np.int64(124), np.int64(126), np.int64(139), np.int64(142), np.int64(145), np.int64(147), np.int64(149), np.int64(153), np.int64(155), np.int64(159), np.int64(164), np.int64(165), np.int64(167), np.int64(169), np.int64(170), np.int64(171), np.int64(173), np.int64(174), np.int64(175), np.int64(177), np.int64(178), np.int64(180), np.int64(184), np.int64(185), np.int64(186), np.int64(193), np.int64(195), np.int64(197), np.int64(198), np.int64(199), np.int64(200), np.int64(204), np.int64(205), np.int64(207), np.int64(208), np.int64(210), np.int64(212), np.int64(214), np.int64(215), np.int64(217), np.int64(221), np.int64(222), np.int64(226), np.int64(227), np.int64(228), np.int64(230), np.int64(231), np.int64(237), np.int64(242), np.int64(246), np.int64(247), np.int64(249), np.int64(250), np.int64(255), np.int64(256), np.int64(260), np.int64(261), np.int64(264), np.int64(271), np.int64(273), np.int64(275), np.int64(277), np.int64(279), np.int64(280), np.int64(282), np.int64(286), np.int64(291), np.int64(292), np.int64(296), np.int64(297), np.int64(298), np.int64(300), np.int64(301), np.int64(303), np.int64(304), np.int64(308), np.int64(309), np.int64(312), np.int64(314), np.int64(325), np.int64(327), np.int64(329), np.int64(333), np.int64(336), np.int64(338), np.int64(340), np.int64(341), np.int64(345), np.int64(346), np.int64(350), np.int64(353), np.int64(356), np.int64(364), np.int64(366), np.int64(367), np.int64(368), np.int64(370), np.int64(377), np.int64(381), np.int64(382), np.int64(384), np.int64(389), np.int64(402), np.int64(415), np.int64(426), np.int64(427), np.int64(428), np.int64(433), np.int64(434), np.int64(436), np.int64(438), np.int64(441), np.int64(444), np.int64(446), np.int64(447), np.int64(449), np.int64(451), np.int64(453), np.int64(456), np.int64(458), np.int64(462), np.int64(466), np.int64(470), np.int64(472), np.int64(474), np.int64(475), np.int64(482), np.int64(484), np.int64(490), np.int64(494), np.int64(496), np.int64(498), np.int64(500), np.int64(509), np.int64(512), np.int64(515), np.int64(516), np.int64(521), np.int64(522), np.int64(523), np.int64(528), np.int64(529), np.int64(530), np.int64(531), np.int64(533), np.int64(535), np.int64(537), np.int64(540), np.int64(546), np.int64(550), np.int64(552), np.int64(558), np.int64(561), np.int64(562), np.int64(563), np.int64(566), np.int64(568), np.int64(569), np.int64(570), np.int64(575), np.int64(576), np.int64(577), np.int64(581), np.int64(583), np.int64(598), np.int64(604), np.int64(607), np.int64(608), np.int64(609), np.int64(613), np.int64(617), np.int64(624), np.int64(626), np.int64(627), np.int64(628), np.int64(629), np.int64(630), np.int64(632), np.int64(633), np.int64(637), np.int64(643), np.int64(645), np.int64(649), np.int64(650), np.int64(651), np.int64(658), np.int64(664), np.int64(665), np.int64(669), np.int64(670), np.int64(671), np.int64(672), np.int64(676), np.int64(686), np.int64(688), np.int64(690), np.int64(695), np.int64(696), np.int64(697), np.int64(698), np.int64(699), np.int64(700), np.int64(701), np.int64(702), np.int64(706), np.int64(707), np.int64(709), np.int64(712), np.int64(714), np.int64(718), np.int64(720), np.int64(721), np.int64(725), np.int64(727), np.int64(728), np.int64(733), np.int64(744), np.int64(748), np.int64(750), np.int64(752), np.int64(753), np.int64(755), np.int64(756), np.int64(758), np.int64(760), np.int64(761), np.int64(762), np.int64(767), np.int64(769), np.int64(772), np.int64(773), np.int64(774), np.int64(779), np.int64(784), np.int64(786), np.int64(788), np.int64(789), np.int64(793), np.int64(795), np.int64(797), np.int64(798), np.int64(799), np.int64(802), np.int64(803), np.int64(804), np.int64(809), np.int64(814), np.int64(816), np.int64(818), np.int64(827), np.int64(829), np.int64(833)], array([0.5       , 0.64732143, 0.16666667,        nan, 0.73076923,
+       0.33333333, 0.4       , 0.36734694, 0.83478261,        nan,
+       0.4047619 , 0.625     ,        nan, 0.53125   , 0.35084034,
+       0.46031746, 0.54001736, 0.25      , 0.45089286,        nan,
+       0.        , 0.5       , 0.47777778, 0.29473684, 0.45138889,
+       0.        , 0.73333333, 0.        ,        nan, 0.75      ,
+       0.55713384, 0.69047619,        nan, 0.43333333, 0.03125   ,
+       0.73333333, 0.45138889, 0.5       , 1.        , 0.2265625 ,
+       1.        , 0.44827586, 0.6765873 ,        nan,        nan,
+       0.67334495, 0.375     , 0.25      , 0.5       , 1.        ,
+       0.52423077, 1.        , 0.7       ,        nan, 0.375     ,
+       1.        , 0.5625    ,        nan, 0.        ,        nan,
+              nan, 0.5       , 0.        , 0.47916667, 0.66666667,
+       0.66666667, 0.5       , 0.        , 0.375     , 0.32142857,
+              nan, 0.41666667, 0.5255102 , 0.66071429, 0.85      ,
+       0.3825    , 0.50465839, 0.50686813, 1.        , 0.5       ,
+       0.33333333, 0.        , 0.84347826, 0.64393939, 0.66666667,
+              nan, 1.        , 0.72826087, 0.31176471, 0.5       ,
+       0.59920635, 0.41578947, 0.45838509, 0.        ,        nan,
+       0.5       , 0.27592593, 0.10714286, 0.49162257, 0.70833333,
+       0.52385621, 0.40299479, 0.56372549,        nan,        nan,
+       0.64035088, 0.46470588, 0.26890756, 0.48412698, 0.575     ,
+       0.5625    , 1.        , 0.54166667,        nan, 1.        ,
+       0.2       , 1.        , 0.5625    , 0.56944444, 0.5       ,
+       0.5952381 , 0.55555556, 0.5       , 0.62962963,        nan,
+       0.484375  , 0.16666667, 0.45      , 1.        , 0.44      ,
+       0.33333333, 0.66666667, 0.53735144, 0.2       , 0.25      ,
+       0.375     , 0.66666667, 0.        , 0.4       , 0.46087246,
+       0.42857143,        nan, 0.53529412, 1.        , 0.5877193 ,
+              nan, 0.96428571, 0.66666667, 0.33333333,        nan,
+       0.62068161, 0.44565217, 0.        , 0.52083333, 0.66666667,
+       0.2       , 0.34027778, 0.5       , 0.5       , 0.875     ,
+       0.53157895, 1.        , 0.51428571, 0.        ,        nan,
+       0.4375    ,        nan, 0.34288194, 1.        , 0.62244898,
+              nan,        nan, 0.4       , 0.42222222, 0.49465241,
+              nan,        nan,        nan,        nan,        nan,
+       0.66666667,        nan, 0.40277778, 0.5       , 0.        ,
+       0.9       , 0.        , 0.73076923, 0.52333333,        nan,
+       0.875     , 0.66666667, 0.        , 0.        , 0.39583333,
+       0.875     , 0.        , 0.41568627, 0.48290598, 0.22321429,
+       0.6547619 , 0.44444444, 0.7       , 0.37132353, 0.30808081,
+       0.38888889, 0.55124322, 0.74545455, 0.66666667, 0.75      ,
+              nan, 0.55276107, 0.75      , 1.        , 1.        ,
+              nan, 0.54166667, 0.33333333, 0.31851852, 0.55681818,
+       1.        , 0.55555556, 0.875     , 0.55      , 0.3       ,
+              nan, 1.        , 1.        , 0.90909091, 1.        ,
+       0.604     , 0.        , 0.        , 0.66666667, 0.77777778,
+       0.41228865, 0.68      , 0.41666667, 0.50168067, 0.52380952,
+       0.5       , 0.30208333,        nan, 0.79166667, 0.75      ,
+       1.        , 0.47115385,        nan, 1.        ,        nan,
+       0.66666667, 0.66666667,        nan,        nan, 0.21875   ,
+       0.25      , 1.        , 0.52142857, 1.        , 1.        ,
+       1.        , 0.62948718, 0.54081633, 0.65151515, 0.225     ,
+       0.        , 0.41666667, 0.        , 0.5       , 1.        ,
+       0.29487179, 0.33506944, 0.83333333, 0.44393054, 1.        ,
+       0.5       , 0.4       , 0.30672269,        nan, 0.53333333,
+              nan,        nan, 0.47064394]))
+rank_0 auc: 0.49400791629168195
+2026-08-13 13:39:16,251 [INFO] Start training
+2026-08-13 13:39:16,276 [INFO] Start training epoch 25, 50 iters per inner epoch.
+/kaggle/working/CoLLM-thesis/minigpt4/tasks/base_task.py:219: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with torch.cuda.amp.autocast(enabled=use_amp):
+/kaggle/working/CoLLM-thesis/minigpt4/models/rec_model.py:48: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  return torch.cuda.amp.autocast(dtype=dtype)
+/usr/local/lib/python3.12/dist-packages/torch/_dynamo/eval_frame.py:1181: UserWarning: torch.utils.checkpoint: the use_reentrant parameter should be passed explicitly. Starting in PyTorch 2.9, calling checkpoint without use_reentrant will raise an exception. use_reentrant=False is recommended, but if you need to preserve the current default behavior, you can pass use_reentrant=True. Refer to docs for more details on the differences between the two variants.
+  return fn(*args, **kwargs)
+Train: data epoch: [25]  [ 0/50]  eta: 0:01:33  lr: 0.000796  loss: 0.7204  time: 1.8681  data: 0.0000  max mem: 13888
+Train: data epoch: [25]  [49/50]  eta: 0:00:02  lr: 0.000781  loss: 0.6679  time: 1.9594  data: 0.0000  max mem: 13888
+Train: data epoch: [25] Total time: 0:01:40 (2.0075 s / it)
+2026-08-13 13:40:56,652 [INFO] Averaged stats: lr: 0.000788  loss: 0.693484
+2026-08-13 13:40:56,673 [INFO] Saving checkpoint at epoch 25 to /kaggle/working/collm-stage1/20260813092/checkpoint_25.pth (model state 16.8 MB, 128 keys).
+2026-08-13 13:40:56,791 [INFO] Start training
+2026-08-13 13:40:56,817 [INFO] Start training epoch 26, 50 iters per inner epoch.
+Train: data epoch: [26]  [ 0/50]  eta: 0:01:44  lr: 0.000780  loss: 0.7266  time: 2.0807  data: 0.0000  max mem: 13888
+Train: data epoch: [26]  [49/50]  eta: 0:00:02  lr: 0.000765  loss: 0.6949  time: 1.9972  data: 0.0000  max mem: 13888
+Train: data epoch: [26] Total time: 0:01:40 (2.0107 s / it)
+2026-08-13 13:42:37,354 [INFO] Averaged stats: lr: 0.000773  loss: 0.697987
+2026-08-13 13:42:37,355 [INFO] Evaluating on valid.
+Evaluation  [   0/1300]  eta: 0:20:44  loss: 0.6934  acc: 0.0000  time: 0.9576  data: 0.2107  max mem: 13888
+Evaluation  [ 260/1300]  eta: 0:12:26  loss: 0.6913  acc: 0.0000  time: 0.7024  data: 0.0009  max mem: 13888
+Evaluation  [ 520/1300]  eta: 0:09:19  loss: 0.6931  acc: 0.0000  time: 0.7286  data: 0.0007  max mem: 13888
+Evaluation  [ 780/1300]  eta: 0:06:13  loss: 0.6927  acc: 0.0000  time: 0.7111  data: 0.0008  max mem: 13888
+Evaluation  [1040/1300]  eta: 0:03:06  loss: 0.7049  acc: 0.0000  time: 0.7185  data: 0.0008  max mem: 13888
+Evaluation  [1299/1300]  eta: 0:00:00  loss: 0.6932  acc: 0.0000  time: 0.7178  data: 0.0040  max mem: 13888
+Evaluation Total time: 0:15:33 (0.7178 s / it)
+only one interaction users: 48
+computed user: 283 can not users: 0
+uauc for validation Cost: 0.28530144691467285 uauc: nan
+2026-08-13 13:58:10,801 [INFO] Averaged stats: loss: 0.693152  acc: 0.000000 ***auc: 0.5084185398084167 ***uauc:(np.float64(nan), [np.int64(20), np.int64(26), np.int64(33), np.int64(34), np.int64(36), np.int64(37), np.int64(39), np.int64(40), np.int64(41), np.int64(48), np.int64(49), np.int64(57), np.int64(71), np.int64(72), np.int64(73), np.int64(79), np.int64(83), np.int64(85), np.int64(87), np.int64(91), np.int64(93), np.int64(95), np.int64(104), np.int64(107), np.int64(108), np.int64(109), np.int64(110), np.int64(112), np.int64(115), np.int64(119), np.int64(121), np.int64(124), np.int64(126), np.int64(139), np.int64(142), np.int64(145), np.int64(147), np.int64(149), np.int64(153), np.int64(155), np.int64(159), np.int64(164), np.int64(165), np.int64(167), np.int64(169), np.int64(170), np.int64(171), np.int64(173), np.int64(174), np.int64(175), np.int64(177), np.int64(178), np.int64(180), np.int64(184), np.int64(185), np.int64(186), np.int64(193), np.int64(195), np.int64(197), np.int64(198), np.int64(199), np.int64(200), np.int64(204), np.int64(205), np.int64(207), np.int64(208), np.int64(210), np.int64(212), np.int64(214), np.int64(215), np.int64(217), np.int64(221), np.int64(222), np.int64(226), np.int64(227), np.int64(228), np.int64(230), np.int64(231), np.int64(237), np.int64(242), np.int64(246), np.int64(247), np.int64(249), np.int64(250), np.int64(255), np.int64(256), np.int64(260), np.int64(261), np.int64(264), np.int64(271), np.int64(273), np.int64(275), np.int64(277), np.int64(279), np.int64(280), np.int64(282), np.int64(286), np.int64(291), np.int64(292), np.int64(296), np.int64(297), np.int64(298), np.int64(300), np.int64(301), np.int64(303), np.int64(304), np.int64(308), np.int64(309), np.int64(312), np.int64(314), np.int64(325), np.int64(327), np.int64(329), np.int64(333), np.int64(336), np.int64(338), np.int64(340), np.int64(341), np.int64(345), np.int64(346), np.int64(350), np.int64(353), np.int64(356), np.int64(364), np.int64(366), np.int64(367), np.int64(368), np.int64(370), np.int64(377), np.int64(381), np.int64(382), np.int64(384), np.int64(389), np.int64(402), np.int64(415), np.int64(426), np.int64(427), np.int64(428), np.int64(433), np.int64(434), np.int64(436), np.int64(438), np.int64(441), np.int64(444), np.int64(446), np.int64(447), np.int64(449), np.int64(451), np.int64(453), np.int64(456), np.int64(458), np.int64(462), np.int64(466), np.int64(470), np.int64(472), np.int64(474), np.int64(475), np.int64(482), np.int64(484), np.int64(490), np.int64(494), np.int64(496), np.int64(498), np.int64(500), np.int64(509), np.int64(512), np.int64(515), np.int64(516), np.int64(521), np.int64(522), np.int64(523), np.int64(528), np.int64(529), np.int64(530), np.int64(531), np.int64(533), np.int64(535), np.int64(537), np.int64(540), np.int64(546), np.int64(550), np.int64(552), np.int64(558), np.int64(561), np.int64(562), np.int64(563), np.int64(566), np.int64(568), np.int64(569), np.int64(570), np.int64(575), np.int64(576), np.int64(577), np.int64(581), np.int64(583), np.int64(598), np.int64(604), np.int64(607), np.int64(608), np.int64(609), np.int64(613), np.int64(617), np.int64(624), np.int64(626), np.int64(627), np.int64(628), np.int64(629), np.int64(630), np.int64(632), np.int64(633), np.int64(637), np.int64(643), np.int64(645), np.int64(649), np.int64(650), np.int64(651), np.int64(658), np.int64(664), np.int64(665), np.int64(669), np.int64(670), np.int64(671), np.int64(672), np.int64(676), np.int64(686), np.int64(688), np.int64(690), np.int64(695), np.int64(696), np.int64(697), np.int64(698), np.int64(699), np.int64(700), np.int64(701), np.int64(702), np.int64(706), np.int64(707), np.int64(709), np.int64(712), np.int64(714), np.int64(718), np.int64(720), np.int64(721), np.int64(725), np.int64(727), np.int64(728), np.int64(733), np.int64(744), np.int64(748), np.int64(750), np.int64(752), np.int64(753), np.int64(755), np.int64(756), np.int64(758), np.int64(760), np.int64(761), np.int64(762), np.int64(767), np.int64(769), np.int64(772), np.int64(773), np.int64(774), np.int64(779), np.int64(784), np.int64(786), np.int64(788), np.int64(789), np.int64(793), np.int64(795), np.int64(797), np.int64(798), np.int64(799), np.int64(802), np.int64(803), np.int64(804), np.int64(809), np.int64(814), np.int64(816), np.int64(818), np.int64(827), np.int64(829), np.int64(833)], array([1.        , 0.42857143, 0.83333333,        nan, 0.67307692,
+       0.5       , 0.        , 0.57142857, 0.7826087 ,        nan,
+       0.3452381 , 0.75      ,        nan, 0.8125    , 0.29831933,
+       0.41269841, 0.50928819, 0.5       , 0.45535714,        nan,
+       0.33333333, 0.5       , 0.77777778, 0.66315789, 0.45833333,
+       0.        , 0.53333333, 0.        ,        nan, 0.5       ,
+       0.44602273, 0.42857143,        nan, 0.        , 0.5       ,
+       0.26666667, 0.55555556, 1.        , 1.        , 0.421875  ,
+       0.5       , 0.4683908 , 0.30357143,        nan,        nan,
+       0.56620209, 0.26388889, 0.        , 0.625     , 1.        ,
+       0.54692308, 0.        , 0.6       ,        nan, 0.5       ,
+       0.66666667, 0.56944444,        nan, 1.        ,        nan,
+              nan, 0.5       , 0.        , 0.48214286, 0.41666667,
+       0.7345679 , 0.45      , 0.        , 0.5       , 0.48214286,
+              nan, 0.29166667, 0.54591837, 0.42857143, 0.8       ,
+       0.50375   , 0.5       , 0.54395604, 1.        , 1.        ,
+       0.33333333, 0.        , 0.65217391, 0.48484848, 0.33333333,
+              nan, 0.5       , 0.54570792, 0.47254902, 0.375     ,
+       0.54166667, 0.67368421, 0.48478261, 0.29166667,        nan,
+       0.38888889, 0.92962963, 0.28571429, 0.62477954, 0.62847222,
+       0.35882353, 0.33984375, 0.44362745,        nan,        nan,
+       0.54385965, 0.52941176, 0.28571429, 0.65079365, 0.5       ,
+       0.75      , 1.        , 0.35416667,        nan, 0.        ,
+       0.        , 1.        , 0.75      , 0.56944444, 0.        ,
+       0.42857143, 0.88888889, 0.5       , 0.4624183 ,        nan,
+       0.3125    , 0.66666667, 0.5       , 1.        , 0.42      ,
+       0.60185185, 0.66666667, 0.44821732, 0.73333333, 0.25      ,
+       0.44444444, 0.66666667, 1.        , 0.93333333, 0.43090243,
+       0.28571429,        nan, 0.64705882, 1.        , 0.45614035,
+              nan, 0.67857143, 0.83333333, 0.66666667,        nan,
+       0.49603175, 0.52173913, 0.        , 0.35416667, 0.66666667,
+       0.6       , 0.30555556, 1.        , 0.5       , 0.875     ,
+       0.4       , 1.        , 0.57142857, 1.        ,        nan,
+       0.375     ,        nan, 0.44270833, 0.83333333, 0.7755102 ,
+              nan,        nan, 0.7       , 0.46666667, 0.45454545,
+              nan,        nan,        nan,        nan,        nan,
+       0.33333333,        nan, 0.44444444, 0.        , 1.        ,
+       0.44444444, 1.        , 0.42735043, 0.55666667,        nan,
+       0.375     , 0.83333333, 0.33333333, 0.5       , 0.33333333,
+       0.75      , 0.        , 0.7372549 , 0.43528694, 0.125     ,
+       0.41666667, 0.        , 0.51666667, 0.59558824, 0.49494949,
+       0.16666667, 0.41379528, 0.90909091, 0.7037037 , 0.5       ,
+              nan, 0.50328048, 0.        , 1.        , 1.        ,
+              nan, 0.66666667, 0.        , 0.48148148, 0.75      ,
+       0.75      , 0.54166667, 0.75      , 0.9       , 0.52      ,
+              nan, 1.        , 1.        , 0.54545455, 0.        ,
+       0.488     , 0.        , 0.        , 0.66666667, 0.44444444,
+       0.56083937, 0.08      , 0.49707602, 0.4012605 , 0.45238095,
+       0.70588235, 0.52083333,        nan, 0.36111111, 1.        ,
+       0.66666667, 0.50961538,        nan, 1.        ,        nan,
+       0.66666667, 0.86666667,        nan,        nan, 0.828125  ,
+       0.75      , 1.        , 0.6       , 1.        , 1.        ,
+       1.        , 0.44230769, 0.59183673, 0.39393939, 0.25      ,
+       1.        , 0.27777778, 0.33333333, 0.42857143, 1.        ,
+       0.51282051, 0.47222222, 0.16666667, 0.44612139, 0.        ,
+       0.67424242, 0.2       , 0.36554622,        nan, 0.4       ,
+              nan,        nan, 0.68560606]))
+rank_0 auc: 0.5084185398084167
+2026-08-13 13:58:10,826 [INFO] Start training
+2026-08-13 13:58:10,851 [INFO] Start training epoch 27, 50 iters per inner epoch.
+/kaggle/working/CoLLM-thesis/minigpt4/tasks/base_task.py:219: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with torch.cuda.amp.autocast(enabled=use_amp):
+/kaggle/working/CoLLM-thesis/minigpt4/models/rec_model.py:48: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  return torch.cuda.amp.autocast(dtype=dtype)
+/usr/local/lib/python3.12/dist-packages/torch/_dynamo/eval_frame.py:1181: UserWarning: torch.utils.checkpoint: the use_reentrant parameter should be passed explicitly. Starting in PyTorch 2.9, calling checkpoint without use_reentrant will raise an exception. use_reentrant=False is recommended, but if you need to preserve the current default behavior, you can pass use_reentrant=True. Refer to docs for more details on the differences between the two variants.
+  return fn(*args, **kwargs)
+Train: data epoch: [27]  [ 0/50]  eta: 0:01:46  lr: 0.000765  loss: 0.6925  time: 2.1372  data: 0.0000  max mem: 13888
+Train: data epoch: [27]  [49/50]  eta: 0:00:02  lr: 0.000749  loss: 0.6933  time: 2.0084  data: 0.0000  max mem: 13888
+Train: data epoch: [27] Total time: 0:01:41 (2.0317 s / it)
+2026-08-13 13:59:52,434 [INFO] Averaged stats: lr: 0.000757  loss: 0.697725
+2026-08-13 13:59:52,454 [INFO] Saving checkpoint at epoch 27 to /kaggle/working/collm-stage1/20260813092/checkpoint_27.pth (model state 16.8 MB, 128 keys).
+2026-08-13 13:59:52,574 [INFO] Start training
+2026-08-13 13:59:52,601 [INFO] Start training epoch 28, 50 iters per inner epoch.
+Train: data epoch: [28]  [ 0/50]  eta: 0:01:47  lr: 0.000749  loss: 0.6970  time: 2.1491  data: 0.0000  max mem: 13888
+Train: data epoch: [28]  [49/50]  eta: 0:00:02  lr: 0.000733  loss: 0.6473  time: 1.9985  data: 0.0000  max mem: 13888
+Train: data epoch: [28] Total time: 0:01:42 (2.0430 s / it)
+2026-08-13 14:01:34,749 [INFO] Averaged stats: lr: 0.000741  loss: 0.693457
+2026-08-13 14:01:34,750 [INFO] Evaluating on valid.
+Evaluation  [   0/1300]  eta: 0:20:28  loss: 0.6944  acc: 0.0000  time: 0.9453  data: 0.1980  max mem: 13888
+Evaluation  [ 260/1300]  eta: 0:12:26  loss: 0.7189  acc: 0.0000  time: 0.7025  data: 0.0008  max mem: 13888
+Evaluation  [ 520/1300]  eta: 0:09:19  loss: 0.6959  acc: 0.0000  time: 0.7282  data: 0.0008  max mem: 13888
+Evaluation  [ 780/1300]  eta: 0:06:13  loss: 0.6944  acc: 0.0000  time: 0.7088  data: 0.0007  max mem: 13888
+Evaluation  [1040/1300]  eta: 0:03:06  loss: 0.6978  acc: 0.0000  time: 0.7200  data: 0.0007  max mem: 13888
+Evaluation  [1299/1300]  eta: 0:00:00  loss: 0.6942  acc: 0.0000  time: 0.7205  data: 0.0046  max mem: 13888
+Evaluation Total time: 0:15:33 (0.7180 s / it)
+only one interaction users: 48
+computed user: 283 can not users: 0
+uauc for validation Cost: 0.2776467800140381 uauc: nan
+2026-08-13 14:17:08,496 [INFO] Averaged stats: loss: 0.691243  acc: 0.000000 ***auc: 0.5089954012929122 ***uauc:(np.float64(nan), [np.int64(20), np.int64(26), np.int64(33), np.int64(34), np.int64(36), np.int64(37), np.int64(39), np.int64(40), np.int64(41), np.int64(48), np.int64(49), np.int64(57), np.int64(71), np.int64(72), np.int64(73), np.int64(79), np.int64(83), np.int64(85), np.int64(87), np.int64(91), np.int64(93), np.int64(95), np.int64(104), np.int64(107), np.int64(108), np.int64(109), np.int64(110), np.int64(112), np.int64(115), np.int64(119), np.int64(121), np.int64(124), np.int64(126), np.int64(139), np.int64(142), np.int64(145), np.int64(147), np.int64(149), np.int64(153), np.int64(155), np.int64(159), np.int64(164), np.int64(165), np.int64(167), np.int64(169), np.int64(170), np.int64(171), np.int64(173), np.int64(174), np.int64(175), np.int64(177), np.int64(178), np.int64(180), np.int64(184), np.int64(185), np.int64(186), np.int64(193), np.int64(195), np.int64(197), np.int64(198), np.int64(199), np.int64(200), np.int64(204), np.int64(205), np.int64(207), np.int64(208), np.int64(210), np.int64(212), np.int64(214), np.int64(215), np.int64(217), np.int64(221), np.int64(222), np.int64(226), np.int64(227), np.int64(228), np.int64(230), np.int64(231), np.int64(237), np.int64(242), np.int64(246), np.int64(247), np.int64(249), np.int64(250), np.int64(255), np.int64(256), np.int64(260), np.int64(261), np.int64(264), np.int64(271), np.int64(273), np.int64(275), np.int64(277), np.int64(279), np.int64(280), np.int64(282), np.int64(286), np.int64(291), np.int64(292), np.int64(296), np.int64(297), np.int64(298), np.int64(300), np.int64(301), np.int64(303), np.int64(304), np.int64(308), np.int64(309), np.int64(312), np.int64(314), np.int64(325), np.int64(327), np.int64(329), np.int64(333), np.int64(336), np.int64(338), np.int64(340), np.int64(341), np.int64(345), np.int64(346), np.int64(350), np.int64(353), np.int64(356), np.int64(364), np.int64(366), np.int64(367), np.int64(368), np.int64(370), np.int64(377), np.int64(381), np.int64(382), np.int64(384), np.int64(389), np.int64(402), np.int64(415), np.int64(426), np.int64(427), np.int64(428), np.int64(433), np.int64(434), np.int64(436), np.int64(438), np.int64(441), np.int64(444), np.int64(446), np.int64(447), np.int64(449), np.int64(451), np.int64(453), np.int64(456), np.int64(458), np.int64(462), np.int64(466), np.int64(470), np.int64(472), np.int64(474), np.int64(475), np.int64(482), np.int64(484), np.int64(490), np.int64(494), np.int64(496), np.int64(498), np.int64(500), np.int64(509), np.int64(512), np.int64(515), np.int64(516), np.int64(521), np.int64(522), np.int64(523), np.int64(528), np.int64(529), np.int64(530), np.int64(531), np.int64(533), np.int64(535), np.int64(537), np.int64(540), np.int64(546), np.int64(550), np.int64(552), np.int64(558), np.int64(561), np.int64(562), np.int64(563), np.int64(566), np.int64(568), np.int64(569), np.int64(570), np.int64(575), np.int64(576), np.int64(577), np.int64(581), np.int64(583), np.int64(598), np.int64(604), np.int64(607), np.int64(608), np.int64(609), np.int64(613), np.int64(617), np.int64(624), np.int64(626), np.int64(627), np.int64(628), np.int64(629), np.int64(630), np.int64(632), np.int64(633), np.int64(637), np.int64(643), np.int64(645), np.int64(649), np.int64(650), np.int64(651), np.int64(658), np.int64(664), np.int64(665), np.int64(669), np.int64(670), np.int64(671), np.int64(672), np.int64(676), np.int64(686), np.int64(688), np.int64(690), np.int64(695), np.int64(696), np.int64(697), np.int64(698), np.int64(699), np.int64(700), np.int64(701), np.int64(702), np.int64(706), np.int64(707), np.int64(709), np.int64(712), np.int64(714), np.int64(718), np.int64(720), np.int64(721), np.int64(725), np.int64(727), np.int64(728), np.int64(733), np.int64(744), np.int64(748), np.int64(750), np.int64(752), np.int64(753), np.int64(755), np.int64(756), np.int64(758), np.int64(760), np.int64(761), np.int64(762), np.int64(767), np.int64(769), np.int64(772), np.int64(773), np.int64(774), np.int64(779), np.int64(784), np.int64(786), np.int64(788), np.int64(789), np.int64(793), np.int64(795), np.int64(797), np.int64(798), np.int64(799), np.int64(802), np.int64(803), np.int64(804), np.int64(809), np.int64(814), np.int64(816), np.int64(818), np.int64(827), np.int64(829), np.int64(833)], array([1.        , 0.51785714, 0.        ,        nan, 0.76923077,
+       0.08333333, 0.2       , 0.33673469, 0.8       ,        nan,
+       0.47619048, 0.5       ,        nan, 0.5       , 0.40546218,
+       0.43650794, 0.50104167, 0.6875    , 0.44717262,        nan,
+       0.        , 0.75      , 0.62222222, 0.31052632, 0.41666667,
+       0.        , 0.43333333, 0.        ,        nan, 0.5       ,
+       0.4665404 , 0.66666667,        nan, 0.2       , 0.        ,
+       0.8       , 0.61805556, 0.5       , 1.        , 0.3828125 ,
+       1.        , 0.40166028, 0.43849206,        nan,        nan,
+       0.69686411, 0.32638889, 0.5       , 0.6875    , 0.66666667,
+       0.50269231, 0.        , 0.4       ,        nan, 0.125     ,
+       1.        , 0.47916667,        nan, 1.        ,        nan,
+              nan, 0.5       , 0.        , 0.47916667, 0.25      ,
+       0.65432099, 0.7875    , 0.        , 0.25      , 0.58928571,
+              nan, 0.26388889, 0.62244898, 0.17857143, 0.45      ,
+       0.42416667, 0.52484472, 0.43818681, 1.        , 0.625     ,
+       0.5       , 0.5       , 0.70434783, 0.53787879, 0.66666667,
+              nan, 1.        , 0.73439242, 0.36960784, 0.375     ,
+       0.61904762, 0.64210526, 0.49906832, 0.22916667,        nan,
+       0.44444444, 0.67037037, 0.85714286, 0.64021164, 0.59027778,
+       0.48496732, 0.3984375 , 0.71568627,        nan,        nan,
+       0.42982456, 0.56470588, 0.18907563, 0.42857143, 0.5375    ,
+       0.625     , 1.        , 0.66666667,        nan, 0.        ,
+       0.6       , 0.66666667, 0.25      , 0.33333333, 0.5       ,
+       0.71428571, 0.66666667, 0.5       , 0.48801743,        nan,
+       0.421875  , 0.        , 0.        , 1.        , 0.52      ,
+       0.31018519, 0.66666667, 0.50764007, 0.33333333, 0.        ,
+       0.52777778, 1.        , 0.        , 0.73333333, 0.40775891,
+       0.14285714,        nan, 0.4627451 , 1.        , 0.62105263,
+              nan, 1.        , 0.33333333, 0.33333333,        nan,
+       0.5952381 , 0.39130435, 0.        , 0.60416667, 0.        ,
+       0.2       , 0.38888889, 0.5       , 0.5       , 0.5       ,
+       0.38947368, 1.        , 0.82857143, 1.        ,        nan,
+       0.5       ,        nan, 0.40625   , 1.        , 0.73469388,
+              nan,        nan, 0.1       , 0.28888889, 0.57219251,
+              nan,        nan,        nan,        nan,        nan,
+       0.66666667,        nan, 0.375     , 0.        , 0.75      ,
+       0.80555556, 1.        , 0.58119658, 0.48857143,        nan,
+       0.46875   , 0.45833333, 0.        , 0.        , 0.16666667,
+       0.71875   , 1.        , 0.61372549, 0.44017094, 0.28571429,
+       0.66666667, 0.55555556, 0.33333333, 0.64705882, 0.60606061,
+       0.25      , 0.4803736 , 0.70909091, 0.33333333, 0.25      ,
+              nan, 0.50437397, 0.625     , 1.        , 1.        ,
+              nan, 0.58333333, 0.66666667, 0.48888889, 0.31818182,
+       0.75      , 0.51388889, 1.        , 0.4       , 0.25      ,
+              nan, 1.        , 1.        , 1.        , 0.25      ,
+       0.462     , 0.33333333, 0.        , 0.66666667, 0.33333333,
+       0.45999396, 0.84      , 0.45906433, 0.40798319, 0.16666667,
+       0.64705882, 0.375     ,        nan, 0.38888889, 1.        ,
+       1.        , 0.375     ,        nan, 1.        ,        nan,
+       0.16666667, 0.6       ,        nan,        nan, 0.875     ,
+       0.125     , 1.        , 0.47857143, 1.        , 1.        ,
+       1.        , 0.62564103, 0.65306122, 0.57575758, 0.2       ,
+       0.        , 0.36111111, 0.        , 0.28571429, 1.        ,
+       0.52564103, 0.34895833, 0.83333333, 0.46949043, 0.5       ,
+       0.76515152, 0.3       , 0.53781513,        nan, 0.33333333,
+              nan,        nan, 0.58522727]))
+rank_0 auc: 0.5089954012929122
+2026-08-13 14:17:08,522 [INFO] Start training
+2026-08-13 14:17:08,546 [INFO] Start training epoch 29, 50 iters per inner epoch.
+/kaggle/working/CoLLM-thesis/minigpt4/tasks/base_task.py:219: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with torch.cuda.amp.autocast(enabled=use_amp):
+/kaggle/working/CoLLM-thesis/minigpt4/models/rec_model.py:48: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  return torch.cuda.amp.autocast(dtype=dtype)
+/usr/local/lib/python3.12/dist-packages/torch/_dynamo/eval_frame.py:1181: UserWarning: torch.utils.checkpoint: the use_reentrant parameter should be passed explicitly. Starting in PyTorch 2.9, calling checkpoint without use_reentrant will raise an exception. use_reentrant=False is recommended, but if you need to preserve the current default behavior, you can pass use_reentrant=True. Refer to docs for more details on the differences between the two variants.
+  return fn(*args, **kwargs)
+Train: data epoch: [29]  [ 0/50]  eta: 0:01:36  lr: 0.000733  loss: 0.6938  time: 1.9316  data: 0.0000  max mem: 13888
+Train: data epoch: [29]  [49/50]  eta: 0:00:02  lr: 0.000716  loss: 0.8538  time: 2.0133  data: 0.0000  max mem: 13888
+Train: data epoch: [29] Total time: 0:01:41 (2.0223 s / it)
+2026-08-13 14:18:49,659 [INFO] Averaged stats: lr: 0.000724  loss: 0.686632
+2026-08-13 14:18:49,680 [INFO] Saving checkpoint at epoch 29 to /kaggle/working/collm-stage1/20260813092/checkpoint_29.pth (model state 16.8 MB, 128 keys).
+2026-08-13 14:18:49,801 [INFO] Start training
+2026-08-13 14:18:49,825 [INFO] Start training epoch 30, 50 iters per inner epoch.
+Train: data epoch: [30]  [ 0/50]  eta: 0:01:43  lr: 0.000716  loss: 0.6302  time: 2.0763  data: 0.0000  max mem: 13888
+Train: data epoch: [30]  [49/50]  eta: 0:00:02  lr: 0.000700  loss: 0.6709  time: 2.0266  data: 0.0000  max mem: 13888
+Train: data epoch: [30] Total time: 0:01:41 (2.0310 s / it)
+2026-08-13 14:20:31,375 [INFO] Averaged stats: lr: 0.000708  loss: 0.693734
+2026-08-13 14:20:31,376 [INFO] Evaluating on valid.
+Evaluation  [   0/1300]  eta: 0:20:31  loss: 0.6941  acc: 0.0000  time: 0.9470  data: 0.2044  max mem: 13888
+Evaluation  [ 260/1300]  eta: 0:12:23  loss: 0.7172  acc: 0.0000  time: 0.6946  data: 0.0008  max mem: 13888
+Evaluation  [ 520/1300]  eta: 0:09:17  loss: 0.6940  acc: 0.0000  time: 0.7212  data: 0.0008  max mem: 13888
+Evaluation  [ 780/1300]  eta: 0:06:12  loss: 0.6939  acc: 0.0000  time: 0.7072  data: 0.0009  max mem: 13888
+Evaluation  [1040/1300]  eta: 0:03:06  loss: 0.7046  acc: 0.0000  time: 0.7151  data: 0.0008  max mem: 13888
+Evaluation  [1299/1300]  eta: 0:00:00  loss: 0.6942  acc: 0.0000  time: 0.7172  data: 0.0046  max mem: 13888
+Evaluation Total time: 0:15:31 (0.7162 s / it)
+only one interaction users: 48
+computed user: 283 can not users: 0
+uauc for validation Cost: 0.2750244140625 uauc: nan
+2026-08-13 14:36:02,747 [INFO] Averaged stats: loss: 0.691327  acc: 0.000000 ***auc: 0.4850619602688694 ***uauc:(np.float64(nan), [np.int64(20), np.int64(26), np.int64(33), np.int64(34), np.int64(36), np.int64(37), np.int64(39), np.int64(40), np.int64(41), np.int64(48), np.int64(49), np.int64(57), np.int64(71), np.int64(72), np.int64(73), np.int64(79), np.int64(83), np.int64(85), np.int64(87), np.int64(91), np.int64(93), np.int64(95), np.int64(104), np.int64(107), np.int64(108), np.int64(109), np.int64(110), np.int64(112), np.int64(115), np.int64(119), np.int64(121), np.int64(124), np.int64(126), np.int64(139), np.int64(142), np.int64(145), np.int64(147), np.int64(149), np.int64(153), np.int64(155), np.int64(159), np.int64(164), np.int64(165), np.int64(167), np.int64(169), np.int64(170), np.int64(171), np.int64(173), np.int64(174), np.int64(175), np.int64(177), np.int64(178), np.int64(180), np.int64(184), np.int64(185), np.int64(186), np.int64(193), np.int64(195), np.int64(197), np.int64(198), np.int64(199), np.int64(200), np.int64(204), np.int64(205), np.int64(207), np.int64(208), np.int64(210), np.int64(212), np.int64(214), np.int64(215), np.int64(217), np.int64(221), np.int64(222), np.int64(226), np.int64(227), np.int64(228), np.int64(230), np.int64(231), np.int64(237), np.int64(242), np.int64(246), np.int64(247), np.int64(249), np.int64(250), np.int64(255), np.int64(256), np.int64(260), np.int64(261), np.int64(264), np.int64(271), np.int64(273), np.int64(275), np.int64(277), np.int64(279), np.int64(280), np.int64(282), np.int64(286), np.int64(291), np.int64(292), np.int64(296), np.int64(297), np.int64(298), np.int64(300), np.int64(301), np.int64(303), np.int64(304), np.int64(308), np.int64(309), np.int64(312), np.int64(314), np.int64(325), np.int64(327), np.int64(329), np.int64(333), np.int64(336), np.int64(338), np.int64(340), np.int64(341), np.int64(345), np.int64(346), np.int64(350), np.int64(353), np.int64(356), np.int64(364), np.int64(366), np.int64(367), np.int64(368), np.int64(370), np.int64(377), np.int64(381), np.int64(382), np.int64(384), np.int64(389), np.int64(402), np.int64(415), np.int64(426), np.int64(427), np.int64(428), np.int64(433), np.int64(434), np.int64(436), np.int64(438), np.int64(441), np.int64(444), np.int64(446), np.int64(447), np.int64(449), np.int64(451), np.int64(453), np.int64(456), np.int64(458), np.int64(462), np.int64(466), np.int64(470), np.int64(472), np.int64(474), np.int64(475), np.int64(482), np.int64(484), np.int64(490), np.int64(494), np.int64(496), np.int64(498), np.int64(500), np.int64(509), np.int64(512), np.int64(515), np.int64(516), np.int64(521), np.int64(522), np.int64(523), np.int64(528), np.int64(529), np.int64(530), np.int64(531), np.int64(533), np.int64(535), np.int64(537), np.int64(540), np.int64(546), np.int64(550), np.int64(552), np.int64(558), np.int64(561), np.int64(562), np.int64(563), np.int64(566), np.int64(568), np.int64(569), np.int64(570), np.int64(575), np.int64(576), np.int64(577), np.int64(581), np.int64(583), np.int64(598), np.int64(604), np.int64(607), np.int64(608), np.int64(609), np.int64(613), np.int64(617), np.int64(624), np.int64(626), np.int64(627), np.int64(628), np.int64(629), np.int64(630), np.int64(632), np.int64(633), np.int64(637), np.int64(643), np.int64(645), np.int64(649), np.int64(650), np.int64(651), np.int64(658), np.int64(664), np.int64(665), np.int64(669), np.int64(670), np.int64(671), np.int64(672), np.int64(676), np.int64(686), np.int64(688), np.int64(690), np.int64(695), np.int64(696), np.int64(697), np.int64(698), np.int64(699), np.int64(700), np.int64(701), np.int64(702), np.int64(706), np.int64(707), np.int64(709), np.int64(712), np.int64(714), np.int64(718), np.int64(720), np.int64(721), np.int64(725), np.int64(727), np.int64(728), np.int64(733), np.int64(744), np.int64(748), np.int64(750), np.int64(752), np.int64(753), np.int64(755), np.int64(756), np.int64(758), np.int64(760), np.int64(761), np.int64(762), np.int64(767), np.int64(769), np.int64(772), np.int64(773), np.int64(774), np.int64(779), np.int64(784), np.int64(786), np.int64(788), np.int64(789), np.int64(793), np.int64(795), np.int64(797), np.int64(798), np.int64(799), np.int64(802), np.int64(803), np.int64(804), np.int64(809), np.int64(814), np.int64(816), np.int64(818), np.int64(827), np.int64(829), np.int64(833)], array([1.        , 0.45982143, 1.        ,        nan, 0.68910256,
+       0.        , 0.2       , 0.58163265, 0.6826087 ,        nan,
+       0.42261905, 0.5       ,        nan, 0.8125    , 0.33193277,
+       0.42857143, 0.57595486, 0.75      , 0.64806548,        nan,
+       0.        , 0.41666667, 0.53333333, 0.5       , 0.48472222,
+       0.        , 0.4       , 0.        ,        nan, 0.5       ,
+       0.41729798, 0.47619048,        nan, 0.        , 0.        ,
+       0.26666667, 0.43055556, 1.        , 1.        , 0.4140625 ,
+       1.        , 0.46743295, 0.36904762,        nan,        nan,
+       0.64285714, 0.34722222, 0.        , 0.375     , 1.        ,
+       0.54115385, 0.        , 0.6       ,        nan, 0.25      ,
+       1.        , 0.44791667,        nan, 1.        ,        nan,
+              nan, 0.5       , 0.        , 0.55059524, 0.5       ,
+       0.70061728, 0.4       , 0.        , 0.5       , 0.71428571,
+              nan, 0.54861111, 0.64285714, 0.60714286, 0.7       ,
+       0.45875   , 0.55124224, 0.57554945, 1.        , 1.        ,
+       0.66666667, 0.5       , 0.58695652, 0.59848485, 0.66666667,
+              nan, 1.        , 0.66889632, 0.39313725, 0.625     ,
+       0.63492063, 0.46578947, 0.42919255, 0.0625    ,        nan,
+       0.61111111, 0.9037037 , 0.46428571, 0.31084656, 0.85069444,
+       0.53202614, 0.46028646, 0.42647059,        nan,        nan,
+       0.48684211, 0.58235294, 0.26890756, 0.6984127 , 0.5       ,
+       0.5       , 0.5       , 0.25      ,        nan, 1.        ,
+       0.        , 1.        , 0.625     , 0.61805556, 0.        ,
+       0.52380952, 0.66666667, 0.5       , 0.59477124,        nan,
+       0.390625  , 0.66666667, 0.3       , 1.        , 0.32      ,
+       0.41203704, 0.5       , 0.45415959, 1.        , 0.25      ,
+       0.54166667, 0.66666667, 0.        , 0.86666667, 0.43806194,
+       0.23809524,        nan, 0.63431373, 1.        , 0.62280702,
+              nan, 0.92857143, 0.83333333, 0.33333333,        nan,
+       0.53944911, 0.34782609, 0.        , 0.375     , 0.66666667,
+       0.8       , 0.26041667, 0.5       , 0.5       , 0.75      ,
+       0.59473684, 1.        , 0.57142857, 1.        ,        nan,
+       0.75      ,        nan, 0.47222222, 0.83333333, 0.76530612,
+              nan,        nan, 0.95      , 0.53333333, 0.42245989,
+              nan,        nan,        nan,        nan,        nan,
+       0.33333333,        nan, 0.44444444, 0.        , 1.        ,
+       0.62777778, 1.        , 0.55555556, 0.57047619,        nan,
+       0.5       , 0.75      , 0.        , 0.5       , 0.33333333,
+       0.625     , 0.        , 0.67254902, 0.37545788, 0.25      ,
+       0.4047619 , 0.05555556, 0.7       , 0.49264706, 0.41414141,
+       0.27777778, 0.48851445, 0.23636364, 0.77777778, 0.5       ,
+              nan, 0.57490432, 0.75      , 1.        , 1.        ,
+              nan, 0.79166667, 0.        , 0.43333333, 0.72727273,
+       0.75      , 0.30555556, 0.75      , 0.9       , 0.28      ,
+              nan, 1.        , 1.        , 1.        , 0.        ,
+       0.556     , 0.        , 0.33333333, 0.66666667, 0.66666667,
+       0.49698068, 0.2       , 0.45906433, 0.42142857, 0.73809524,
+       0.79411765, 0.47916667,        nan, 0.51388889, 1.        ,
+       0.66666667, 0.53846154,        nan, 1.        ,        nan,
+       0.66666667, 0.93333333,        nan,        nan, 0.84375   ,
+       0.75      , 0.5       , 0.55      , 1.        , 1.        ,
+       1.        , 0.47564103, 0.67857143, 0.54545455, 0.175     ,
+       1.        , 0.36111111, 0.5       , 0.85714286, 1.        ,
+       0.37820513, 0.61631944, 0.91666667, 0.3876988 , 0.66666667,
+       0.76515152, 0.1       , 0.34453782,        nan, 0.83333333,
+              nan,        nan, 0.65530303]))
+rank_0 auc: 0.4850619602688694
+2026-08-13 14:36:02,764 [INFO] Early stop. The results has not changed up to 10 epochs.
+2026-08-13 14:36:02,764 [INFO] Training stopped: early stop: no validation improvement for 10 epochs. Best epoch: 10, best agg_metrics: 0.6620027502261046.
+2026-08-13 14:36:02,765 [INFO] Training time 5:08:30

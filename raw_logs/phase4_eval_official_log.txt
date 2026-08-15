@@ -1,0 +1,86 @@
+{
+    "run": {
+        "task": "rec_pretrain",
+        "lr_sched": "linear_warmup_cosine_lr",
+        "init_lr": 0.001,
+        "min_lr": 8e-05,
+        "warmup_lr": 1e-05,
+        "mode": "v2",
+        "weight_decay": 0.001,
+        "max_epoch": 80,
+        "early_stop_epochs": 10,
+        "save_ckpt_freq": 20,
+        "eval_freq": 2,
+        "iters_per_epoch": 50,
+        "batch_size_train": 4,
+        "batch_size_eval": 4,
+        "num_workers": 4,
+        "log_freq": 50,
+        "warmup_steps": 200,
+        "seed": 42,
+        "output_dir": "${oc.env:COLLM_OUTPUT_DIR}/collm-eval",
+        "amp": true,
+        "resume_ckpt_path": null,
+        "evaluate": true,
+        "train_splits": [
+            "train"
+        ],
+        "valid_splits": [
+            "valid"
+        ],
+        "test_splits": [
+            "test",
+            "valid"
+        ],
+        "device": "cuda",
+        "world_size": 1,
+        "dist_url": "env://",
+        "distributed": false
+    },
+    "model": {
+        "arch": "mini_gpt4rec_v2",
+        "model_type": "pretrain_vicuna",
+        "freeze_rec": true,
+        "freeze_proj": false,
+        "freeze_lora": true,
+        "use_grad_checkpoint": true,
+        "max_txt_len": 1024,
+        "proj_token_num": 1,
+        "proj_drop": 0,
+        "proj_mid_times": 10,
+        "end_sym": "###",
+        "prompt_path": "prompts/collm_movie.txt",
+        "prompt_template": "{}",
+        "llama_model": "${oc.env:COLLM_LLAMA_DIR}",
+        "user_num": -100,
+        "item_num": -100,
+        "ans_type": "v2",
+        "rec_model": "MF",
+        "lora_config": {
+            "use_lora": true,
+            "r": 8,
+            "alpha": 16,
+            "target_modules": [
+                "q_proj",
+                "v_proj"
+            ],
+            "dropout": 0.05
+        },
+        "rec_config": {
+            "user_num": 839,
+            "item_num": 3256,
+            "embedding_size": 256,
+            "pretrained_path": "${oc.env:COLLM_MF_REC_PTH}"
+        },
+        "ckpt": "${oc.env:COLLM_STAGE2_CKPT}"
+    },
+    "datasets": {
+        "movie_ood": {
+            "path": "${oc.env:COLLM_ML1M_DIR}",
+            "data_type": "default",
+            "build_info": {
+                "storage": "${oc.env:COLLM_ML1M_DIR}"
+            }
+        }
+    }
+}
