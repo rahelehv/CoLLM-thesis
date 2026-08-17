@@ -41,8 +41,20 @@
 - CONCLUSION: full CoLLM pipeline (MF -> LoRA text-only -> CIE mapping) successfully reproduced and validated against the paper, with results in the same range as reported (even exceeding on AUC).
 - Fixed during Phase 4: rec builders unconditionally built test_warm/test_cold on evaluate_only=True (requiring missing test_warm_cold_ood2.pkl). Threaded run.test_splits from task.build_datasets into the builders so warm/cold are only built when requested (commit 8d10dc3).
 
-## Project status: Baseline reproduction COMPLETE
-All 4 phases done. Next step (not started): literature review / improvement ideas for the thesis's novel contribution, building on this validated baseline.
+## Project status: Baseline reproduction COMPLETE, Option C (richer CIE) IN PROGRESS
+All 4 phases done. Novel-contribution plan (confirmed): 3 sequential CIE variants on Vicuna-7B, all NEW files only (no edits to baseline_train_mf_ood.py / minigpt4/ existing files / existing train_configs). Single-GPU (`python`, world_size=1), same as Phases 1-4.
+- Phase 0 CONTROL (proj_token_num: 4) -> collm_cie_pn4_{finetune,eval}.yaml. Isolates token-capacity effect.
+- Phase 1 CIE-G (affine + gated residual, registered mini_gpt4rec_cie_g) -> isolates ReLU-destroys-geometry hypothesis. Needs new minigpt4/models/minigpt4rec_cie.py + train_collm_mf_din_cie.py (new entry script imports the new model module so its @registry.register_model runs; minigpt4/models/__init__.py is untouchable).
+- Phase 2 CIE-X (query-based cross-attention fusion, mini_gpt4rec_cie_x) -> tests full fusion hypothesis.
+- Fair comparison: same eval protocol as Phase 4 (test_splits ["test","valid"], collm_movie.txt, COLLM_MF_REC_PTH, seed 42). Baseline to beat: test AUC=0.7434, NDCG=0.8663, valid AUC=0.7257. UAUC excluded (nan artifact).
+- CIE hyperparams read from new rec_config.cie key (inherited from_config unchanged). Checkpoint flow unchanged (merge_stage_ckpts.py). Stage-1 NOT retrained (freeze_proj=True in stage-1 so old CIE never saved; stage-2 ckpt=stage-1 LoRA).
+- Budget: ~10h/variant (stage-2 ~9.4h + eval ~0.8h) -> ~2 variants/week, ~1.5 weeks for all three.
+- Gotcha: proj_token_num>1 expands history slots 4x vs max_txt_len=1024; verify no truncation (breaks placeholder/embedding count) in the #######prmpt decoded example: log line.
+
+## Deferred (NOT abandoned): MiCA as second thesis contribution
+- MiCA = Minor Component Adaptation, arXiv 2604.01694 (Ruediger & Raschka, Apr 2026): SVD-based PEFT constraining updates to minor singular directions; up to 5.9x knowledge acquisition, 6-60% of LoRA's params.
+- Idea: replace LoRA in Stages 1/2. High novelty (unpublished in CF<->LLM alignment, to our knowledge), HIGH RISK: unproven on recommendation task (paper benchmarks language knowledge acquisition), code availability unverified, port to torch 1.12/peft 0.3 risky, ~9h/experiment (Stage-1-scale). Contested: 2602.03493 (minor comps not uniformly best) and 2606.31813 (ICML26, PiSSA/MiLoRA can underperform LoRA on non-SFT objectives).
+- DEFERRED until Option C (control+G+X) is complete. Do not forget.
 
 ## Not yet started
 - LightGCN/SASRec baseline scripts: same logging/checkpoint improvements as MF are planned but deferred until actually needed.

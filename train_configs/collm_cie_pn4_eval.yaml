@@ -1,0 +1,78 @@
+model:
+  arch: mini_gpt4rec_v2 # by default
+  model_type: pretrain_vicuna
+  freeze_rec: True  #
+  freeze_proj: False # match stage-2 (CIE) training; kept for identical weight-loading semantics
+  freeze_lora: True # keep stage-1 LoRA adapters frozen during eval
+  use_grad_checkpoint: True # recompute activations in backward; lets fp16/batch-4 fit on a 16GB T4
+  max_txt_len: 1024 # by default
+  proj_token_num: 4 # CONTROL (Option C Phase 0): MUST match training (shape consistency at load/inference)
+  proj_drop: 0 # by default
+  proj_mid_times: 10 # proj_mid_times * rec embedding size = the middle layer size of the mapping module
+  end_sym: "###"
+  prompt_path: "prompts/collm_movie.txt" # stage 2: prompts WITH <UserID>/<ItemIDList>/<TargetItemID>
+  prompt_template: '{}'
+  llama_model: "${oc.env:COLLM_LLAMA_DIR}" #vicuna path
+  user_num: -100
+  item_num: -100
+  ans_type: 'v2' # by default
+  rec_model: "MF" #[MF, lightgcn,.....], see "Rec2Base" class in  minigpt4/models/rec_model.py
+  lora_config:
+    use_lora: True
+    r: 8
+    alpha: 16
+    target_modules: ["q_proj", "v_proj"] # default: ["q_proj", "v_proj"]; others? ['lm_head'], ["q_proj", "v_proj",'k_proj','o_proj']
+    dropout: 0.05
+  rec_config: # recommender model config
+    user_num: -100
+    item_num: -100
+    embedding_size: 256 #embedding size
+    pretrained_path: "${oc.env:COLLM_MF_REC_PTH}" # Phase-1 MF .pth; must exist or the run raises
+
+  # MERGED checkpoint: stage-1 LoRA + stage-2 CIE (see merge_stage_ckpts.py)
+  ckpt: "${oc.env:COLLM_STAGE2_CKPT}"
+
+
+datasets:
+  movie_ood:
+    path: "${oc.env:COLLM_ML1M_DIR}" #data path
+    data_type: default
+    build_info:
+      storage: "${oc.env:COLLM_ML1M_DIR}" # data path
+
+run:
+  task: rec_pretrain
+  lr_sched: "linear_warmup_cosine_lr"
+  init_lr: 1e-3
+  min_lr: 8e-5
+  warmup_lr: 1e-5
+  mode: 'v2' # always, please not change it
+
+
+  weight_decay: 1e-3 # by default
+  max_epoch: 80 # irrelevant for evaluate-only
+  early_stop_epochs: 10 # irrelevant for evaluate-only
+  save_ckpt_freq: 20 # irrelevant for evaluate-only
+  eval_freq: 2 # irrelevant for evaluate-only
+  iters_per_epoch: 50 #100
+  batch_size_train: 4 # 8
+  batch_size_eval: 4 # 32
+  num_workers: 4
+  log_freq: 50
+  warmup_steps: 200
+
+  seed: 42
+  output_dir: ${oc.env:COLLM_OUTPUT_DIR}/collm-cie-pn4-eval #log and eval result saving path (dedicated)
+
+  amp: True
+  resume_ckpt_path: null
+
+  evaluate: True # True: only evaluation on test_splits
+  train_splits: ["train"]
+  valid_splits: ["valid"] # validation set
+  test_splits: ["test","valid"] # used when evluate=True, reporting both the testing and validation results
+
+  device: "cuda"
+  world_size: 1
+  dist_url: "env://"
+  distributed: False
