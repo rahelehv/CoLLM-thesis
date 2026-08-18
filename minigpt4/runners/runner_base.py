@@ -9,6 +9,7 @@ import datetime
 import json
 import logging
 import os
+import re
 import time
 from pathlib import Path
 
@@ -371,9 +372,12 @@ class RunnerBase:
 
     def train(self):
         start_time = time.time()
-        best_agg_metric = -100000
-        best_epoch = 0
-        not_change = 0
+        # early-stop / best-checkpoint bookkeeping is persisted in each checkpoint
+        # so a mid-run resume (even with a different eval_freq/max_epoch) keeps the
+        # patience count and best-epoch tracking consistent.
+        self.best_agg_metric = -100000
+        self.best_epoch = 0
+        self.not_change = 0
         early_stop_epochs = self.config.run_cfg.get("early_stop_epochs", 20)
         save_ckpt_freq = self.config.run_cfg.get("save_ckpt_freq", 0)
         stop_reason = "max_epoch reached"
@@ -416,20 +420,20 @@ class RunnerBase:
                                 ), "No agg_metrics found in validation log."
 
                                 agg_metrics = val_log["agg_metrics"]
-                                if agg_metrics > best_agg_metric and split_name == "valid":
-                                    best_epoch, best_agg_metric = cur_epoch, agg_metrics
+                                if agg_metrics > self.best_agg_metric and split_name == "valid":
+                                    self.best_epoch, self.best_agg_metric = cur_epoch, agg_metrics
 
                                     self._save_checkpoint(cur_epoch, is_best=True)
-                                    not_change = 0
+                                    self.not_change = 0
                                     
                                     
                                     # logging.info("Evaluating on {}.".format('test'))
                                     # test_log = self.eval_epoch(split_name='test', cur_epoch='best', skip_reload=True)
                                     # logging.info("testing result:", test_log)
 
-                                val_log.update({"best_epoch": best_epoch})
+                                val_log.update({"best_epoch": self.best_epoch})
                                 self.log_stats(val_log, split_name)
-                                not_change += 1
+                                self.not_change += 1
                                 # if not_change > 20: # early stop
                                 #     break
                         torch.cuda.empty_cache()
@@ -455,7 +459,7 @@ class RunnerBase:
                 if not self.model_to_betrained():
                     stop_reason = "no trainable parameters remain"
                     break
-                if not_change > early_stop_epochs:
+                if self.not_change > early_stop_epochs:
                     stop_reason = "early stop: no validation improvement for {} epochs".format(early_stop_epochs)
                     logging.info("Early stop. The results has not changed up to {} epochs.".format(early_stop_epochs))
                     break
@@ -470,7 +474,7 @@ class RunnerBase:
         if not self.evaluate_only:
             logging.info(
                 "Training stopped: {}. Best epoch: {}, best agg_metrics: {}.".format(
-                    stop_reason, best_epoch, best_agg_metric
+                    stop_reason, self.best_epoch, self.best_agg_metric
                 )
             )
 
@@ -644,6 +648,13 @@ class RunnerBase:
         Only genuinely trainable parameters are persisted (LoRA adapters and any
         stage-specific trainable module such as the CIE/llama_proj mapping layer),
         so checkpoints stay tiny. Never persist the frozen LLM base weights.
+
+        Saves are atomic (write to a temp file, then rename into place) so a crash
+        mid-write can never leave a corrupted checkpoint_N.pth. Periodic checkpoints
+        are retained automatically: only the most recent ``save_ckpt_keep`` (default 3)
+        plus checkpoint_best.pth are kept, so the working dir cannot fill up the
+        Kaggle disk quota. Early-stop / best-tracking bookkeeping is persisted so a
+        mid-run resume keeps patience and best-epoch state consistent.
         """
         model_no_ddp = self.unwrap_dist_model(self.model)
         trainable = {
@@ -666,6 +677,11 @@ class RunnerBase:
             "config": self.config.to_dict(),
             "scaler": self.scaler.state_dict() if self.scaler else None,
             "epoch": cur_epoch,
+            "best_agg_metric": self.best_agg_metric,
+            "best_epoch": self.best_epoch,
+            # a best checkpoint is always saved right after a new best, so the
+            # patience count restarts from 0 on resume from it
+            "not_change": 0 if is_best else self.not_change,
         }
         save_to = os.path.join(
             self.output_dir,
@@ -679,7 +695,46 @@ class RunnerBase:
                 cur_epoch, save_to, model_mb, len(saved_state)
             )
         )
-        torch.save(save_obj, save_to)
+        # atomic save: write to a temp file, then os.replace (atomic on both POSIX
+        # and Windows) into the final name, so an interrupted write never leaves a
+        # half-written checkpoint under the final filename.
+        save_tmp = save_to + ".tmp"
+        torch.save(save_obj, save_tmp)
+        os.replace(save_tmp, save_to)
+        self._prune_periodic_checkpoints()
+
+    def _prune_periodic_checkpoints(self):
+        """
+        Keep only the ``save_ckpt_keep`` most recent periodic checkpoints plus
+        checkpoint_best.pth; delete older ones. Also sweeps stale ``.tmp`` files
+        left behind by interrupted atomic saves.
+        """
+        keep = int(self.config.run_cfg.get("save_ckpt_keep", 3))
+        ckpt_dir = self.output_dir
+        periodic = []
+        for fname in os.listdir(ckpt_dir):
+            m = re.match(r"^checkpoint_(\d+)\.pth$", fname)
+            if m:
+                periodic.append((int(m.group(1)), os.path.join(ckpt_dir, fname)))
+        periodic.sort()
+        for _, path in periodic[:-keep]:
+            try:
+                os.remove(path)
+                logging.info(
+                    "Pruned old periodic checkpoint {} (keeping {} most recent).".format(
+                        path, keep
+                    )
+                )
+            except OSError as e:
+                logging.warning("Could not prune {}: {}".format(path, e))
+        for fname in os.listdir(ckpt_dir):
+            if fname.endswith(".pth.tmp"):
+                stale = os.path.join(ckpt_dir, fname)
+                try:
+                    os.remove(stale)
+                    logging.info("Removed stale temp checkpoint {}".format(stale))
+                except OSError as e:
+                    logging.warning("Could not remove {}: {}".format(stale, e))
 
     def _reload_best_model(self, model):
         """
@@ -723,7 +778,65 @@ class RunnerBase:
             self.scaler.load_state_dict(checkpoint["scaler"])
 
         self.start_epoch = checkpoint["epoch"] + 1
+        # restore early-stop / best-epoch bookkeeping so a resume continues the
+        # patience count and best checkpoint tracking from where it left off
+        if "best_agg_metric" in checkpoint:
+            self.best_agg_metric = checkpoint["best_agg_metric"]
+            self.best_epoch = checkpoint["best_epoch"]
+            self.not_change = checkpoint.get("not_change", 0)
+        else:
+            # legacy checkpoint (saved before bookkeeping was persisted): recover
+            # the true best agg/epoch from the run's log.txt so the first
+            # post-resume validation cannot overwrite a better checkpoint with a
+            # worse one. not_change cannot be recovered -> restart the patience
+            # counter (conservative: can only delay early-stop, never trigger it).
+            best_agg, best_ep = self._recover_best_from_log(
+                os.path.dirname(url_or_filename)
+            )
+            self.best_agg_metric = best_agg
+            self.best_epoch = best_ep
+            self.not_change = 0
         logging.info("Resume checkpoint from {}".format(url_or_filename))
+
+    def _recover_best_from_log(self, ckpt_dir):
+        """
+        Parse the run's log.txt (JSON-lines) for the best ``valid_agg_metrics``
+        value seen so far and the epoch it occurred at. Falls back to the
+        "nothing recorded" defaults if the log is missing/unparseable.
+        """
+        import numpy as np
+
+        best_agg, best_ep = -100000, 0
+        log_path = os.path.join(ckpt_dir, "log.txt")
+        if not os.path.isfile(log_path):
+            return best_agg, best_ep
+        try:
+            with open(log_path, "r", encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if not line.startswith("{"):
+                        continue
+                    try:
+                        rec = json.loads(line)
+                    except ValueError:
+                        continue
+                    if "valid_agg_metrics" not in rec:
+                        continue
+                    agg = rec["valid_agg_metrics"]
+                    if agg is None:
+                        continue
+                    if isinstance(agg, list):
+                        agg = agg[0] if agg else None
+                    if isinstance(agg, (np.integer, np.floating)):
+                        agg = agg.item()
+                    if not isinstance(agg, (int, float)) or np.isnan(agg):
+                        continue
+                    if agg > best_agg:
+                        best_agg = agg
+                        best_ep = int(rec.get("valid_best_epoch", 0))
+        except OSError:
+            pass
+        return best_agg, best_ep
 
     def _json_safe(self, obj):
         import numpy as np

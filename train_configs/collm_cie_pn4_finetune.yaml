@@ -50,10 +50,11 @@ run:
 
 
   weight_decay: 1e-3 # by default
-  max_epoch: 80
-  early_stop_epochs: 10 # in EVALUATED epochs (eval_freq=2 -> ~20 real epochs), keeps patience equivalent to before
+  max_epoch: 50 # relaxed from 80: validation (1300 batches, ~82% of wall time) dominates, so a longer cap wastes quota (best was ~real epoch 28)
+  early_stop_epochs: 10 # in EVALUATED epochs (eval_freq=4 -> up to ~40 real epochs of patience); max_epoch is the binding cap
   save_ckpt_freq: 20 # also save a plain checkpoint every N epochs (for session resume)
-  eval_freq: 2 # run validation (1300 batches/epoch, the dominant cost) every N epochs
+  save_ckpt_keep: 3 # retain only this many most recent periodic checkpoints (+ checkpoint_best.pth always); auto-pruned on save to protect the 20GB working-dir quota
+  eval_freq: 4 # run validation (1300 batches/epoch, the dominant cost) every N epochs (2 -> 4: ~40% faster wall time, coarser best-checkpoint sampling)
   iters_per_epoch: 50 #100
   batch_size_train: 4 # 8
   batch_size_eval: 4 # 32
