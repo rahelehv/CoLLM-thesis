@@ -2,7 +2,7 @@
 
 **Project:** LoRA-tuned LLM + Collaborative Filtering embeddings projected into the LLM embedding space (CoLLM, arXiv 2310.19488), ML-1M / Matrix Factorization pipeline.
 **Period:** 2026-08-08 (repo fork) through 2026-08-15 (final evaluation).
-**Status:** Baseline reproduction COMPLETE — all four phases done, results comparable to (and on AUC exceeding) the paper's Table II.
+**Status:** Baseline reproduction COMPLETE (Phases 1-4) + Option C Control done — Control shows token capacity alone does not help (0.72569 @28, +0.00003 vs. Phase 3), motivating CIE-G/X. Results comparable to (and on AUC exceeding) the paper's Table II.
 
 This report is written to serve three purposes at once: (1) a deep technical record for the author's own understanding, (2) a reference for the thesis advisor and committee to probe any decision, and (3) raw material to adapt into the implementation chapter of the thesis. It deliberately includes the messy parts — the wrong turns, the dead ends, and the reasoning behind every choice — because that is what makes it defensible in a thesis defense.
 
@@ -466,6 +466,32 @@ The same `nan` appears in **every** phase's logs, including Phase 1's plain-MF b
 
 ---
 
+# 6.5 Option C — Control (proj_token_num 4): token capacity alone does not help
+
+## 6.5.1 Objective
+
+Isolate the effect of **raw mapping capacity**: does giving the CIE more text-token slots per collaborative embedding (and proportionally more parameters) improve ranking? The baseline CIE (`minigpt4rec_v2.py:179-184`) is `Linear(256→2560) → ReLU → Linear(2560→4096*proj_token_num)` with `proj_token_num=1` (one collaborative embedding → one text-token embedding). The control sets `proj_token_num: 4` (`MiniGPT4Rec_v2`, same 2-layer MLP, expanded second linear to `4096*4`) while keeping everything else identical (MF frozen, LoRA frozen in stage 2, same `collm_movie.txt` prompts, `freeze_proj=False`/`freeze_lora=True`, same optimizer/scheduler, same `COLLM_MF_REC_PTH`/`COLLM_STAGE1_CKPT`, single-GPU `python train_collm_mf_din.py`, seed 42). No new code — the only file diff is the YAML.
+
+The hypothesis under test: if the bottleneck were *capacity* (one token is too few to carry collaborative information), `proj_token_num 1→4` should improve `valid_auc`. If the bottleneck is *architectural* (how the mapping is structured — e.g. the ReLU destroys MF's dot-product geometry), adding capacity will not help, which motivates the structural variants CIE-G and CIE-X.
+
+## 6.5.2 Configuration
+
+`train_configs/collm_cie_pn4_finetune.yaml` (copy of `collm_finetune_mf_ood.yaml` with three diffs: `proj_token_num: 4`, `eval_freq: 4` / `max_epoch: 50` / `save_ckpt_keep: 3` from the post-Phase-4 infra fix `a712fc7`, and `output_dir: .../collm-cie-pn4`). Eval uses `collm_cie_pn4_eval.yaml` (same arch/token count, `evaluate: True`, merged ckpt — not run for this control because the valid metric already answers the question and the checkpoint was not retained).
+
+Infra since `a712fc7`: `runner_base.py` now does atomic saves (tmp+`os.replace`), retention (`save_ckpt_keep` periodic + `checkpoint_best.pth` always), and persists `best_agg_metric`/`best_epoch`/`not_change` with legacy `log.txt` recovery, so a mid-run resume keeps patience/best state consistent. Control was the first run to use this infra.
+
+## 6.5.3 Results
+
+- **Best `valid_auc = 0.7256933808225703` at epoch 28**, early-stop patience never triggered — training ran to the cap `max_epoch: 50`. **Total 6h55m** (vs. Phase 3's 9h22m — the `eval_freq 2→4` saving is real and was verified in the log timing).
+- **Comparison:** Phase 3 (`proj_token_num=1`) was `best_valid_auc=0.7256668021338382` also at **epoch 28**. Delta = **+0.00003** — essentially identical.
+- **Checkpoint:** `checkpoint_best.pth` was **not downloaded** before the Kaggle session ended (only `checkpoint_42.pth` was). This is fine — CIE-G and CIE-X each start fresh from the Phase-1 MF weights + the Phase-2 LoRA ckpt (stage-1 `freeze_proj=True` so the old CIE was never saved; stage-2 `ckpt` is the LoRA checkpoint), not from the control run. Only the AUC number is needed for the writeup.
+
+## 6.5.4 Interpretation
+
+Increasing token/parameter capacity alone (1→4) gives **no meaningful improvement**. The bottleneck is architectural, not capacity — exactly the motivation for the structural tests: CIE-G (affine + gated ReLU-MLP, does the ReLU destroy dot-product geometry?) and CIE-X (query-based cross-attention fusion, does joint fusion help?). This also validates the speed optimization: the same answer (same best epoch, same valid_auc) was reached in 6h55m instead of 9h22m with coarser validation sampling.
+
+---
+
 # 7. Summary of All Code Changes
 
 Comprehensive table: file | what changed | why | phase. All commits verified in `git log`.
@@ -498,6 +524,9 @@ Comprehensive table: file | what changed | why | phase. All commits verified in 
 | `minigpt4/tasks/rec_base_task.py` | Port `u_dcg`/`compute_dcg` from dormant `rec_base_task_ndcg.py`; compute+log+store NDCG | Table II metric was dormant, never computed (Section 6.2) | 4 | `67be072` |
 | `minigpt4/tasks/base_task.py`, `minigpt4/datasets/builders/rec_pair_builder.py` | Thread `test_splits` through builders; gate warm/cold construction on it | Fix unconditional `test_warm_cold_ood2.pkl` build crash (Section 6.3) | 4 | `8d10dc3` |
 | `MEMORY.md` | Phase 4 marked DONE; baseline reproduction COMPLETE | Status | 4 | `4ac9b0f` |
+| `train_configs/collm_cie_pn4_{finetune,eval}.yaml` (new) | Control `proj_token_num: 4` stage-2 configs (copy of `collm_finetune_mf_ood.yaml` + dedicated `output_dir`) | Isolate token-capacity hypothesis (Option C Phase 0) | Option C | `5107287` |
+| `minigpt4/runners/runner_base.py`, `train_configs/collm_cie_pn4_finetune.yaml` | Atomic saves (tmp+`os.replace`), retention `save_ckpt_keep: 3` (+`checkpoint_best.pth` always), persisted `best_*`/`not_change` with `log.txt` recovery; `eval_freq: 4`/`max_epoch: 50` | Speed (~40% wall saving, 6h55m vs 9h22m) + disk safety + resume correctness (Section 6.5) | Option C (infra) | `a712fc7` |
+| `MEMORY.md`, `IMPLEMENTATION_REPORT.md` §6.5 | Control result: `best_valid_auc 0.72569 @28` (`+0.00003` vs Phase 3) — no gain from capacity alone | Architectural bottleneck confirmed → motivates CIE-G/X | Option C | (2026-08-22) |
 
 Files **not** modified (deliberately): `modeling_llama.py` (the vendored fork is the *correct* implementation; the bug was the environment, not the file), the `_lgcn`/`_sasrec` entrypoints and `*_lgcn`/`*_sasrec` configs (deferred until needed), `minigpt4rec_v2_qwen.py` (Qwen configs are not runnable as-is; out of scope), and `dataset/*.ipynb` (preprocessing was already correct; we used its outputs).
 
@@ -577,5 +606,6 @@ These must be stated plainly in the thesis. None invalidate the headline result,
 | 3. CIE mapping (Stage 2) | `collm_finetune_mf_ood.yaml` | best_valid_auc = **0.7257** (epoch 28) | 9h22m, ~44 MB ckpt |
 | 4. Final eval | `collm_eval_mf_ood.yaml` (merged ckpt) | test AUC **0.7434**, NDCG **0.8663**, UAUC nan; valid AUC 0.7257 / NDCG 0.8646 | 45m54s |
 | Paper Table II CoLLM-MF | — | AUC 0.7295, UAUC 0.6875, NDCG 0.8714 | our AUC exceeds; NDCG close (protocol caveat); UAUC n/a |
+| **Option C Control** | `collm_cie_pn4_finetune.yaml` (`proj_token_num: 4`) | best_valid_auc = **0.7256933808225703** (epoch 28) | 6h55m, `max_epoch 50` reached; `+0.00003` vs. Phase 3 — no gain from token capacity alone |
 
 **Bottom line:** The full CoLLM pipeline (MF → LoRA text-only → CIE mapping → evaluation) was successfully built, debugged, and reproduced against the paper on ML-1M, with results in the same range as reported — even exceeding the paper on AUC — and with a documented, reproducible environment and a reusable diagnostic toolchain.

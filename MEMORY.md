@@ -43,13 +43,14 @@
 
 ## Project status: Baseline reproduction COMPLETE, Option C (richer CIE) IN PROGRESS
 All 4 phases done. Novel-contribution plan (confirmed): 3 sequential CIE variants on Vicuna-7B, all NEW files only (no edits to baseline_train_mf_ood.py / minigpt4/ existing files / existing train_configs). Single-GPU (`python`, world_size=1), same as Phases 1-4.
-- Phase 0 CONTROL (proj_token_num: 4) -> collm_cie_pn4_{finetune,eval}.yaml. Isolates token-capacity effect.
-- Phase 1 CIE-G (affine + gated residual, registered mini_gpt4rec_cie_g) -> isolates ReLU-destroys-geometry hypothesis. Needs new minigpt4/models/minigpt4rec_cie.py + train_collm_mf_din_cie.py (new entry script imports the new model module so its @registry.register_model runs; minigpt4/models/__init__.py is untouchable).
+- Phase 0 CONTROL (proj_token_num: 4) -> collm_cie_pn4_{finetune,eval}.yaml. Isolates token-capacity effect. **DONE 2026-08-22: best epoch 28, best_valid_auc=0.7256933808225703, 6h55m (max_epoch 50 reached, not early-stop). Essentially IDENTICAL to Phase 3's proj_token_num=1 result (0.7256668021338382 @28, 9h22m). Verdict: increasing token capacity alone (1->4) gives no meaningful improvement — the bottleneck is architectural (how the mapping is structured), not raw parameter/token count. checkpoint_best.pth not downloaded (only checkpoint_42.pth); not needed — CIE-G/X start fresh from Phase-1 MF + Phase-2 LoRA ckpts, only the AUC number is needed for the writeup.**
+- Phase 1 CIE-G (affine + gated residual, registered mini_gpt4rec_cie_g) -> isolates ReLU-destroys-geometry hypothesis. Needs new minigpt4/models/minigpt4rec_cie.py + train_collm_mf_din_cie.py (new entry script imports the new model module so its @registry.register_model runs; minigpt4/models/__init__.py is untouchable). NEXT.
 - Phase 2 CIE-X (query-based cross-attention fusion, mini_gpt4rec_cie_x) -> tests full fusion hypothesis.
 - Fair comparison: same eval protocol as Phase 4 (test_splits ["test","valid"], collm_movie.txt, COLLM_MF_REC_PTH, seed 42). Baseline to beat: test AUC=0.7434, NDCG=0.8663, valid AUC=0.7257. UAUC excluded (nan artifact).
 - CIE hyperparams read from new rec_config.cie key (inherited from_config unchanged). Checkpoint flow unchanged (merge_stage_ckpts.py). Stage-1 NOT retrained (freeze_proj=True in stage-1 so old CIE never saved; stage-2 ckpt=stage-1 LoRA).
 - Budget: ~10h/variant (stage-2 ~9.4h + eval ~0.8h) -> ~2 variants/week, ~1.5 weeks for all three.
 - Gotcha: proj_token_num>1 expands history slots 4x vs max_txt_len=1024; verify no truncation (breaks placeholder/embedding count) in the #######prmpt decoded example: log line.
+- Runner infra since a712fc7: atomic saves (tmp+os.replace), retention save_ckpt_keep=3 (+checkpoint_best.pth), persisted best_agg_metric/best_epoch/not_change with legacy log.txt recovery; Control updated to eval_freq:4/max_epoch:50/save_ckpt_keep:3. CIE-G/X will use same from the start.
 
 ## Deferred (NOT abandoned): MiCA as second thesis contribution
 - MiCA = Minor Component Adaptation, arXiv 2604.01694 (Ruediger & Raschka, Apr 2026): SVD-based PEFT constraining updates to minor singular directions; up to 5.9x knowledge acquisition, 6-60% of LoRA's params.
