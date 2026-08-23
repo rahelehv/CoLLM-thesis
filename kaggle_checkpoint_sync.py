@@ -139,7 +139,7 @@ def main():
                     os.rename(tmp, dest)
                     # validate it actually loads
                     import torch
-                    ck = torch.load(dest, map_location="cpu")
+                    ck = torch.load(dest, map_location="cpu", weights_only=False)
                     if "model" not in ck:
                         raise ValueError("checkpoint missing 'model' key")
                     with open(os.path.join(args.sync_dir, "checkpoint_info.txt"), "w") as f:

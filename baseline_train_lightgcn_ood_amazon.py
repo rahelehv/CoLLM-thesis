@@ -209,7 +209,7 @@ def run_a_trail(train_config,log_file=None, save_mode=False,save_file=None,need_
     criterion = nn.BCEWithLogitsLoss()
 
     if not need_train:
-        model.load_state_dict(torch.load(save_file))
+        model.load_state_dict(torch.load(save_file, weights_only=False))
         model.eval()
         pre=[]
         label = []

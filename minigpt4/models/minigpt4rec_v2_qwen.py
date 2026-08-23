@@ -93,7 +93,7 @@ class MiniGPT4Rec_v2(Rec2Base):
         self.rec_encoder = self.init_rec_encoder(rec_model, rec_config, rec_precision)
         # try:
         if self.rec_encoder is not None and pretrained_rec != "not_have":
-            self.rec_encoder.load_state_dict(torch.load(pretrained_rec, map_location="cpu"))
+            self.rec_encoder.load_state_dict(torch.load(pretrained_rec, map_location="cpu", weights_only=False))
             print("successfully load the pretrained model......")
         # except:
         #     # print(pretrained_rec)
@@ -915,7 +915,7 @@ class MiniGPT4Rec_v2(Rec2Base):
         ckpt_path = cfg.get("ckpt", "")  # load weights of MiniGPT-4
         if ckpt_path:
             print("Load MiniGPT4Rec Checkpoint: {}".format(ckpt_path))
-            ckpt = torch.load(ckpt_path, map_location="cpu",weights_only=True)
+            ckpt = torch.load(ckpt_path, map_location="cpu", weights_only=False)
             msg = model.load_state_dict(ckpt['model'], strict=False)
             # del_k = None
             # for k, v in ckpt['model'].items():
@@ -926,7 +926,7 @@ class MiniGPT4Rec_v2(Rec2Base):
             print("loading message, msg.... \n", msg)
             # reload the rec model, avoiding it be covered by the loaded ckpt
             if os.path.exists(rec_config['pretrained_path']) and freeze_rec:
-                model.rec_encoder.load_state_dict(torch.load(rec_config['pretrained_path'], map_location="cpu"))
+                model.rec_encoder.load_state_dict(torch.load(rec_config["pretrained_path"], map_location="cpu", weights_only=False))
         ans_type = cfg.get('ans_type')
         model.set_answer_type(mode=ans_type)
         model.print_prompt()

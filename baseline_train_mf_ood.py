@@ -211,7 +211,7 @@ def run_a_trail(train_config,log_file=None, save_mode=False,save_file=None,need_
     criterion = nn.BCEWithLogitsLoss()
 
     if not need_train:
-        model.load_state_dict(torch.load(save_file))
+        model.load_state_dict(torch.load(save_file, weights_only=False))
         model.eval()
         pre=[]
         label = []
@@ -249,7 +249,7 @@ def run_a_trail(train_config,log_file=None, save_mode=False,save_file=None,need_
 
     start_epoch = 0
     if resume and ckpt_path is not None and os.path.exists(ckpt_path):
-        ckpt = torch.load(ckpt_path, map_location="cpu")
+        ckpt = torch.load(ckpt_path, map_location="cpu", weights_only=False)
         if ckpt.get("done"):
             print("resume: training already finished (epoch {}, reason: {}). Skipping.".format(ckpt["epoch"], ckpt.get("stop_reason")))
             print("resume: best result:", ckpt.get("best_metric"))

@@ -743,7 +743,7 @@ class RunnerBase:
         checkpoint_path = os.path.join(self.output_dir, "checkpoint_best.pth")
 
         logging.info("Loading checkpoint from {}.".format(checkpoint_path))
-        checkpoint = torch.load(checkpoint_path, map_location="cpu")
+        checkpoint = torch.load(checkpoint_path, map_location="cpu", weights_only=False)
         try:
             model.load_state_dict(checkpoint["model"])
         except RuntimeError as e:
@@ -764,9 +764,9 @@ class RunnerBase:
             cached_file = download_cached_file(
                 url_or_filename, check_hash=False, progress=True
             )
-            checkpoint = torch.load(cached_file, map_location=self.device)
+            checkpoint = torch.load(cached_file, map_location=self.device, weights_only=False)
         elif os.path.isfile(url_or_filename):
-            checkpoint = torch.load(url_or_filename, map_location=self.device)
+            checkpoint = torch.load(url_or_filename, map_location=self.device, weights_only=False)
         else:
             raise RuntimeError("checkpoint url or path is invalid")
 

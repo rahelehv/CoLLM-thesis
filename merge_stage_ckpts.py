@@ -31,8 +31,8 @@ def main():
         if not os.path.isfile(path):
             raise FileNotFoundError("checkpoint not found: {}".format(path))
 
-    ck1 = torch.load(args.stage1_ckpt, map_location="cpu")
-    ck2 = torch.load(args.stage2_ckpt, map_location="cpu")
+    ck1 = torch.load(args.stage1_ckpt, map_location="cpu", weights_only=False)
+    ck2 = torch.load(args.stage2_ckpt, map_location="cpu", weights_only=False)
 
     if "model" not in ck1 or "model" not in ck2:
         raise ValueError("both checkpoints must contain a 'model' key")
