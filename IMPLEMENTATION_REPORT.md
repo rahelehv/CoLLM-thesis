@@ -2,7 +2,7 @@
 
 **Project:** LoRA-tuned LLM + Collaborative Filtering embeddings projected into the LLM embedding space (CoLLM, arXiv 2310.19488), ML-1M / Matrix Factorization pipeline.
 **Period:** 2026-08-08 (repo fork) through 2026-08-15 (final evaluation).
-**Status:** Baseline reproduction COMPLETE (Phases 1-4) + Option C Control done — Control shows token capacity alone does not help (0.72569 @28, +0.00003 vs. Phase 3), motivating CIE-G/X. Results comparable to (and on AUC exceeding) the paper's Table II.
+**Status:** Baseline reproduction COMPLETE (Phases 1-4) + Option C Control done (0.72569 @28, no gain from 1→4 tokens) + CIE-G done (0.72136 @28, —0.004 vs. baseline, gated affine not supported). CIE-X next. Results comparable to (and on AUC exceeding) the paper's Table II.
 
 This report is written to serve three purposes at once: (1) a deep technical record for the author's own understanding, (2) a reference for the thesis advisor and committee to probe any decision, and (3) raw material to adapt into the implementation chapter of the thesis. It deliberately includes the messy parts — the wrong turns, the dead ends, and the reasoning behind every choice — because that is what makes it defensible in a thesis defense.
 
@@ -490,6 +490,26 @@ Infra since `a712fc7`: `runner_base.py` now does atomic saves (tmp+`os.replace`)
 
 Increasing token/parameter capacity alone (1→4) gives **no meaningful improvement**. The bottleneck is architectural, not capacity — exactly the motivation for the structural tests: CIE-G (affine + gated ReLU-MLP, does the ReLU destroy dot-product geometry?) and CIE-X (query-based cross-attention fusion, does joint fusion help?). This also validates the speed optimization: the same answer (same best epoch, same valid_auc) was reached in 6h55m instead of 9h22m with coarser validation sampling.
 
+## 6.6 Option C — CIE-G (affine + gated MLP): geometry-preserving hypothesis not supported
+
+### 6.6.1 Objective
+
+Test whether the baseline CIE's `ReLU` destroys MF's dot-product geometry. Baseline is `Linear(256→2560) → ReLU → Linear(2560→4096*proj_token_num)` (`minigpt4rec_v2.py:179-184`). CIE-G (`minigpt4rec_cie.py:17`, registered `mini_gpt4rec_cie_g`) keeps the text-token budget at 1 but splits the mapping into an affine path `Linear(256→4096)` plus a gated residual `MLP(256→2560→ReLU→4096)` with a learnable scalar gate `sigmoid(gate)` (init 0.0 → 0.5). Output = `affine(x) + sigmoid(gate)*MLP(x)` (`minigpt4rec_cie.py:33`). If ReLU were the bottleneck, the affine path should preserve dot-product structure and the gate should learn to down-weight the damaged MLP.
+
+Config `collm_cie_g_finetune.yaml` (copy of `collm_cie_pn4_finetune.yaml` with `arch: mini_gpt4rec_cie_g`, `proj_token_num: 1`, same `eval_freq:4`/`max_epoch:50`/`save_ckpt_keep:3`, `output_dir: .../collm-cie-g`). Entry `train_collm_mf_din_cie.py:13` imports `minigpt4rec_cie` for registry side-effect (otherwise identical to `train_collm_mf_din.py`). Same frozen setup (`freeze_rec=True`, `freeze_proj=False`, `freeze_lora=True`, `ckpt=$COLLM_STAGE1_CKPT`).
+
+Infra note: run hit the PyTorch 2.6 `weights_only=True` unpickling error on resume (`_pickle.UnpicklingError: numpy._core.multiarray.scalar`) at `runner_base.py:769`. Fixed mid-run by patching every `torch.load` in the repo to `weights_only=False` (commit `e06de42`, 13 files) — safe since all checkpoints are self-created. Resume via `resume_ckpt_path` succeeded after the fix.
+
+### 6.6.2 Results
+
+- **Best `valid_auc = 0.7213615742542488` at epoch 28**, training ran to `max_epoch 50` (plateau, same early-stop pattern as control/baseline). **Total ~2h37m for the resumed segment** (full run would be ~6-7h with `eval_freq:4`).
+- **Comparison:** `0.72136` is **slightly below** Phase 3 baseline `0.72567 @28` (delta **-0.0043**) and Control `0.72569 @28` (delta **-0.0043**). The 4 validation snapshots in the tail log show a clear plateau: `0.72096` → `0.7116` → `0.70698` → `0.70857` (epochs ~36, 40, 44, 48) — never re-approaching the 0.725+ peak at epoch 28. `best_agg_metrics` stayed at `0.72136` for the final 20+ epochs.
+- **Checkpoint:** `checkpoint_best.pth` corresponds to epoch 28; periodic `checkpoint_41..49.pth` were pruned to 3 + best (`runner_base.py:746` atomic save + retention).
+
+### 6.6.3 Interpretation
+
+The gated affine hypothesis is **not supported** in this form: preserving an affine path alongside the ReLU-MLP did not improve (and in fact slightly degraded) valid AUC relative to both the baseline and the capacity control. Possible explanations: (a) MF geometry is already sufficiently linear for the baseline MLP to learn, so the ReLU is not the bottleneck; (b) the single-token budget (`proj_token_num:1`) is insufficient for the affine split to matter; (c) the scalar gate (single `sigmoid(gate)` shared across the whole MLP output) is too coarse. This negative result is itself informative — it narrows the space for CIE-X: if CIE-X succeeds, the gain is due to *joint fusion / cross-attention* rather than merely fixing ReLU geometry.
+
 ---
 
 # 7. Summary of All Code Changes
@@ -527,6 +547,9 @@ Comprehensive table: file | what changed | why | phase. All commits verified in 
 | `train_configs/collm_cie_pn4_{finetune,eval}.yaml` (new) | Control `proj_token_num: 4` stage-2 configs (copy of `collm_finetune_mf_ood.yaml` + dedicated `output_dir`) | Isolate token-capacity hypothesis (Option C Phase 0) | Option C | `5107287` |
 | `minigpt4/runners/runner_base.py`, `train_configs/collm_cie_pn4_finetune.yaml` | Atomic saves (tmp+`os.replace`), retention `save_ckpt_keep: 3` (+`checkpoint_best.pth` always), persisted `best_*`/`not_change` with `log.txt` recovery; `eval_freq: 4`/`max_epoch: 50` | Speed (~40% wall saving, 6h55m vs 9h22m) + disk safety + resume correctness (Section 6.5) | Option C (infra) | `a712fc7` |
 | `MEMORY.md`, `IMPLEMENTATION_REPORT.md` §6.5 | Control result: `best_valid_auc 0.72569 @28` (`+0.00003` vs Phase 3) — no gain from capacity alone | Architectural bottleneck confirmed → motivates CIE-G/X | Option C | (2026-08-22) |
+| `minigpt4/models/minigpt4rec_cie.py` (new), `train_collm_mf_din_cie.py` (new), `train_configs/collm_cie_g_{finetune,eval}.yaml` (new) | CIE-G `mini_gpt4rec_cie_g`: `CIE_G_Proj` affine + gated MLP (`affine + sigmoid(gate)*MLP`, gate 0.0→0.5) | Test ReLU-destroys-geometry (Option C Phase 1) | Option C | `5c1231a` |
+| `*.py` (13 files) | `torch.load(..., weights_only=False)` at every checkpoint load | Fix PyTorch 2.6 `weights_only=True` unpickling of `numpy.scalar` in self-saved ckpts | Option C | `e06de42` |
+| `MEMORY.md`, `IMPLEMENTATION_REPORT.md` §6.6 | CIE-G result: `best_valid_auc 0.72136 @28` (`-0.0043` vs baseline/Control) — gated affine not supported | Negative result narrows space for CIE-X | Option C | (2026-08-23) |
 
 Files **not** modified (deliberately): `modeling_llama.py` (the vendored fork is the *correct* implementation; the bug was the environment, not the file), the `_lgcn`/`_sasrec` entrypoints and `*_lgcn`/`*_sasrec` configs (deferred until needed), `minigpt4rec_v2_qwen.py` (Qwen configs are not runnable as-is; out of scope), and `dataset/*.ipynb` (preprocessing was already correct; we used its outputs).
 
@@ -607,5 +630,6 @@ These must be stated plainly in the thesis. None invalidate the headline result,
 | 4. Final eval | `collm_eval_mf_ood.yaml` (merged ckpt) | test AUC **0.7434**, NDCG **0.8663**, UAUC nan; valid AUC 0.7257 / NDCG 0.8646 | 45m54s |
 | Paper Table II CoLLM-MF | — | AUC 0.7295, UAUC 0.6875, NDCG 0.8714 | our AUC exceeds; NDCG close (protocol caveat); UAUC n/a |
 | **Option C Control** | `collm_cie_pn4_finetune.yaml` (`proj_token_num: 4`) | best_valid_auc = **0.7256933808225703** (epoch 28) | 6h55m, `max_epoch 50` reached; `+0.00003` vs. Phase 3 — no gain from token capacity alone |
+| **Option C CIE-G** | `collm_cie_g_finetune.yaml` (`mini_gpt4rec_cie_g`, affine+gated) | best_valid_auc = **0.72136** (epoch 28) | `max_epoch 50` reached; `-0.0043` vs. Phase 3/Control — gated affine does not help |
 
 **Bottom line:** The full CoLLM pipeline (MF → LoRA text-only → CIE mapping → evaluation) was successfully built, debugged, and reproduced against the paper on ML-1M, with results in the same range as reported — even exceeding the paper on AUC — and with a documented, reproducible environment and a reusable diagnostic toolchain.
