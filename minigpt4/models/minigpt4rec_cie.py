@@ -14,7 +14,8 @@ Checkpoint keys are disjoint from the baseline (llama_proj.affine.*,
 llama_proj.mlp.*, llama_proj.gate) so strict=False loading is fine and
 merge_stage_ckpts.py still works (LoRA ckpt + CIE ckpt have no overlap).
 
-CIE-X (mini_gpt4rec_cie_x) will be added to this same file later.
+CIE-X (mini_gpt4rec_cie_x): joint fusion via 4-head self-attention over the
+collaborative sequence (user+history+target) + FFN, then affine to LLM space.
 """
 
 import logging
@@ -153,3 +154,224 @@ class MiniGPT4Rec_CIE_G(MiniGPT4Rec_v2):
             # (stage 2: this is the only trainable module)
             for _, param in self.llama_proj.named_parameters():
                 param.requires_grad = True
+
+
+@registry.register_model("mini_gpt4rec_cie_x")
+class MiniGPT4Rec_CIE_X(MiniGPT4Rec_v2):
+    """
+    CIE-X variant: query-based cross-attention fusion (Option C Phase 2).
+
+    Collaborative embeddings (user + history + target) jointly attend before
+    mapping to the LLM space. Each position queries the full collaborative
+    context via multi-head self-attention, so every token is context-aware
+    before the final affine projection. Tests "does joint fusion help?" vs.
+    the per-ID independent mapping of the baseline / CIE-G.
+
+    Architecture (all in 256-d collaborative space, then affine to 4096):
+      seq_raw = [user_raw (1), interacted_raw (max_items), target_raw (1)]  # (B, S, 256)
+      seq = seq_raw + MultiheadAttention(LayerNorm(seq_raw), mask)           # residual
+      seq = seq + FFN(LayerNorm(seq))  # FFN: Linear(256->2560)->ReLU->Linear(2560->256)
+      fused_* = split(seq)  ->  llama_proj (Linear 256->4096*proj_token_num)
+
+    The per-ID token budget stays at proj_token_num=1 (same as baseline/CIE-G),
+    so prompt placeholder counts are unchanged; only *how* the 256-d
+    collaborative vectors are contextualised before the LLM injection changes.
+    Checkpoint keys are disjoint from baseline (cie_fusion_* + llama_proj) so
+    strict=False and merge_stage_ckpts.py remain correct.
+    """
+
+    def __init__(
+        self,
+        rec_model="MF",
+        rec_config=None,
+        pretrained_rec=None,
+        freeze_rec=True,
+        rec_precision="fp16",
+        llama_model="",
+        prompt_path="",
+        prompt_template="",
+        max_txt_len=32,
+        end_sym="\n",
+        low_resource=False,
+        device_8bit=0,
+        proj_token_num=1,
+        proj_drop=0,
+        lora_config=None,
+        proj_mid=5,
+        freeze_lora=False,
+        freeze_proj=False,
+        use_grad_checkpoint=False,
+    ):
+        super().__init__(
+            rec_model=rec_model,
+            rec_config=rec_config,
+            pretrained_rec=pretrained_rec,
+            freeze_rec=freeze_rec,
+            rec_precision=rec_precision,
+            llama_model=llama_model,
+            prompt_path=prompt_path,
+            prompt_template=prompt_template,
+            max_txt_len=max_txt_len,
+            end_sym=end_sym,
+            low_resource=low_resource,
+            device_8bit=device_8bit,
+            proj_token_num=proj_token_num,
+            proj_drop=proj_drop,
+            lora_config=lora_config,
+            proj_mid=proj_mid,
+            freeze_lora=freeze_lora,
+            freeze_proj=False,
+            use_grad_checkpoint=use_grad_checkpoint,
+        )
+
+        if self.rec_encoder is not None and "prompt" not in rec_model:
+            emb_size = self.rec_encoder.config.embedding_size
+            hidden_size = self.llama_model.config.hidden_size
+            mid = int(proj_mid)
+            # Fusion: 4-head self-attention over the collaborative sequence (user+history+target)
+            self.cie_fusion_attn = nn.MultiheadAttention(emb_size, num_heads=4, batch_first=True)
+            self.cie_fusion_norm1 = nn.LayerNorm(emb_size)
+            self.cie_fusion_norm2 = nn.LayerNorm(emb_size)
+            self.cie_fusion_ff = nn.Sequential(
+                nn.Linear(emb_size, emb_size * mid),
+                nn.ReLU(),
+                nn.Linear(emb_size * mid, emb_size),
+            )
+            # Final affine mapping after fusion (no ReLU, preserves fused geometry)
+            self.llama_proj = nn.Linear(emb_size, hidden_size * self.proj_token_num)
+            logging.info(
+                "CIE-X: built fusion (MHA 4-head, FFN %d->%d->%d, LNx2) + final Linear(%d->%d).",
+                emb_size, emb_size * mid, emb_size, emb_size, hidden_size * self.proj_token_num,
+            )
+            print(f"CIE-X fusion: MHA(256, 4-head, batch_first) + FFN(256->{emb_size*mid}->256) + Linear(256->{hidden_size * self.proj_token_num})")
+
+        # Re-apply freeze as requested — now over fusion + final proj
+        cie_modules = []
+        for attr in ("cie_fusion_attn", "cie_fusion_norm1", "cie_fusion_norm2", "cie_fusion_ff", "llama_proj"):
+            mod = getattr(self, attr, None)
+            if mod is not None:
+                cie_modules.append(mod)
+        if freeze_proj:
+            for mod in cie_modules:
+                for _, p in mod.named_parameters():
+                    p.requires_grad = False
+                if hasattr(mod, "eval"):
+                    mod.eval()
+                    mod.train = disabled_train
+            logging.info("!!!! freeze CIE-X fusion + llama_proj...")
+        else:
+            for mod in cie_modules:
+                for _, p in mod.named_parameters():
+                    p.requires_grad = True
+
+    def encode_recdata_v2(self, sample, ids_order=None):
+        if self.rec_encoder is None:
+            return None, None
+        device = sample["UserID"].device
+        if self.low_resource:
+            self.rec_to_cpu()
+            for key in sample:
+                sample[key] = sample[key].to("cpu")
+
+        with self.maybe_autocast():
+            batch_size = sample["UserID"].shape[0]
+            hidden_size = self.llama_model.config.hidden_size
+            all_user_embeds, all_item_embeds = self.rec_encoder.computer()
+            if self.rec_model_type == "sasrec":
+                user_embeds_raw = self.rec_encoder.seq_encoder(sample["sas_seq"]).unsqueeze(-2)
+            elif self.rec_model_type == "DCN" or self.rec_model_type == "DIN":
+                user_embeds_raw = self.rec_encoder.all_encode(
+                    sample["UserID"], sample["TargetItemID"], sample["sas_seq"][:, -10:]
+                ).unsqueeze(-2)
+            else:
+                user_embeds_raw = self.rec_encoder.user_encoder(
+                    sample["UserID"], all_users=all_user_embeds
+                ).unsqueeze(-2)
+            target_raw = self.rec_encoder.item_encoder(
+                sample["TargetItemID"], all_items=all_item_embeds
+            ).unsqueeze(-2)
+
+            # Joint-fusion path: only when history is present and ids_order covers all three
+            if "InteractedItemIDs_pad" in sample.keys() and ids_order is not None and len(ids_order) == 3:
+                interacted_raw = self.rec_encoder.item_encoder(
+                    sample["InteractedItemIDs_pad"], all_items=all_item_embeds
+                )  # (B, max_items, 256)
+
+                # Build sequence [user, history..., target] and padding mask for history
+                seq_raw = torch.cat([user_embeds_raw, interacted_raw, target_raw], dim=1)  # (B, S, 256)
+                max_items = interacted_raw.shape[1]
+                pad_mask_interacted = sample["InteractedItemIDs_pad"] == self.rec_encoder.padding_index  # (B, max_items)
+                pad_mask_seq = torch.cat(
+                    [
+                        torch.zeros(batch_size, 1, dtype=torch.bool, device=device),
+                        pad_mask_interacted,
+                        torch.zeros(batch_size, 1, dtype=torch.bool, device=device),
+                    ],
+                    dim=1,
+                )  # (B, S), True = ignore
+
+                # Fusion: pre-norm attention + residual, then pre-norm FFN + residual
+                # (LayerNorm and MHA/FFN run inside autocast, same as parent)
+                seq_norm = self.cie_fusion_norm1(seq_raw)
+                attn_out, _ = self.cie_fusion_attn(
+                    seq_norm, seq_norm, seq_norm, key_padding_mask=pad_mask_seq
+                )
+                seq_fused = seq_raw + attn_out
+                seq_fused_norm = self.cie_fusion_norm2(seq_fused)
+                ff_out = self.cie_fusion_ff(seq_fused_norm)
+                seq_fused = seq_fused + ff_out
+
+                # Split back to per-entity fused embeddings
+                fused_user = seq_fused[:, 0:1, :]  # (B,1,256)
+                fused_interacted = seq_fused[:, 1 : 1 + max_items, :]  # (B,max_items,256)
+                fused_target = seq_fused[:, -1:, :]  # (B,1,256)
+
+                # Final affine mapping to LLM space (proj_token_num tokens per collaborative embedding)
+                user_llama = self.llama_proj(fused_user).reshape(
+                    batch_size, -1, self.proj_token_num, hidden_size
+                )
+                target_llama = self.llama_proj(fused_target).reshape(
+                    batch_size, -1, self.proj_token_num, hidden_size
+                )
+                interacted_llama = self.llama_proj(fused_interacted).reshape(
+                    batch_size, -1, self.proj_token_num, hidden_size
+                )
+
+                merged_embeds = [user_llama, interacted_llama, target_llama]
+                merged_embeds = [merged_embeds[k] for k in ids_order]
+                merged_embeds = torch.cat(merged_embeds, dim=1)
+                idx_flag = torch.ones_like(sample["InteractedItemIDs_pad"])
+                idx_flag = torch.where(
+                    sample["InteractedItemIDs_pad"] == self.rec_encoder.padding_index, 0, idx_flag
+                )
+                idx_flag = [
+                    torch.ones([idx_flag.shape[0], 1]).to(idx_flag.device),
+                    idx_flag,
+                    torch.ones([idx_flag.shape[0], 1]).to(idx_flag.device),
+                ]
+                idx_flag = [idx_flag[k] for k in ids_order]
+                idx_flag = torch.cat(idx_flag, dim=1).to(device)
+                idx_nopad = torch.nonzero(idx_flag)
+
+                sample_embeds_llama = {
+                    "User_emb": user_llama.reshape(batch_size, -1, hidden_size),
+                    "TargetItem_emb": target_llama.reshape(batch_size, -1, hidden_size),
+                    "InteractedItems_embs": interacted_llama.reshape(batch_size, -1, hidden_size),
+                    "merged_embs": merged_embeds[idx_nopad[:, 0], idx_nopad[:, 1]].reshape(-1, hidden_size),
+                }
+            else:
+                # Fallback: no history (or non-standard prompt) — per-ID affine mapping
+                user_llama = self.llama_proj(user_embeds_raw).reshape(
+                    batch_size, -1, self.proj_token_num, hidden_size
+                )
+                target_llama = self.llama_proj(target_raw).reshape(
+                    batch_size, -1, self.proj_token_num, hidden_size
+                )
+                sample_embeds_llama = {
+                    "User_emb": user_llama.reshape(batch_size, -1, hidden_size),
+                    "TargetItem_emb": target_llama.reshape(batch_size, -1, hidden_size),
+                    "InteractedItems_embs": None,
+                    "merged_embs": None,
+                }
+        sample_atts_llama = None
+        return sample_embeds_llama, sample_atts_llama
