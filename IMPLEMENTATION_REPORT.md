@@ -510,6 +510,22 @@ Infra note: run hit the PyTorch 2.6 `weights_only=True` unpickling error on resu
 
 The gated affine hypothesis is **not supported** in this form: preserving an affine path alongside the ReLU-MLP did not improve (and in fact slightly degraded) valid AUC relative to both the baseline and the capacity control. Possible explanations: (a) MF geometry is already sufficiently linear for the baseline MLP to learn, so the ReLU is not the bottleneck; (b) the single-token budget (`proj_token_num:1`) is insufficient for the affine split to matter; (c) the scalar gate (single `sigmoid(gate)` shared across the whole MLP output) is too coarse. This negative result is itself informative — it narrows the space for CIE-X: if CIE-X succeeds, the gain is due to *joint fusion / cross-attention* rather than merely fixing ReLU geometry.
 
+## 6.7 Option C — CIE-X (joint MHA fusion): negative, late peak at 48
+
+### 6.7.1 Objective
+
+Test whether *joint contextualisation* of the collaborative sequence helps: instead of mapping each collaborative embedding independently (baseline/CIE-G), let user/history/target attend over each other before the LLM projection. CIE-X (`minigpt4rec_cie.py:157`, registered `mini_gpt4rec_cie_x`) builds `seq_raw = [user_raw (1), history_raw (max_items), target_raw (1)]` (256-d), applies `LayerNorm → 4-head MHA (batch_first, `key_padding_mask` for history) → residual → LayerNorm → FFN(256→2560→ReLU→256) → residual` (`minigpt4rec_cie.py:190`), then a final `Linear(256→4096)` to LLM space (overrides `encode_recdata_v2`, same `proj_token_num:1` token budget so prompt placeholders are unchanged). Entry `train_collm_mf_din_cie.py:13` already imports `minigpt4rec_cie`.
+
+### 6.7.2 Results
+
+- **Best `valid_auc = 0.7004266250752259` at epoch 48**, training ran to `max_epoch 50`. **Delta —0.025 vs. Phase 3 baseline (0.72567 @28)** and **—0.025 vs. Control**, **—0.021 vs. CIE-G (0.72136 @28)**. Tail log: previous validates at `0.7209` (early) → `0.7116` → `0.7070` for CIE-G, but CIE-X kept climbing to 48, still far below the 0.725+ peak.
+- **Checkpoint:** `model state 10.5 MB, 14 keys` (`CIE-X`) vs. `48.8 MB, 7 keys` (`CIE-G`) — CIE-X is **far smaller** (joint fusion + single linear vs. affine+gated MLP with `hidden*proj_token_num` outputs). Late best epoch (48 vs. 28) suggests *capacity-limited / under-fitting* (needs more epochs/width to reach the same optimum), not over-fitting. `valid_ndcg 0.8556 @48` also below baseline `0.8646`.
+- **Training:** resumed from `checkpoint_47.pth` (`resume_ckpt_path` in dumped `run` config), total `0:22:30` for the final segment (full run with `eval_freq:4` would be ~6-7h like Control/CIE-G).
+
+### 6.7.3 Interpretation
+
+Joint MHA fusion in this lightweight form (single 4-head layer, 256-d) **does not help and degrades** vs. the independent per-ID mapping. The 10.5 MB model has ~4× fewer CIE params than CIE-G and may be *under-capacity* for the fusion task; the late peak at 48 (vs. 28 for all other variants) is consistent with needing more training/width to learn the attention, yet still plateauing 0.025 below baseline. Alternatives to test: wider/deeper fusion, query-based pooling (Perceiver-style learned queries), or history-aware prompting. As a thesis result, the two negative CIE variants are valuable: they show (a) the baseline CIE is already near-optimal for the single-token budget, and (b) capacity alone (Control) and the two tested structural fixes do not beat it — the bottleneck, if any, lies elsewhere (e.g. prompt design, `proj_token_num`, or LoRA scope). MiCA remains the deferred second-contribution avenue.
+
 ---
 
 # 7. Summary of All Code Changes
@@ -550,6 +566,8 @@ Comprehensive table: file | what changed | why | phase. All commits verified in 
 | `minigpt4/models/minigpt4rec_cie.py` (new), `train_collm_mf_din_cie.py` (new), `train_configs/collm_cie_g_{finetune,eval}.yaml` (new) | CIE-G `mini_gpt4rec_cie_g`: `CIE_G_Proj` affine + gated MLP (`affine + sigmoid(gate)*MLP`, gate 0.0→0.5) | Test ReLU-destroys-geometry (Option C Phase 1) | Option C | `5c1231a` |
 | `*.py` (13 files) | `torch.load(..., weights_only=False)` at every checkpoint load | Fix PyTorch 2.6 `weights_only=True` unpickling of `numpy.scalar` in self-saved ckpts | Option C | `e06de42` |
 | `MEMORY.md`, `IMPLEMENTATION_REPORT.md` §6.6 | CIE-G result: `best_valid_auc 0.72136 @28` (`-0.0043` vs baseline/Control) — gated affine not supported | Negative result narrows space for CIE-X | Option C | (2026-08-23) |
+| `minigpt4/models/minigpt4rec_cie.py` (CIE-X), `train_configs/collm_cie_x_{finetune,eval}.yaml` | CIE-X `mini_gpt4rec_cie_x`: joint 4-head MHA over `[user,history,target]` + FFN + final Linear(256→4096) (override `encode_recdata_v2`) | Test joint fusion (Option C Phase 2) | Option C | `8ef84df` |
+| `MEMORY.md`, `IMPLEMENTATION_REPORT.md` §6.7 | CIE-X result: `best_valid_auc 0.70043 @48` (`-0.025` vs baseline, `-0.021` vs CIE-G, 10.5 MB/14 keys) — joint fusion degrades, late peak | Capacity-limited negative result; baseline remains best | Option C | (2026-08-23) |
 
 Files **not** modified (deliberately): `modeling_llama.py` (the vendored fork is the *correct* implementation; the bug was the environment, not the file), the `_lgcn`/`_sasrec` entrypoints and `*_lgcn`/`*_sasrec` configs (deferred until needed), `minigpt4rec_v2_qwen.py` (Qwen configs are not runnable as-is; out of scope), and `dataset/*.ipynb` (preprocessing was already correct; we used its outputs).
 
@@ -631,5 +649,6 @@ These must be stated plainly in the thesis. None invalidate the headline result,
 | Paper Table II CoLLM-MF | — | AUC 0.7295, UAUC 0.6875, NDCG 0.8714 | our AUC exceeds; NDCG close (protocol caveat); UAUC n/a |
 | **Option C Control** | `collm_cie_pn4_finetune.yaml` (`proj_token_num: 4`) | best_valid_auc = **0.7256933808225703** (epoch 28) | 6h55m, `max_epoch 50` reached; `+0.00003` vs. Phase 3 — no gain from token capacity alone |
 | **Option C CIE-G** | `collm_cie_g_finetune.yaml` (`mini_gpt4rec_cie_g`, affine+gated) | best_valid_auc = **0.72136** (epoch 28) | `max_epoch 50` reached; `-0.0043` vs. Phase 3/Control — gated affine does not help |
+| **Option C CIE-X** | `collm_cie_x_finetune.yaml` (`mini_gpt4rec_cie_x`, joint MHA) | best_valid_auc = **0.70043** (epoch 48) | `max_epoch 50` reached; `-0.025` vs. baseline — joint fusion degrades, late peak, 10.5 MB |
 
 **Bottom line:** The full CoLLM pipeline (MF → LoRA text-only → CIE mapping → evaluation) was successfully built, debugged, and reproduced against the paper on ML-1M, with results in the same range as reported — even exceeding the paper on AUC — and with a documented, reproducible environment and a reusable diagnostic toolchain.
