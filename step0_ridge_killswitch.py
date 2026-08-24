@@ -117,12 +117,17 @@ def vicuna_text_embeddings(titles, llama_model, batch_size=32, max_len=48):
     from transformers import LlamaTokenizer
 
     tok = LlamaTokenizer.from_pretrained(llama_model, use_fast=False)
+    tok.pad_token = tok.eos_token
     model = LlamaForCausalLM.from_pretrained(
         llama_model, torch_dtype=torch.float16, low_cpu_mem_usage=True
     )
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model.to(device).eval()
     print(f"[emb] model on {device}")
+    import transformers
+    print(f"[emb] transformers={transformers.__version__}, "
+          f"llama_cls_module={LlamaForCausalLM.__module__} "
+          f"(expect minigpt4.models.modeling_llama; 4.28.0 expected per project pin)")
 
     outs = []
     with torch.no_grad():
