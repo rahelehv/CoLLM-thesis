@@ -1,0 +1,35 @@
+CIE-R lambda-proxy run #2: cie_reg_lambda=0.1 (config collm_cie_r_l01_proxy.yaml)
+Source: user-provided Kaggle console + log.txt paste, session 20260825090, 2026-08-25.
+Env verified: same protocol as l001 (seed 42, single T4, max_epoch 12, eval_freq 2,
+batch 4/4, cosine LR horizon = max_epoch).
+
+Activation proof (new unambiguous logging):
+  ">>> CIE-R REGULARIZER (effective): cie_reg_lambda=0.1 (read from YAML key model.cie_reg_lambda)"
+  ">>> CIE-R REGULARIZER ACTIVE in training forward: lambda=0.1 (first training step confirmed)"
+  Trainable params: 11,147,776 (llama_proj.{0,2}.{weight,bias}, 4 keys, 44.6 MB ckpt)
+
+Valid AUC trajectory (eval_freq=2):
+  epoch  0: 0.66600
+  epoch  2: 0.68937
+  epoch  4: 0.69140
+  epoch  6: 0.65623   <-- noisy dip
+  epoch  8: 0.68782
+  epoch 10: 0.70334   <-- BEST (last evaluated epoch)
+  (training ended at max_epoch=11; no further eval)
+
+NDCG across evals: 0.82946 - 0.85013 (best 0.85013 @ep10)
+Final: Training stopped max_epoch reached. Best epoch 10, best agg_metrics 0.7033422626838625.
+Training time 2:36:35.
+
+Comparison vs lambda=0.01 control (raw_logs/cie_r_l001_proxy_results.txt):
+  ep0 +0.006 | ep2 +0.020 | ep4 +0.028 | ep6 -0.010 | ep8 +0.019 | ep10 BEST +0.032
+  Best-vs-best: 0.70334 vs 0.67133 = +0.03200 (threshold was +/-0.003)
+  NDCG best-vs-best: 0.85013 vs 0.84361 = +0.00652
+
+Interpretation:
+  - lambda=0.1 HELPS substantially vs the near-control under identical schedule.
+  - Leads at 5 of 6 checkpoints; fits faster early (consistent with relational term
+    densifying gradient signal into llama_proj while BCE alone is noisy).
+  - Caveats: n=1 seed/arm; both arms peak at last eval (12-epoch horizon truncates);
+    dip at ep6 shows within-run variance. Await lambda=1.0 arm; full run will use
+    max_epoch=50 to remove the horizon truncation.
