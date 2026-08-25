@@ -1,0 +1,32 @@
+CIE-R lambda-proxy run #1: lam=0.001x? -> NO: cie_reg_lambda=0.01 (config collm_cie_r_l001_proxy.yaml)
+Source: user-provided Kaggle console + log.txt paste, session 20260825061, 2026-08-25.
+Env verified: transformers 4.28-era pipeline, vendored modeling_llama, seed 42, single T4,
+world_size 1, max_epoch 12, eval_freq 2, batch 4/4, iters_per_epoch 50, warmup_steps 200,
+cosine LR (init 1e-3 -> min 8e-5 over max_epoch=12 horizon).
+
+Activation proof:
+  Model Attributes dump: "cie_reg_lambda": 0.01
+  Console: CIE-R from_config: cie_reg_lambda=0.01
+  Trainable params: 11,147,776 (llama_proj.{0,2}.{weight,bias} = 4 keys, 44.6 MB ckpt)
+  => baseline MLP mapping intact; regularizer active.
+
+Valid AUC trajectory (eval_freq=2):
+  epoch  0: 0.66041
+  epoch  2: 0.66973
+  epoch  4: 0.66369
+  epoch  6: 0.66637
+  epoch  8: 0.66922
+  epoch 10: 0.67133   <-- BEST (last evaluated epoch)
+  (training ended at max_epoch=11; no further eval)
+
+NDCG range across evals: 0.84211 - 0.84361 (best 0.84361 @ep10)
+Final: Training stopped max_epoch reached. Best epoch 10, best agg_metrics 0.6713335775405032.
+Training time 2:36:32.
+
+Interpretation notes:
+- Curve is nearly flat (+0.011 over 12 epochs) and best falls on the LAST eval ->
+  the 12-epoch cosine horizon truncates learning; do NOT compare these absolutes
+  against the 80-epoch baseline curve (baseline: ep0 .680 ep2 .697 ep4 .647 ep6 .704
+  ep8 .711 ep10 .710). Proxy verdicts are RELATIVE among lambda runs only.
+- At lambda=0.01 the reg term (~<=1% of gradient signal) makes this effectively the
+  lambda~0 control for the l01/l1 comparisons.
