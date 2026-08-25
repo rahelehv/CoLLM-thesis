@@ -1,0 +1,80 @@
+model:
+  arch: mini_gpt4rec_cie_r # CIE-R: baseline llama_proj + lambda-weighted relational-consistency regularization (distance-wise RKD)
+  model_type: pretrain_vicuna
+  freeze_rec: True  #
+  freeze_proj: False # stage 2: train the (unchanged, baseline) llama_proj only
+  freeze_lora: True # stage 2: keep the stage-1 LoRA adapters frozen
+  use_grad_checkpoint: True # recompute activations in backward; lets fp16/batch-4 fit on a 16GB T4
+  max_txt_len: 1024 # by default
+  proj_token_num: 1 # CIE-G keeps 1 (same as baseline); this variant tests *structure*, not token count
+  proj_drop: 0 # by default
+  proj_mid_times: 10 # unchanged from baseline stage-2
+  end_sym: "###"
+  prompt_path: "prompts/collm_movie.txt" # stage 2: prompts WITH <UserID>/<ItemIDList>/<TargetItemID>
+  prompt_template: '{}'
+  llama_model: "${oc.env:COLLM_LLAMA_DIR}" #vicuna path
+  user_num: -100
+  item_num: -100
+  ans_type: 'v2' # by default
+  rec_model: "MF" #[MF, lightgcn,.....], see "Rec2Base" class in  minigpt4/models/rec_model.py
+  lora_config:
+    use_lora: True
+    r: 8
+    alpha: 16
+    target_modules: ["q_proj", "v_proj"] # default: ["q_proj", "v_proj"]; others? ['lm_head'], ["q_proj", "v_proj",'k_proj','o_proj']
+    dropout: 0.05
+  cie_reg_lambda: 1.0 # BCE + lambda * MSE_offdiag(S_raw, S_proj); gradients reach llama_proj only
+  rec_config: # recommender model config
+    user_num: -100
+    item_num: -100
+    embedding_size: 256 #embedding size
+    pretrained_path: "${oc.env:COLLM_MF_REC_PTH}" # Phase-1 MF .pth; must exist or the run raises
+
+
+  ckpt: "${oc.env:COLLM_STAGE1_CKPT}" # stage-1 LoRA checkpoint (checkpoint_best.pth); loaded with strict=False
+
+
+datasets:
+  movie_ood:
+    path: "${oc.env:COLLM_ML1M_DIR}" #data path
+    data_type: default
+    build_info:
+      storage: "${oc.env:COLLM_ML1M_DIR}" # data path
+
+run:
+  task: rec_pretrain
+  lr_sched: "linear_warmup_cosine_lr"
+  init_lr: 1e-3
+  min_lr: 8e-5
+  warmup_lr: 1e-5
+  mode: 'v2' # always, please not change it
+
+
+  weight_decay: 1e-3 # by default
+  max_epoch: 12 # PROXY run: early-trajectory comparison vs baseline (ep8=0.7110, ep12=0.7100)
+  early_stop_epochs: 10 # evaluated-epoch patience; cannot bind within max_epoch=12, cap is binding
+  save_ckpt_freq: 6 # resume point mid-proxy in case the session dies
+  save_ckpt_keep: 3 # retain only this many most recent periodic checkpoints (+ checkpoint_best.pth always); auto-pruned on save to protect the 20GB working-dir quota
+  eval_freq: 2 # match baseline trajectory granularity for the proxy comparison
+  iters_per_epoch: 50 #100
+  batch_size_train: 4 # 8
+  batch_size_eval: 4 # 32
+  num_workers: 4
+  log_freq: 50
+  warmup_steps: 200
+
+  seed: 42
+  output_dir: ${oc.env:COLLM_OUTPUT_DIR}/collm-cie-r-l1 #log and model saving path (dedicated; do not collide with baseline stage-2 or control)
+
+  amp: True
+  resume_ckpt_path: null
+
+  evaluate: False # False: training, True: only evaluation
+  train_splits: ["train"]
+  valid_splits: ["valid"] # validation set
+  test_splits: ["test","valid"] # used when evluate=True, reporting both the testing and validation results
+
+  device: "cuda"
+  world_size: 1
+  dist_url: "env://"
+  distributed: False

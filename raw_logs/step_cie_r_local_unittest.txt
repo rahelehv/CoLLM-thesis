@@ -1,0 +1,46 @@
+========================================================================
+CIE-R LOCAL UNIT TEST
+python : 3.13.0
+torch  : 2.10.0+cpu
+========================================================================
+
+--- section 1: compile ---
+[PASS] py_compile module + entry script
+
+--- section 2: structural contract (ast) ---
+[PASS] class MiniGPT4Rec_CIE_R defined
+[PASS] registered as mini_gpt4rec_cie_r  (["registry.register_model('mini_gpt4rec_cie_r')"])
+[PASS] subclasses MiniGPT4Rec_v2  (['MiniGPT4Rec_v2'])
+[PASS] method from_config present
+[PASS] method _batch_relation_loss present
+[PASS] method forward_v2 present
+[PASS] method __init__ present
+[PASS] from_config reads cie_reg_lambda
+[PASS] forward_v2 trains-only guard
+[PASS] graceful skip when no history field
+[PASS] raw side detached (frozen encoder)
+
+--- section 3: loss math (extracted from shipped source) ---
+    identical-space loss      : 0.000e+00
+[PASS] (a) identical spaces -> ~0
+    independent-space loss    : 0.169747
+[PASS] (b) independent spaces -> large (>0.1)
+    aligned-projection loss   : 0.035282
+    shuffled-projection loss  : 0.246514
+[PASS] (c) shuffling increases loss
+    step 0: loss=0.035282 grad_norm=1.345e-01
+[PASS] (d) gradients reach projector at step 0
+    after 60 steps: loss=0.000103 (first=0.035282)
+[PASS] (d) optimization reduces loss substantially
+[PASS] (d) optimized loss near zero (<1e-3)  (1.03e-04)
+[PASS] (e) deterministic
+[PASS] edge: single token returns finite 0-ish scalar
+
+--- section 4: proxy configs ---
+[PASS] config collm_cie_r_l001_proxy.yaml  (arch_ok=True lambda=0.01 run_ok=True)
+[PASS] config collm_cie_r_l01_proxy.yaml  (arch_ok=True lambda=0.1 run_ok=True)
+[PASS] config collm_cie_r_l1_proxy.yaml  (arch_ok=True lambda=1.0 run_ok=True)
+
+========================================================================
+RESULT: 23 passed, 0 failed
+========================================================================
