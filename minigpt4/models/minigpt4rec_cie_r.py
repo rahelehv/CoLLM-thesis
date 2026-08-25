@@ -109,22 +109,26 @@ class MiniGPT4Rec_CIE_R(MiniGPT4Rec_v2):
             use_grad_checkpoint=use_grad_checkpoint,
         )
         self.cie_reg_lambda = float(cie_reg_lambda or 0.0)
+        self._reg_announced = False
         logging.info(
             "CIE-R ready: llama_proj unchanged (baseline MLP), "
-            "cie_reg_lambda=%g, loss = BCE + %g * MSE_offdiag(S_raw, S_proj)",
-            self.cie_reg_lambda, self.cie_reg_lambda,
+            "cie_reg_lambda=%g (CONSTRUCTOR value; the authoritative one is set "
+            "by from_config from the YAML key model.cie_reg_lambda)",
+            self.cie_reg_lambda,
         )
         print(
-            f"CIE-R: cie_reg_lambda={self.cie_reg_lambda} "
-            f"(llama_proj untouched; relational-consistency reg active in training only)"
+            f"CIE-R: cie_reg_lambda={self.cie_reg_lambda} (constructor default -- "
+            f"see '>>> CIE-R REGULARIZER' line for the effective value)"
         )
 
     @classmethod
     def from_config(cls, cfg):
         model = super().from_config(cfg)
         model.cie_reg_lambda = float(cfg.get("cie_reg_lambda", 0.0) or 0.0)
-        logging.info("CIE-R from_config: cie_reg_lambda=%g", model.cie_reg_lambda)
-        print(f"CIE-R from_config: cie_reg_lambda={model.cie_reg_lambda}")
+        print(
+            f"\n>>> CIE-R REGULARIZER (effective): cie_reg_lambda={model.cie_reg_lambda} "
+            f"(read from YAML key model.cie_reg_lambda)\n"
+        )
         return model
 
     def _batch_relation_loss(self, samples):
@@ -191,6 +195,12 @@ class MiniGPT4Rec_CIE_R(MiniGPT4Rec_v2):
     def forward_v2(self, samples):
         out = super().forward_v2(samples)
         if self.training and self.cie_reg_lambda > 0 and self.rec_encoder is not None:
+            if not self._reg_announced:
+                self._reg_announced = True
+                print(
+                    f">>> CIE-R REGULARIZER ACTIVE in training forward: "
+                    f"lambda={self.cie_reg_lambda} (first training step confirmed)"
+                )
             l_rel = self._batch_relation_loss(samples)
             if l_rel is not None:
                 out["loss"] = out["loss"] + self.cie_reg_lambda * l_rel.to(out["loss"].dtype)
