@@ -1,10 +1,13 @@
 """
 CIE-R entry script.
 
-Identical to train_collm_mf_din_cie.py except it additionally imports
-minigpt4.models.minigpt4rec_cie_r so the mini_gpt4rec_cie_r registration
-runs before the registry is queried. minigpt4/models/__init__.py is
-intentionally not touched (new-files-only constraint).
+REGISTERS (via import side-effect): mini_gpt4rec_cie_g, mini_gpt4rec_cie_x,
+AND mini_gpt4rec_cie_r (superset of train_collm_mf_din_cie.py). Use THIS
+script for CIE-R proxy/full runs; the YAML's model.arch selects the class.
+
+It differs from train_collm_mf_din_cie.py only in one extra import;
+minigpt4/models/__init__.py is intentionally not touched
+(new-files-only constraint).
 
 Usage:
   python train_collm_mf_din_cie_r.py --cfg-path=train_configs/collm_cie_r_l01_proxy.yaml

@@ -1,10 +1,12 @@
 """
 CIE entry script (Option C).
 
-Identical to train_collm_mf_din.py except it imports
-minigpt4.models.minigpt4rec_cie so the CIE model registrations
-(mini_gpt4rec_cie_g, mini_gpt4rec_cie_x) run before the registry
-is queried. minigpt4/models/__init__.py is intentionally not touched
+REGISTERS (via import side-effect): mini_gpt4rec_cie_g (CIE-G),
+mini_gpt4rec_cie_x (CIE-X). Does NOT register mini_gpt4rec_cie_r --
+use train_collm_mf_din_cie_r.py for CIE-R runs.
+
+It differs from train_collm_mf_din.py only in that extra import;
+minigpt4/models/__init__.py is intentionally not touched
 (new-files-only constraint).
 
 Usage:
