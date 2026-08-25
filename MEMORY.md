@@ -52,10 +52,15 @@ All 4 phases done. Novel-contribution plan (confirmed): 3 sequential CIE variant
 - Gotcha: proj_token_num>1 expands history slots 4x vs max_txt_len=1024; verify no truncation (breaks placeholder/embedding count) in the #######prmpt decoded example: log line.
 - Runner infra since a712fc7: atomic saves (tmp+os.replace), retention save_ckpt_keep=3 (+checkpoint_best.pth), persisted best_agg_metric/best_epoch/not_change with legacy log.txt recovery; Control updated to eval_freq:4/max_epoch:50/save_ckpt_keep:3. CIE-G/X will use same from the start.
 
-## Current work: CIE-R proxies (2026-08-24) — see INNOVATION.md decision log
-- CIE-A (anchored init) CLOSED: step-0 kill-switch measured MF↔Vicuna-title linear alignment ≈ null (OOF R²=0.0079, Spearman ρ=0.0272; script `step0_ridge_killswitch.py`, cache `title_embs_cache.npz` on Kaggle).
-- Pivoted to CIE-R = baseline llama_proj + BCE + λ·MSE_offdiag(S_raw,S_proj) (distance-wise RKD; gradients only into llama_proj). Implemented in `minigpt4/models/minigpt4rec_cie_r.py`; local unit test 23/23 PASS (`raw_logs/step_cie_r_local_unittest.txt`).
-- NEXT ACTION: run the 3 λ-proxy configs (`train_configs/collm_cie_r_l{001,01,1}_proxy.yaml`, max_epoch=12, eval_freq=2, ~1.5h each, one Kaggle session), compare vs baseline stage-2 trajectory (ep0 0.680 / ep2 0.697 / ep4 0.647 / ep6 0.704 / ep8 0.711 / ep12 0.710; best-ever 0.7257@28), pick λ together, then one full ~7h run.
+## Current work: CIE-R full run (2026-08-25) — see INNOVATION.md decision log
+- λ-proxy sweep DONE (12-epoch runs, compare-among-themselves due to LR-horizon confound):
+  - l001 (λ=0.01, near-control): best 0.67133 @10 — `raw_logs/cie_r_l001_proxy_results.txt`
+  - l01  (λ=0.1):               best **0.70334** @10 (+0.032 vs control) — WINNER
+  - l1   (λ=1.0):               best 0.69300 @4 then decline to control level — over-regularized
+- DECISION: **λ=0.1** for the full run.
+- Full-run configs ready: `train_configs/collm_cie_r_l01_full.yaml` (max_epoch=50, eval_freq=4, save_ckpt_freq=20/keep=3; output_dir collm-cie-r-l01-full) + `collm_cie_r_l01_full_eval.yaml` (merged-ckpt eval via COLLM_STAGE2_CKPT).
+- NEXT ACTION: Kaggle `git pull`, run full (~6.5–7h, single session OK but tight — resume_ckpt_path flow if killed), then merge stage1+stage2 ckpts (`merge_stage_ckpts.py --stage1-ckpt ... --stage2-ckpt ... --output merged.pth`), then eval config → compare test AUC vs baseline 0.7434.
+- Background: CIE-A closed (kill-switch null: R²=0.008, ρ=0.027); CIE-R = baseline llama_proj + BCE + λ·MSE_offdiag(S_raw,S_proj), gradients only into llama_proj; local unit test 23/23 (`raw_logs/step_cie_r_local_unittest.txt`).
 
 ## Entry scripts (which to use when)
 | Script | Registers | Use for |

@@ -1,0 +1,28 @@
+CIE-R lambda-proxy run #3: cie_reg_lambda=1.0 (config collm_cie_r_l1_proxy.yaml)
+Source: user-provided parse_cie_r_proxies.py output over Kaggle log.txt files, 2026-08-25.
+Same protocol as l001/l01 (seed 42, single T4, max_epoch 12, eval_freq 2, cosine horizon=max_epoch).
+Activation proof: parser shows lam column from each log's model.cie_reg_lambda; run dir
+collm-cie-r-l1. Runtime not captured in this summary (see Kaggle console/log).
+
+Valid AUC trajectory (eval_freq=2):
+  epoch  0: 0.67400   <- fastest start of all three arms
+  epoch  2: 0.66293
+  epoch  4: 0.69300   <-- BEST
+  epoch  6: 0.68750
+  epoch  8: 0.66771
+  epoch 10: 0.67133
+NDCG at best: 0.84530
+
+Three-way comparison (vs l001 control):
+                 ep0     ep2     ep4     ep6     ep8     ep10    BEST
+  lam=0.01     .66041  .66973  .66369  .66637  .66922  .67133  .67133@10
+  lam=0.1      .66596  .68937  .69140  .65623  .68782  .70334  .70334@10
+  lam=1.0      .67403  .66293  .69300  .68751  .66771  .67133  .69300@4
+
+Decision (pre-agreed rule):
+  - lam=0.1 best-vs-best +0.03200 -> HELPS (clear winner)
+  - lam=1.0 best-vs-best +0.0217 but peaked @ep4 then declined to control level by ep10;
+    falls in the pre-agreed "in between" band -> NOT picked
+  - PICKED: lambda=0.1 for the full run (collm_cie_r_l01_full.yaml)
+Interpretation: lambda=1.0 starts fastest (dense early signal) but over-regularizes /
+conflicts with task fit over time; lambda=0.1 balances both.
