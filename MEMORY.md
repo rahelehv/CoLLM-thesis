@@ -52,15 +52,16 @@ All 4 phases done. Novel-contribution plan (confirmed): 3 sequential CIE variant
 - Gotcha: proj_token_num>1 expands history slots 4x vs max_txt_len=1024; verify no truncation (breaks placeholder/embedding count) in the #######prmpt decoded example: log line.
 - Runner infra since a712fc7: atomic saves (tmp+os.replace), retention save_ckpt_keep=3 (+checkpoint_best.pth), persisted best_agg_metric/best_epoch/not_change with legacy log.txt recovery; Control updated to eval_freq:4/max_epoch:50/save_ckpt_keep:3. CIE-G/X will use same from the start.
 
-## Current work: CIE-R full run (2026-08-25) — see INNOVATION.md decision log
-- λ-proxy sweep DONE (12-epoch runs, compare-among-themselves due to LR-horizon confound):
-  - l001 (λ=0.01, near-control): best 0.67133 @10 — `raw_logs/cie_r_l001_proxy_results.txt`
-  - l01  (λ=0.1):               best **0.70334** @10 (+0.032 vs control) — WINNER
-  - l1   (λ=1.0):               best 0.69300 @4 then decline to control level — over-regularized
-- DECISION: **λ=0.1** for the full run.
-- Full-run configs ready: `train_configs/collm_cie_r_l01_full.yaml` (max_epoch=50, eval_freq=4, save_ckpt_freq=20/keep=3; output_dir collm-cie-r-l01-full) + `collm_cie_r_l01_full_eval.yaml` (merged-ckpt eval via COLLM_STAGE2_CKPT).
-- NEXT ACTION: Kaggle `git pull`, run full (~6.5–7h, single session OK but tight — resume_ckpt_path flow if killed), then merge stage1+stage2 ckpts (`merge_stage_ckpts.py --stage1-ckpt ... --stage2-ckpt ... --output merged.pth`), then eval config → compare test AUC vs baseline 0.7434.
-- Background: CIE-A closed (kill-switch null: R²=0.008, ρ=0.027); CIE-R = baseline llama_proj + BCE + λ·MSE_offdiag(S_raw,S_proj), gradients only into llama_proj; local unit test 23/23 (`raw_logs/step_cie_r_local_unittest.txt`).
+## Current work: CIE-R full run — DONE (valid), needs test eval (2026-08-29) — see INNOVATION.md
+- λ-proxy sweep DONE (12-epoch, same horizon):
+  - l001 (λ=0.01): best 0.67133 @10 — `raw_logs/cie_r_l001_proxy_results.txt` (near-control)
+  - l01  (λ=0.1):  best **0.70334** @10 (+0.032) — **WINNER**, picked for full run
+  - l1   (λ=1.0):  best 0.69300 @4 then decay — over-regularized
+- FULL RUN (λ=0.1, 50-epoch, resume from 43 after 1 crash — a712fc7/e06de42 saved it): **best 0.72523 @36**, last 0.72083@44 / 0.71852@48, ~51 min wall on resume. vs baselines: baseline 0.72567@28, control 0.72569@28, CIE-G 0.72136@28, CIE-X 0.70043@48 → **essentially tied with baseline (-0.00044, null)**. Proxy's +0.032 washed out over full horizon — reg accelerated early fit, not final ceiling.
+- Fix: SyntaxWarning `mode \in` → `mode in` in minigpt4rec_v2.py:258 (commit this session).
+- CHECKPOINT CAVEAT: best @36 lives only in first session's output dir (wiped); only `checkpoint_43.pth` was published as `collm-cie-r-checkpoint-43`. Current `checkpoint_best.pth` was never re-saved in the resumed dir. For test eval, use `checkpoint_43.pth` (-0.004 away) as proxy and note caveat, or re-materialize best by scanning first-session log.txt for the best epoch and promoting the nearest periodic.
+- NEXT ACTIONS: (1) download `checkpoint_43.pth` locally, (2) merge stage1 LoRA + stage2 CIE via `merge_stage_ckpts.py`, (3) run `collm_cie_r_l01_full_eval.yaml` (merged ckpt at COLLM_STAGE2_CKPT) to get test AUC/NDCG vs baseline 0.7434/0.8663, (4) if time/quota allow, a brief re-run to capture true best (optional — result is expected ~control).
+- Background: CIE-A closed (kill-switch R²=0.008, ρ=0.027); CIE-R = baseline llama_proj + BCE + λ·MSE_offdiag(S_raw,S_proj); unit test 23/23 (`raw_logs/step_cie_r_local_unittest.txt`); `raw_logs/cie_r_l01_full_results.txt` has full trajectory.
 
 ## Entry scripts (which to use when)
 | Script | Registers | Use for |

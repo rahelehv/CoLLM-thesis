@@ -254,9 +254,9 @@ class MiniGPT4Rec_v2(Rec2Base):
         return False
     
     def set_mode(self, mode):
-        '''
-        mode \in ['v1','v2',None]
-        '''
+        """
+        mode in ['v1','v2',None]
+        """
         self.run_mode_ = mode
     
     def rec_to_cpu(self):

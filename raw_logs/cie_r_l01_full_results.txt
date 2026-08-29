@@ -1,0 +1,34 @@
+CIE-R lambda=0.1 FULL RUN (collm-cie-r-l01-full, arch mini_gpt4rec_cie_r)
+Source: Kaggle session 20260829074, resumed from checkpoint_43 after crash.
+Env: single T4, max_epoch 50, eval_freq 4, cosine LR horizon=max_epoch, seed 42,
+cie_reg_lambda 0.1 confirmed active, trainable 11.1M (llama_proj 4 keys), ~51 min GPU.
+
+Valid AUC trajectory (eval_freq=4; first session epochs 0-43 not pasted, best recovered):
+  BEST (from runner state): 0.7252266946846632 @ epoch 36
+  resumed segment evals:
+    epoch 44: 0.7208337125869693  ndcg 0.8605038026725559
+    epoch 48: 0.7185229257523588  ndcg 0.8611430361188328
+  Final: Training stopped max_epoch reached. Best epoch 36, best 0.7252266946846632.
+
+Comparison vs baselines (same max_epoch=50, eval_freq=4 family):
+  baseline stage-2 (Phase 3): 0.7256668021338382 @28
+  control (proj_token_num 4): 0.7256933808225703 @28
+  CIE-G (affine+gated):       0.7213615742542488 @28
+  CIE-X (MHA fusion):         0.7004266250752259 @48
+  CIE-R (this run, lam 0.1): 0.7252266946846632 @36  (-0.00044 vs baseline, null)
+  NDCG: CIE-R 0.8605-0.8611 vs baseline NDCG ~0.8646 (proxy NDCGs were 0.84x)
+
+Proxy vs full discrepancy:
+  proxies (max_epoch=12 truncated horizon) had shown lam 0.1 +0.032 over control
+  (0.70334@10 vs 0.67133@10) -- that was RELATIVE among 12-epoch arms only.
+  Over the full 50-epoch horizon where LR anneals slowly, the baseline catches up.
+
+Checkpoint note:
+  checkpoint_best.pth from epoch 36 was saved in the FIRST session's output dir
+  (20260825...), not in the resumed dir 20260829074 which only holds
+  checkpoint_43/45/46/47/49. Because Kaggle working is wiped between sessions
+  and only checkpoint_43 was published as a Model, the best weights are LOST
+  unless the first session's output was downloaded. Current best-available
+  periodic is checkpoint_43.pth (epoch 43, close to best, -0.0044 away).
+  For test eval, use checkpoint_43 or checkpoint_44 (0.72083) as proxy and note
+  the caveat, or re-run to re-materialize best if exact number needed.
