@@ -68,14 +68,15 @@ All 4 phases done. Novel-contribution plan (confirmed): 3 sequential CIE variant
 | `baseline_train_mf_ood.py` | — (standalone trainer) | Phase-1 MF recommender .pth |
 | `train_collm_mf_din.py` | `mini_gpt4rec_v2` only | Phases 2–4 baseline (stage 1 / stage 2 / eval) |
 | `train_collm_mf_din_cie.py` | `mini_gpt4rec_cie_g`, `mini_gpt4rec_cie_x` | Option C CIE-G/CIE-X runs (completed, negative results) |
-| `train_collm_mf_din_cie_r.py` | `mini_gpt4rec_cie_g` + `_x` + `_r` | **CIE-R runs (current)** — superset of _cie.py |
+| `train_collm_mf_din_cie_r.py` | `mini_gpt4rec_cie_g` + `_x` + `_r` | **CIE-R runs** — superset of _cie.py |
+| `train_collm_mf_din_mica.py` | `mini_gpt4rec_mica` | **MiCA Stage-1 runs (current)** |
 | `train_collm_{mf_din}_lgcn.py` / `_sasrec.py` | respective archs | deferred, not yet used |
 Rule of thumb: the YAML's `model.arch` must be registered by the entry script you launch; if unregistered → error.
 
-## Deferred (NOT abandoned): MiCA as second thesis contribution
-- MiCA = Minor Component Adaptation, arXiv 2604.01694 (Ruediger & Raschka, Apr 2026): SVD-based PEFT constraining updates to minor singular directions; up to 5.9x knowledge acquisition, 6-60% of LoRA's params.
-- Idea: replace LoRA in Stages 1/2. High novelty (unpublished in CF<->LLM alignment, to our knowledge), HIGH RISK: unproven on recommendation task (paper benchmarks language knowledge acquisition), code availability unverified, port to torch 1.12/peft 0.3 risky, ~9h/experiment (Stage-1-scale). Contested: 2602.03493 (minor comps not uniformly best) and 2606.31813 (ICML26, PiSSA/MiLoRA can underperform LoRA on non-SFT objectives).
-- DEFERRED until Option C (control+G+X) is complete. Do not forget.
+## MiCA Stage-1 — IN PROGRESS (2026-08-31) — see INNOVATION.md §2.1
+- MiCA = Minor Component Adaptation, arXiv 2604.01694 (Ruediger & Raschka, Apr 2026): B=minor singular vectors (frozen), A=0 (trainable), ~50% params of LoRA at same r. Official peft has it (examples/mica_finetuning) but needs py>=3.10 + transformers upgrade that reintroduces rotary NaN → vendored ~30-line surgery on peft 0.3 chosen instead.
+- IMPLEMENTED: `minigpt4/models/minigpt4rec_mica.py` (mini_gpt4rec_mica, SVD init + freeze B), entry `train_collm_mf_din_mica.py`, config `train_configs/collm_mica_pretrain_mf_ood.yaml` (arch mica, mica: true, r=8 alpha=16 q/v). Local unit test PASS (raw_logs/step_mica_local_unittest.txt).
+- NEXT: Kaggle Stage-1 ~5h08m (same as baseline Stage 1, eval_freq 2) → compare valid AUC vs baseline 0.662 @10.
 
 ## Not yet started
 - LightGCN/SASRec baseline scripts: same logging/checkpoint improvements as MF are planned but deferred until actually needed.

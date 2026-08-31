@@ -1,0 +1,27 @@
+=== MiCA LOCAL UNIT TEST ===
+[PASS] py_compile module + entry
+[PASS] class MiniGPT4Rec_MiCA defined
+[PASS] registered as mini_gpt4rec_mica (["registry.register_model('mini_gpt4rec_mica')"])
+[PASS] method __init__ present
+[PASS] method from_config present
+
+--- SVD minor selection ---
+[PASS] shape (512, 512) minor singular values < major (minor max 0.53 major min 42.89)
+[PASS] shape (512, 512) U_minor shape
+[PASS] shape (512, 1024) minor singular values < major (minor max 10.75 major min 52.39)
+[PASS] shape (512, 1024) U_minor shape
+[PASS] shape (1024, 512) minor singular values < major (minor max 10.70 major min 52.45)
+[PASS] shape (1024, 512) U_minor shape
+
+--- peft overwrite simulation ---
+[PASS] B copied minor vectors
+[PASS] A zeroed
+[PASS] B frozen, A trainable
+
+--- YAML configs ---
+[PASS] train_configs/collm_mica_pretrain_mf_ood.yaml arch
+[PASS] train_configs/collm_mica_pretrain_mf_ood.yaml mica flag
+[PASS] train_configs/collm_mica_pretrain_mf_ood.yaml freeze_lora False (stage1 trains MiCA)
+
+============================================================
+RESULT: PASS
