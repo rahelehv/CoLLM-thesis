@@ -372,6 +372,10 @@ class RunnerBase:
 
     def train(self):
         start_time = time.time()
+        self.segment_start = start_time
+        # cumulative_time persists across resumes (sum of all previous segments)
+        if not hasattr(self, "cumulative_time"):
+            self.cumulative_time = 0
         # early-stop / best-checkpoint bookkeeping is persisted in each checkpoint
         # so a mid-run resume (even with a different eval_freq/max_epoch) keeps the
         # patience count and best-epoch tracking consistent.
@@ -389,6 +393,12 @@ class RunnerBase:
         # resume from checkpoint if specified
         if not self.evaluate_only and self.resume_ckpt_path is not None:
             self._load_checkpoint(self.resume_ckpt_path)
+            # _load_checkpoint restores cumulative_time from the checkpoint if present
+            if not hasattr(self, "cumulative_time"):
+                self.cumulative_time = 0
+            # reset segment clock to now — only time after resume counts toward new segment
+            self.segment_start = time.time()
+            start_time = self.segment_start
 
         if not self.evaluate_only:# with training
             for cur_epoch in range(self.start_epoch, self.max_epoch):
@@ -481,6 +491,10 @@ class RunnerBase:
         total_time = time.time() - start_time
         total_time_str = str(datetime.timedelta(seconds=int(total_time)))
         logging.info("Training time {}".format(total_time_str))
+        # cumulative across all resumes
+        cumulative = getattr(self, "cumulative_time", 0) + (time.time() - getattr(self, "segment_start", start_time))
+        cumulative_str = str(datetime.timedelta(seconds=int(cumulative)))
+        logging.info("Cumulative training time (all segments): {}".format(cumulative_str))
         self.set_model_mode(None) # recover to the default model
 
     def evaluate(self, cur_epoch="best", skip_reload=False):
@@ -671,6 +685,8 @@ class RunnerBase:
                 # never persist the base LLM weights under any name
                 continue
             saved_state[k] = state_dict[k]
+        # cumulative time up to this epoch (previous segments + current segment)
+        cumulative_now = getattr(self, "cumulative_time", 0) + (time.time() - getattr(self, "segment_start", time.time()))
         save_obj = {
             "model": saved_state,
             "optimizer": self.optimizer.state_dict(),
@@ -682,6 +698,7 @@ class RunnerBase:
             # a best checkpoint is always saved right after a new best, so the
             # patience count restarts from 0 on resume from it
             "not_change": 0 if is_best else self.not_change,
+            "cumulative_time": cumulative_now,
         }
         save_to = os.path.join(
             self.output_dir,
@@ -778,6 +795,8 @@ class RunnerBase:
             self.scaler.load_state_dict(checkpoint["scaler"])
 
         self.start_epoch = checkpoint["epoch"] + 1
+        # restore cumulative time (total across all segments before this resume)
+        self.cumulative_time = checkpoint.get("cumulative_time", 0)
         # restore early-stop / best-epoch bookkeeping so a resume continues the
         # patience count and best checkpoint tracking from where it left off
         if "best_agg_metric" in checkpoint:
