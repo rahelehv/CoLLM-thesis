@@ -77,10 +77,8 @@ def _apply_mica_to_peft_model(peft_model, base_llama, r):
             with torch.no_grad():
                 param.zero_()
             # keep trainable (default)
-    # Verify A zero, B frozen
+    # Verify B frozen (A trainability depends on freeze_lora, checked by caller)
     for name, param in peft_model.named_parameters():
-        if "lora_A" in name:
-            assert param.requires_grad, f"MiCA: lora_A should be trainable: {name}"
         if "lora_B" in name:
             assert not param.requires_grad, f"MiCA: lora_B should be frozen: {name}"
     return patched
