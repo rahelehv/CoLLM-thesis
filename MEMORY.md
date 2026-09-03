@@ -80,11 +80,15 @@ Rule of thumb: the YAML's `model.arch` must be registered by the entry script yo
 - INCIDENT (thesis transparency): During MiCA Stage 1 training, checkpoint_best.pth (epoch 64, best_agg_metrics=0.6889447800271994) was lost due to a Kaggle session ending before it was manually downloaded (periodic checkpoints 29/49/51/53/55/69/75/79 were saved, but not checkpoint_best.pth, which persists separately from the pruned periodic checkpoints and requires manual backup like all our checkpoints). To recover the exact result, we resumed training from checkpoint_55.pth with max_epoch=65 (via --options override), reproducing epochs 56-64 forward-only. Since dataloader shuffle order/RNG state isn't persisted in checkpoints (only model/optimizer/scaler/epoch/best-metric state), this reproduction is not bit-identical to the original run, but empirically differs by an estimated ~0.001-0.003 AUC based on prior similar recoveries (see CIE-R's checkpoint_39-for-36 substitution). This reconstructed checkpoint is used as the canonical MiCA Stage 1 result going forward.
 - RECOVERED CHECKPOINT (55→64, 9 epochs, 1:40:56): **0.6887475928839792 @64** (NDCG 0.8578966047949523, 8.4 MB, 64 keys) vs original 0.6889447800271994 @64 → Δ -0.000197, well within the 0.001-0.003 estimate — **reproducibility check passed**. Downloaded and now canonical.
 
-## MiCA Stage-2 — NEXT (CIE on MiCA backbone, mirrors LoRA Stage 2)
-- Config: `train_configs/collm_mica_finetune_mf_ood.yaml` (arch `mini_gpt4rec_mica`, `freeze_proj: False`, `freeze_lora: True` = freeze MiCA, `ckpt: ${COLLM_MICA_STAGE1_CKPT}`, `prompt_path: prompts/collm_movie.txt` with IDs). Entry script is the **same** `train_collm_mf_din_mica.py` that registered MiCA — it handles both Stage 1 and Stage 2 (arch + freeze flags pick the mode); no new entry variant needed.
-- Speed/safety already baked in: `eval_freq: 4`, `max_epoch: 50`, `save_ckpt_keep: 3`, atomic saves — identical to Control/CIE-G/X/CIE-R full runs. No yaml edits needed.
-- Env var: **`COLLM_MICA_STAGE1_CKPT`** — point at the recovered MiCA Stage-1 `checkpoint_best.pth` (the 0.688747 @64 you just downloaded). Keep `COLLM_STAGE1_CKPT` (LoRA) untouched for baselines.
-- NEXT: run Stage-2, then merge + eval vs LoRA baseline (0.72567 valid / 0.7434 test).
+## MiCA Stage-2 — DONE (2026-09-03) — CIE on frozen MiCA backbone
+- Config: `train_configs/collm_mica_finetune_mf_ood.yaml` (arch `mini_gpt4rec_mica`, `freeze_proj: False`, `freeze_lora: True` = freeze MiCA A too, same entry `train_collm_mf_din_mica.py`).
+- RESULT: **best 0.7322250564574408 @20 (valid)** vs LoRA Stage-2 baseline 0.72567 @28 → **+0.0066, our best valid number yet**. Checkpoint_best backed up (Kaggle Model + local).
+- MERGE COMPATIBILITY (verified by code inspection against both checkpoint structures): `merge_stage_ckpts.py` works **as-is, no MiCA variant needed**. Stage-1 MiCA ckpt saves only the 64 trainable lora_A keys (B was frozen, never saved — see 8.4 MB state). Stage-2 ckpt saves only the 4 llama_proj keys (MiCA A frozen there by fdfb477 fix). Union disjoint → expected merge print `stage-1 keys: 64 | stage-2 keys: 4 | merged: 68 | overlap: 0`. B is deterministically rebuilt from SVD at every model construction, so its absence from the ckpt is fine — BUT the eval config MUST be arch `mini_gpt4rec_mica` + `mica: true`, otherwise B stays peft-default zero and trained A is silently dead.
+
+## MiCA eval (Phase-4 equivalent) — NEXT
+- Config: `train_configs/collm_mica_eval_mf_ood.yaml` (evaluate: True, test_splits ["test","valid"], `ckpt: ${COLLM_MICA_STAGE2_CKPT}` = merged MiCA ckpt; entry `train_collm_mf_din_mica.py`).
+- New env var **`COLLM_MICA_STAGE2_CKPT`** for the merged file. Keep `COLLM_STAGE1_CKPT`/`COLLM_STAGE2_CKPT` (LoRA) untouched.
+- Compare vs Table II + own Phase 4 (test AUC=0.7434, NDCG=0.8663); full-run target table in INNOVATION.md.
 
 ## Not yet started
 - LightGCN/SASRec baseline scripts: same logging/checkpoint improvements as MF are planned but deferred until actually needed.
