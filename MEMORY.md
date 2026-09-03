@@ -85,10 +85,13 @@ Rule of thumb: the YAML's `model.arch` must be registered by the entry script yo
 - RESULT: **best 0.7322250564574408 @20 (valid)** vs LoRA Stage-2 baseline 0.72567 @28 → **+0.0066, our best valid number yet**. Checkpoint_best backed up (Kaggle Model + local).
 - MERGE COMPATIBILITY (verified by code inspection against both checkpoint structures): `merge_stage_ckpts.py` works **as-is, no MiCA variant needed**. Stage-1 MiCA ckpt saves only the 64 trainable lora_A keys (B was frozen, never saved — see 8.4 MB state). Stage-2 ckpt saves only the 4 llama_proj keys (MiCA A frozen there by fdfb477 fix). Union disjoint → expected merge print `stage-1 keys: 64 | stage-2 keys: 4 | merged: 68 | overlap: 0`. B is deterministically rebuilt from SVD at every model construction, so its absence from the ckpt is fine — BUT the eval config MUST be arch `mini_gpt4rec_mica` + `mica: true`, otherwise B stays peft-default zero and trained A is silently dead.
 
-## MiCA eval (Phase-4 equivalent) — NEXT
-- Config: `train_configs/collm_mica_eval_mf_ood.yaml` (evaluate: True, test_splits ["test","valid"], `ckpt: ${COLLM_MICA_STAGE2_CKPT}` = merged MiCA ckpt; entry `train_collm_mf_din_mica.py`).
-- New env var **`COLLM_MICA_STAGE2_CKPT`** for the merged file. Keep `COLLM_STAGE1_CKPT`/`COLLM_STAGE2_CKPT` (LoRA) untouched.
-- Compare vs Table II + own Phase 4 (test AUC=0.7434, NDCG=0.8663); full-run target table in INNOVATION.md.
+## MiCA eval (Phase-4 equivalent) — DONE (2026-09-03)
+- Config `train_configs/collm_mica_eval_mf_ood.yaml`, `merged_mica_s12.pth` (MiCA stage-1 A + stage-2 CIE via `merge_stage_ckpts.py` as-is; expected diagnostics `stage-1 keys: 64 | stage-2 keys: 4 | merged: 68 | overlap: 0`). Merge verified in log: missing_keys contain only frozen/base + `lora_B.*` (correctly absent — rebuilt by SVD at construction), while `lora_A.*` and `llama_proj.*` loaded.
+- **Test: AUC 0.7420, NDCG 0.8710** (1833 batches) — vs own Phase 4 (0.7434/0.8663): AUC −0.0014 (tied), NDCG +0.0047. Vs paper Table II (0.7295/0.8714): **AUC exceeds by +0.0125, NDCG matches (−0.0004)**.
+- **Valid: AUC 0.73223, NDCG 0.8734** (1300 batches) — vs own Phase 4 valid (0.7257/0.8646): +0.0065/+0.0089. Valid reproduces stage-2 best *exactly* → merge + eval path consistent.
+- UAUC nan on test too (287 computed, same per-user artifact as all phases).
+- Total eval 0:39:51 (+ startup ≈ 1h); cumulative-time tracker from fca77ab works (`Training time 0:39:51 / Cumulative 0:39:51` on fresh run).
+- VERDICT: MiCA ≥ LoRA baseline on 3/4 metrics within noise, strictly better on both NDCGs and valid AUC, at ~50% PEFT params. Genuine positive thesis contribution.
 
 ## Not yet started
 - LightGCN/SASRec baseline scripts: same logging/checkpoint improvements as MF are planned but deferred until actually needed.

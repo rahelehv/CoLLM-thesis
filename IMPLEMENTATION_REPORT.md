@@ -534,6 +534,23 @@ Joint MHA fusion in this lightweight form (single 4-head layer, 256-d) **does no
 
 **Recovered checkpoint (epochs 56-64, resumed from 55, 1:40:56):** **0.6887475928839792 @64** (NDCG 0.8578966047949523, 8.4 MB, 64 keys) vs original **0.6889447800271994 @64** → Δ -0.000197, well within the expected 0.001-0.003 range. **Reproducibility check passed** — the 9-epoch forward-only resume from checkpoint_55 is effectively identical despite missing RNG/shuffle state, confirming determinism.
 
+## 6.9 MiCA Stage 2 + test eval — a genuine positive (2026-09-03)
+
+Stage 2 on the frozen MiCA backbone (`collm_mica_finetune_mf_ood.yaml`: `freeze_proj=False`, `freeze_lora=True`, ID prompt) reached **best valid AUC 0.7322250564574408 @20** vs LoRA baseline 0.72567 → **+0.0066**. Merge used `merge_stage_ckpts.py` unmodified; log evidence confirms the disjoint union (missing_keys = base + `lora_B.*` only; `lora_A.*` and `llama_proj.*` all loaded) and `MiCA: patched 64 lora_B … / MiCA from_config: active` before `Load MiniGPT4Rec Checkpoint`, so B was correctly rebuilt from SVD rather than left at peft-default zero.
+
+Test eval (`collm_mica_eval_mf_ood.yaml`, 1833 test + 1300 valid batches, ~40 min):
+
+| Metric | MiCA | LoRA baseline (Phase 4) | Delta | Paper Table II |
+|---|---|---|---|---|
+| **test AUC** | **0.7420** | 0.7434 | −0.0014 (tied) | 0.7295 (we exceed by +0.0125) |
+| **test NDCG** | **0.8710** | 0.8663 | **+0.0047** | 0.8714 (match, −0.0004) |
+| valid AUC | 0.73223 | 0.7257 | +0.0065 | — |
+| valid NDCG | 0.8734 | 0.8646 | +0.0089 | — |
+
+Valid reproduces the stage-2 best *exactly* (0.7322250564574408), confirming merge + eval consistency — the same pattern as Phase 4. UAUC nan on test (287 users computed) is the same per-user artifact seen in every phase (Section 6.4), not a model failure.
+
+**Interpretation:** unlike Control/CIE-G/CIE-X/CIE-R (null or negative), MiCA is the first variant to beat the LoRA baseline on more metrics than it loses — 3 of 4 own-baseline comparisons positive (test AUC within noise), both NDCGs up, and it matches/exceeds the paper on both Table II numbers. All at ~50% of LoRA's trainable params (2.1M vs 4.2M). This is the novel-contribution result the thesis needed.
+
 ---
 
 # 7. Summary of All Code Changes
@@ -658,5 +675,8 @@ These must be stated plainly in the thesis. None invalidate the headline result,
 | **Option C Control** | `collm_cie_pn4_finetune.yaml` (`proj_token_num: 4`) | best_valid_auc = **0.7256933808225703** (epoch 28) | 6h55m, `max_epoch 50` reached; `+0.00003` vs. Phase 3 — no gain from token capacity alone |
 | **Option C CIE-G** | `collm_cie_g_finetune.yaml` (`mini_gpt4rec_cie_g`, affine+gated) | best_valid_auc = **0.72136** (epoch 28) | `max_epoch 50` reached; `-0.0043` vs. Phase 3/Control — gated affine does not help |
 | **Option C CIE-X** | `collm_cie_x_finetune.yaml` (`mini_gpt4rec_cie_x`, joint MHA) | best_valid_auc = **0.70043** (epoch 48) | `max_epoch 50` reached; `-0.025` vs. baseline — joint fusion degrades, late peak, 10.5 MB |
+| **MiCA Stage-1** | `collm_mica_pretrain_mf_ood.yaml` (`mini_gpt4rec_mica`, B frozen/U_minor, A trained) | best_valid_auc = **0.68875** (epoch 64, recovered) | 1:40:56, 2.1M params (½ LoRA); `+0.027` vs. LoRA Stage-1 0.662 |
+| **MiCA Stage-2** | `collm_mica_finetune_mf_ood.yaml` (CIE on frozen MiCA) | best_valid_auc = **0.73223** (epoch 20) | `+0.0066` vs. LoRA Stage-2; best valid yet |
+| **MiCA test eval** | `collm_mica_eval_mf_ood.yaml` (merged MiCA ckpt) | test AUC **0.7420**, NDCG **0.8710**; valid AUC 0.73223 / NDCG 0.8734 | ~40 min; ties/beats LoRA baseline 3/4, exceeds paper AUC, matches paper NDCG |
 
 **Bottom line:** The full CoLLM pipeline (MF → LoRA text-only → CIE mapping → evaluation) was successfully built, debugged, and reproduced against the paper on ML-1M, with results in the same range as reported — even exceeding the paper on AUC — and with a documented, reproducible environment and a reusable diagnostic toolchain.
