@@ -1,0 +1,36 @@
+[mf] item_embedding: (3256, 256)
+[data] train_ood2.pkl: (33891, 9)
+[data] valid_ood2.pkl: (10401, 9)
+[data] test_ood2.pkl: (7331, 9)
+[data] valid_small_ood2.pkl: (5200, 9)
+[map] titled items: 3255 (item_num incl. pad = 3256)
+[eval] items used: 3255, dim MF=256
+/usr/local/lib/python3.12/dist-packages/timm/models/hub.py:4: FutureWarning: Importing from timm.models.hub is deprecated, please import via timm.models
+  warnings.warn(f"Importing from {__name__} is deprecated, please import via timm.models", FutureWarning)
+[emb] using vendored minigpt4.models.modeling_llama
+Loading checkpoint shards: 100%|██████████████████| 2/2 [00:39<00:00, 19.68s/it]
+Some weights of LlamaForCausalLM were not initialized from the model checkpoint at /kaggle/working/vicuna-v0/pretrained_ckpt/vicuna_ckpt/7b_v0 and are newly initialized: ['model.layers.5.self_attn.rotary_emb.inv_freq', 'model.layers.25.self_attn.rotary_emb.inv_freq', 'model.layers.24.self_attn.rotary_emb.inv_freq', 'model.layers.11.self_attn.rotary_emb.inv_freq', 'model.layers.21.self_attn.rotary_emb.inv_freq', 'model.layers.19.self_attn.rotary_emb.inv_freq', 'model.layers.0.self_attn.rotary_emb.inv_freq', 'model.layers.27.self_attn.rotary_emb.inv_freq', 'model.layers.17.self_attn.rotary_emb.inv_freq', 'model.layers.14.self_attn.rotary_emb.inv_freq', 'model.layers.15.self_attn.rotary_emb.inv_freq', 'model.layers.20.self_attn.rotary_emb.inv_freq', 'model.layers.30.self_attn.rotary_emb.inv_freq', 'model.layers.6.self_attn.rotary_emb.inv_freq', 'model.layers.8.self_attn.rotary_emb.inv_freq', 'model.layers.2.self_attn.rotary_emb.inv_freq', 'model.layers.10.self_attn.rotary_emb.inv_freq', 'model.layers.1.self_attn.rotary_emb.inv_freq', 'model.layers.9.self_attn.rotary_emb.inv_freq', 'model.layers.28.self_attn.rotary_emb.inv_freq', 'model.layers.23.self_attn.rotary_emb.inv_freq', 'model.layers.26.self_attn.rotary_emb.inv_freq', 'model.layers.29.self_attn.rotary_emb.inv_freq', 'model.layers.22.self_attn.rotary_emb.inv_freq', 'model.layers.16.self_attn.rotary_emb.inv_freq', 'model.layers.3.self_attn.rotary_emb.inv_freq', 'model.layers.31.self_attn.rotary_emb.inv_freq', 'model.layers.12.self_attn.rotary_emb.inv_freq', 'model.layers.7.self_attn.rotary_emb.inv_freq', 'model.layers.13.self_attn.rotary_emb.inv_freq', 'model.layers.18.self_attn.rotary_emb.inv_freq', 'model.layers.4.self_attn.rotary_emb.inv_freq']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+[emb] model on cuda
+[emb] transformers=4.28.0, llama_cls_module=minigpt4.models.modeling_llama (expect minigpt4.models.modeling_llama; 4.28.0 expected per project pin)
+[emb] 32/3255
+[emb] 672/3255
+[emb] 1312/3255
+[emb] 1952/3255
+[emb] 2592/3255
+[emb] 3232/3255
+[cache] saved /kaggle/working/title_embs_cache.npz
+
+=== STEP 0 REPORT ===
+items evaluated        : 3255 / 3255 non-pad
+text dim               : 4096
+---- ridge MF -> text (5-fold OOF) ----
+best alpha             : 1e+04
+mean fold R2           : 0.0057
+OOF R2 (uniform avg)   : 0.0079
+OOF R2 (var weighted)  : 0.0079
+---- similarity-structure agreement ----
+spearman               : 0.0272
+pearson                : 0.0275
+recall@10              : 0.0142
+====================== 

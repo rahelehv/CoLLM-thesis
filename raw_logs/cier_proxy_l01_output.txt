@@ -1,0 +1,684 @@
+Not using distributed mode
+2026-08-25 09:01:38,481 [INFO] Building datasets...
+data path: /kaggle/working/ml-1m/train data size: (33891, 7)
+Movie OOD datasets, max history length: 10
+2026-08-25 09:01:38,750 [INFO] Movie OOD datasets, max history length:10
+data path: /kaggle/working/ml-1m/valid_small data size: (5200, 7)
+Movie OOD datasets, max history length: 10
+2026-08-25 09:01:39,154 [INFO] Movie OOD datasets, max history length:10
+data path: /kaggle/working/ml-1m/test data size: (7331, 7)
+Movie OOD datasets, max history length: 10
+2026-08-25 09:01:39,261 [INFO] Movie OOD datasets, max history length:10
+data dir: /kaggle/working/ml-1m/
+2026-08-25 09:01:39,659 [INFO] 
+=====  Running Parameters    =====
+2026-08-25 09:01:39,661 [INFO] {
+    "amp": true,
+    "batch_size_eval": 4,
+    "batch_size_train": 4,
+    "device": "cuda",
+    "dist_url": "env://",
+    "distributed": false,
+    "early_stop_epochs": 10,
+    "eval_freq": 2,
+    "evaluate": false,
+    "init_lr": 0.001,
+    "iters_per_epoch": 50,
+    "log_freq": 50,
+    "lr_sched": "linear_warmup_cosine_lr",
+    "max_epoch": 12,
+    "min_lr": 8e-05,
+    "mode": "v2",
+    "num_workers": 4,
+    "output_dir": "/kaggle/working/collm_logs/collm-cie-r-l01",
+    "resume_ckpt_path": null,
+    "save_ckpt_freq": 6,
+    "save_ckpt_keep": 3,
+    "seed": 42,
+    "task": "rec_pretrain",
+    "test_splits": [
+        "test",
+        "valid"
+    ],
+    "train_splits": [
+        "train"
+    ],
+    "valid_splits": [
+        "valid"
+    ],
+    "warmup_lr": 1e-05,
+    "warmup_steps": 200,
+    "weight_decay": 0.001,
+    "world_size": 1
+}
+2026-08-25 09:01:39,661 [INFO] 
+======  Dataset Attributes  ======
+2026-08-25 09:01:39,661 [INFO] 
+======== movie_ood =======
+2026-08-25 09:01:39,662 [INFO] {
+    "build_info": {
+        "storage": "/kaggle/working/ml-1m/"
+    },
+    "data_type": "default",
+    "path": "/kaggle/working/ml-1m/"
+}
+2026-08-25 09:01:39,662 [INFO] 
+======  Model Attributes  ======
+2026-08-25 09:01:39,665 [INFO] {
+    "ans_type": "v2",
+    "arch": "mini_gpt4rec_cie_r",
+    "cie_reg_lambda": 0.1,
+    "ckpt": "/kaggle/input/models/rahelehv/collm-stage-1-lora-checkpoint/pytorch/default/1/checkpoint_best_stage1.pth",
+    "end_sym": "###",
+    "freeze_lora": true,
+    "freeze_proj": false,
+    "freeze_rec": true,
+    "item_num": -100,
+    "llama_model": "/kaggle/working/vicuna-v0/pretrained_ckpt/vicuna_ckpt/7b_v0",
+    "lora_config": {
+        "alpha": 16,
+        "dropout": 0.05,
+        "r": 8,
+        "target_modules": [
+            "q_proj",
+            "v_proj"
+        ],
+        "use_lora": true
+    },
+    "max_txt_len": 1024,
+    "model_type": "pretrain_vicuna",
+    "proj_drop": 0,
+    "proj_mid_times": 10,
+    "proj_token_num": 1,
+    "prompt_path": "prompts/collm_movie.txt",
+    "prompt_template": "{}",
+    "rec_config": {
+        "embedding_size": 256,
+        "item_num": 3256,
+        "pretrained_path": "/kaggle/working/CoLLM-thesis/weights/0912_ml1m_oodv2_best_model_d256lr-0.001wd0.0001.pth",
+        "user_num": 839
+    },
+    "rec_model": "MF",
+    "use_grad_checkpoint": true,
+    "user_num": -100
+}
+runing MiniGPT4Rec_v2 ...... 
+Loading Rec_model
+### rec_encoder: MF
+creat MF model, user num: 839 item num: 3256
+successfully load the pretrained model......
+2026-08-25 09:01:39,681 [INFO] freeze rec encoder
+freeze rec encoder
+Loading Rec_model Done
+Loading LLAMA
+Loading checkpoint shards: 100%|██████████████████| 2/2 [00:55<00:00, 27.93s/it]
+Some weights of LlamaForCausalLM were not initialized from the model checkpoint at /kaggle/working/vicuna-v0/pretrained_ckpt/vicuna_ckpt/7b_v0 and are newly initialized: ['model.layers.7.self_attn.rotary_emb.inv_freq', 'model.layers.6.self_attn.rotary_emb.inv_freq', 'model.layers.11.self_attn.rotary_emb.inv_freq', 'model.layers.30.self_attn.rotary_emb.inv_freq', 'model.layers.29.self_attn.rotary_emb.inv_freq', 'model.layers.14.self_attn.rotary_emb.inv_freq', 'model.layers.28.self_attn.rotary_emb.inv_freq', 'model.layers.26.self_attn.rotary_emb.inv_freq', 'model.layers.3.self_attn.rotary_emb.inv_freq', 'model.layers.13.self_attn.rotary_emb.inv_freq', 'model.layers.24.self_attn.rotary_emb.inv_freq', 'model.layers.0.self_attn.rotary_emb.inv_freq', 'model.layers.22.self_attn.rotary_emb.inv_freq', 'model.layers.15.self_attn.rotary_emb.inv_freq', 'model.layers.1.self_attn.rotary_emb.inv_freq', 'model.layers.31.self_attn.rotary_emb.inv_freq', 'model.layers.25.self_attn.rotary_emb.inv_freq', 'model.layers.10.self_attn.rotary_emb.inv_freq', 'model.layers.20.self_attn.rotary_emb.inv_freq', 'model.layers.9.self_attn.rotary_emb.inv_freq', 'model.layers.8.self_attn.rotary_emb.inv_freq', 'model.layers.12.self_attn.rotary_emb.inv_freq', 'model.layers.19.self_attn.rotary_emb.inv_freq', 'model.layers.5.self_attn.rotary_emb.inv_freq', 'model.layers.21.self_attn.rotary_emb.inv_freq', 'model.layers.16.self_attn.rotary_emb.inv_freq', 'model.layers.4.self_attn.rotary_emb.inv_freq', 'model.layers.23.self_attn.rotary_emb.inv_freq', 'model.layers.2.self_attn.rotary_emb.inv_freq', 'model.layers.27.self_attn.rotary_emb.inv_freq', 'model.layers.17.self_attn.rotary_emb.inv_freq', 'model.layers.18.self_attn.rotary_emb.inv_freq']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+Loading LLAMA Done
+Enabling gradient checkpointing on llama_model
+Enabled input-requires-grad hook for gradient checkpointing
+Setting Lora
+Setting Lora Done
+freeze lora...
+type: <class 'int'> 10
+Load 4 training prompts
+Prompt List: 
+['#Question: A user has given high ratings to the following movies: <ItemTitleList>. Additionally, we have information about the user\'s preferences encoded in the feature <UserID>. Using all available information, make a prediction about whether the user would enjoy the movie titled <TargetItemTitle> with the feature <TargetItemID>? Answer with "Yes" or "No". \\n#Answer:', '#Question: A user has given high ratings to the following movies: <ItemTitleList>. Additionally, we have information about the user\'s preferences encoded in the feature <UserID>. Using all available information, make a prediction about whether the user would enjoy the movie titled <TargetItemTitle> with the feature <TargetItemID>? Answer with "Yes" or "No". \\n#Answer:', '#Question: A user has given high ratings to the following movies: <ItemTitleList>. Additionally, we have information about the user\'s preferences encoded in the feature <UserID>. Using all available information, make a prediction about whether the user would enjoy the movie titled <TargetItemTitle> with the feature <TargetItemID>? Answer with "Yes" or "No". \\n#Answer:', '#Question: A user has given high ratings to the following movies: <ItemTitleList>. Additionally, we have information about the user\'s preferences encoded in the feature <UserID>. Using all available information, make a prediction about whether the user would enjoy the movie titled <TargetItemTitle> with the feature <TargetItemID>? Answer with "Yes" or "No". \\n#Answer:']
+2026-08-25 09:03:50,124 [INFO] CIE-R ready: llama_proj unchanged (baseline MLP), cie_reg_lambda=0 (CONSTRUCTOR value; the authoritative one is set by from_config from the YAML key model.cie_reg_lambda)
+CIE-R: cie_reg_lambda=0.0 (constructor default -- see '>>> CIE-R REGULARIZER' line for the effective value)
+Load MiniGPT4Rec Checkpoint: /kaggle/input/models/rahelehv/collm-stage-1-lora-checkpoint/pytorch/default/1/checkpoint_best_stage1.pth
+loading message, msg....  _IncompatibleKeys(missing_keys=['rec_encoder.user_embedding.weight', 'rec_encoder.item_embedding.weight', 'llama_model.model.embed_tokens.weight', 'llama_model.model.layers.0.self_attn.q_proj.weight', 'llama_model.model.layers.0.self_attn.k_proj.weight', 'llama_model.model.layers.0.self_attn.v_proj.weight', 'llama_model.model.layers.0.self_attn.o_proj.weight', 'llama_model.model.layers.0.self_attn.rotary_emb.inv_freq', 'llama_model.model.layers.0.mlp.gate_proj.weight', 'llama_model.model.layers.0.mlp.down_proj.weight', 'llama_model.model.layers.0.mlp.up_proj.weight', 'llama_model.model.layers.0.input_layernorm.weight', 'llama_model.model.layers.0.post_attention_layernorm.weight', 'llama_model.model.layers.1.self_attn.q_proj.weight', 'llama_model.model.layers.1.self_attn.k_proj.weight', 'llama_model.model.layers.1.self_attn.v_proj.weight', 'llama_model.model.layers.1.self_attn.o_proj.weight', 'llama_model.model.layers.1.self_attn.rotary_emb.inv_freq', 'llama_model.model.layers.1.mlp.gate_proj.weight', 'llama_model.model.layers.1.mlp.down_proj.weight', 'llama_model.model.layers.1.mlp.up_proj.weight', 'llama_model.model.layers.1.input_layernorm.weight', 'llama_model.model.layers.1.post_attention_layernorm.weight', 'llama_model.model.layers.2.self_attn.q_proj.weight', 'llama_model.model.layers.2.self_attn.k_proj.weight', 'llama_model.model.layers.2.self_attn.v_proj.weight', 'llama_model.model.layers.2.self_attn.o_proj.weight', 'llama_model.model.layers.2.self_attn.rotary_emb.inv_freq', 'llama_model.model.layers.2.mlp.gate_proj.weight', 'llama_model.model.layers.2.mlp.down_proj.weight', 'llama_model.model.layers.2.mlp.up_proj.weight', 'llama_model.model.layers.2.input_layernorm.weight', 'llama_model.model.layers.2.post_attention_layernorm.weight', 'llama_model.model.layers.3.self_attn.q_proj.weight', 'llama_model.model.layers.3.self_attn.k_proj.weight', 'llama_model.model.layers.3.self_attn.v_proj.weight', 'llama_model.model.layers.3.self_attn.o_proj.weight', 'llama_model.model.layers.3.self_attn.rotary_emb.inv_freq', 'llama_model.model.layers.3.mlp.gate_proj.weight', 'llama_model.model.layers.3.mlp.down_proj.weight', 'llama_model.model.layers.3.mlp.up_proj.weight', 'llama_model.model.layers.3.input_layernorm.weight', 'llama_model.model.layers.3.post_attention_layernorm.weight', 'llama_model.model.layers.4.self_attn.q_proj.weight', 'llama_model.model.layers.4.self_attn.k_proj.weight', 'llama_model.model.layers.4.self_attn.v_proj.weight', 'llama_model.model.layers.4.self_attn.o_proj.weight', 'llama_model.model.layers.4.self_attn.rotary_emb.inv_freq', 'llama_model.model.layers.4.mlp.gate_proj.weight', 'llama_model.model.layers.4.mlp.down_proj.weight', 'llama_model.model.layers.4.mlp.up_proj.weight', 'llama_model.model.layers.4.input_layernorm.weight', 'llama_model.model.layers.4.post_attention_layernorm.weight', 'llama_model.model.layers.5.self_attn.q_proj.weight', 'llama_model.model.layers.5.self_attn.k_proj.weight', 'llama_model.model.layers.5.self_attn.v_proj.weight', 'llama_model.model.layers.5.self_attn.o_proj.weight', 'llama_model.model.layers.5.self_attn.rotary_emb.inv_freq', 'llama_model.model.layers.5.mlp.gate_proj.weight', 'llama_model.model.layers.5.mlp.down_proj.weight', 'llama_model.model.layers.5.mlp.up_proj.weight', 'llama_model.model.layers.5.input_layernorm.weight', 'llama_model.model.layers.5.post_attention_layernorm.weight', 'llama_model.model.layers.6.self_attn.q_proj.weight', 'llama_model.model.layers.6.self_attn.k_proj.weight', 'llama_model.model.layers.6.self_attn.v_proj.weight', 'llama_model.model.layers.6.self_attn.o_proj.weight', 'llama_model.model.layers.6.self_attn.rotary_emb.inv_freq', 'llama_model.model.layers.6.mlp.gate_proj.weight', 'llama_model.model.layers.6.mlp.down_proj.weight', 'llama_model.model.layers.6.mlp.up_proj.weight', 'llama_model.model.layers.6.input_layernorm.weight', 'llama_model.model.layers.6.post_attention_layernorm.weight', 'llama_model.model.layers.7.self_attn.q_proj.weight', 'llama_model.model.layers.7.self_attn.k_proj.weight', 'llama_model.model.layers.7.self_attn.v_proj.weight', 'llama_model.model.layers.7.self_attn.o_proj.weight', 'llama_model.model.layers.7.self_attn.rotary_emb.inv_freq', 'llama_model.model.layers.7.mlp.gate_proj.weight', 'llama_model.model.layers.7.mlp.down_proj.weight', 'llama_model.model.layers.7.mlp.up_proj.weight', 'llama_model.model.layers.7.input_layernorm.weight', 'llama_model.model.layers.7.post_attention_layernorm.weight', 'llama_model.model.layers.8.self_attn.q_proj.weight', 'llama_model.model.layers.8.self_attn.k_proj.weight', 'llama_model.model.layers.8.self_attn.v_proj.weight', 'llama_model.model.layers.8.self_attn.o_proj.weight', 'llama_model.model.layers.8.self_attn.rotary_emb.inv_freq', 'llama_model.model.layers.8.mlp.gate_proj.weight', 'llama_model.model.layers.8.mlp.down_proj.weight', 'llama_model.model.layers.8.mlp.up_proj.weight', 'llama_model.model.layers.8.input_layernorm.weight', 'llama_model.model.layers.8.post_attention_layernorm.weight', 'llama_model.model.layers.9.self_attn.q_proj.weight', 'llama_model.model.layers.9.self_attn.k_proj.weight', 'llama_model.model.layers.9.self_attn.v_proj.weight', 'llama_model.model.layers.9.self_attn.o_proj.weight', 'llama_model.model.layers.9.self_attn.rotary_emb.inv_freq', 'llama_model.model.layers.9.mlp.gate_proj.weight', 'llama_model.model.layers.9.mlp.down_proj.weight', 'llama_model.model.layers.9.mlp.up_proj.weight', 'llama_model.model.layers.9.input_layernorm.weight', 'llama_model.model.layers.9.post_attention_layernorm.weight', 'llama_model.model.layers.10.self_attn.q_proj.weight', 'llama_model.model.layers.10.self_attn.k_proj.weight', 'llama_model.model.layers.10.self_attn.v_proj.weight', 'llama_model.model.layers.10.self_attn.o_proj.weight', 'llama_model.model.layers.10.self_attn.rotary_emb.inv_freq', 'llama_model.model.layers.10.mlp.gate_proj.weight', 'llama_model.model.layers.10.mlp.down_proj.weight', 'llama_model.model.layers.10.mlp.up_proj.weight', 'llama_model.model.layers.10.input_layernorm.weight', 'llama_model.model.layers.10.post_attention_layernorm.weight', 'llama_model.model.layers.11.self_attn.q_proj.weight', 'llama_model.model.layers.11.self_attn.k_proj.weight', 'llama_model.model.layers.11.self_attn.v_proj.weight', 'llama_model.model.layers.11.self_attn.o_proj.weight', 'llama_model.model.layers.11.self_attn.rotary_emb.inv_freq', 'llama_model.model.layers.11.mlp.gate_proj.weight', 'llama_model.model.layers.11.mlp.down_proj.weight', 'llama_model.model.layers.11.mlp.up_proj.weight', 'llama_model.model.layers.11.input_layernorm.weight', 'llama_model.model.layers.11.post_attention_layernorm.weight', 'llama_model.model.layers.12.self_attn.q_proj.weight', 'llama_model.model.layers.12.self_attn.k_proj.weight', 'llama_model.model.layers.12.self_attn.v_proj.weight', 'llama_model.model.layers.12.self_attn.o_proj.weight', 'llama_model.model.layers.12.self_attn.rotary_emb.inv_freq', 'llama_model.model.layers.12.mlp.gate_proj.weight', 'llama_model.model.layers.12.mlp.down_proj.weight', 'llama_model.model.layers.12.mlp.up_proj.weight', 'llama_model.model.layers.12.input_layernorm.weight', 'llama_model.model.layers.12.post_attention_layernorm.weight', 'llama_model.model.layers.13.self_attn.q_proj.weight', 'llama_model.model.layers.13.self_attn.k_proj.weight', 'llama_model.model.layers.13.self_attn.v_proj.weight', 'llama_model.model.layers.13.self_attn.o_proj.weight', 'llama_model.model.layers.13.self_attn.rotary_emb.inv_freq', 'llama_model.model.layers.13.mlp.gate_proj.weight', 'llama_model.model.layers.13.mlp.down_proj.weight', 'llama_model.model.layers.13.mlp.up_proj.weight', 'llama_model.model.layers.13.input_layernorm.weight', 'llama_model.model.layers.13.post_attention_layernorm.weight', 'llama_model.model.layers.14.self_attn.q_proj.weight', 'llama_model.model.layers.14.self_attn.k_proj.weight', 'llama_model.model.layers.14.self_attn.v_proj.weight', 'llama_model.model.layers.14.self_attn.o_proj.weight', 'llama_model.model.layers.14.self_attn.rotary_emb.inv_freq', 'llama_model.model.layers.14.mlp.gate_proj.weight', 'llama_model.model.layers.14.mlp.down_proj.weight', 'llama_model.model.layers.14.mlp.up_proj.weight', 'llama_model.model.layers.14.input_layernorm.weight', 'llama_model.model.layers.14.post_attention_layernorm.weight', 'llama_model.model.layers.15.self_attn.q_proj.weight', 'llama_model.model.layers.15.self_attn.k_proj.weight', 'llama_model.model.layers.15.self_attn.v_proj.weight', 'llama_model.model.layers.15.self_attn.o_proj.weight', 'llama_model.model.layers.15.self_attn.rotary_emb.inv_freq', 'llama_model.model.layers.15.mlp.gate_proj.weight', 'llama_model.model.layers.15.mlp.down_proj.weight', 'llama_model.model.layers.15.mlp.up_proj.weight', 'llama_model.model.layers.15.input_layernorm.weight', 'llama_model.model.layers.15.post_attention_layernorm.weight', 'llama_model.model.layers.16.self_attn.q_proj.weight', 'llama_model.model.layers.16.self_attn.k_proj.weight', 'llama_model.model.layers.16.self_attn.v_proj.weight', 'llama_model.model.layers.16.self_attn.o_proj.weight', 'llama_model.model.layers.16.self_attn.rotary_emb.inv_freq', 'llama_model.model.layers.16.mlp.gate_proj.weight', 'llama_model.model.layers.16.mlp.down_proj.weight', 'llama_model.model.layers.16.mlp.up_proj.weight', 'llama_model.model.layers.16.input_layernorm.weight', 'llama_model.model.layers.16.post_attention_layernorm.weight', 'llama_model.model.layers.17.self_attn.q_proj.weight', 'llama_model.model.layers.17.self_attn.k_proj.weight', 'llama_model.model.layers.17.self_attn.v_proj.weight', 'llama_model.model.layers.17.self_attn.o_proj.weight', 'llama_model.model.layers.17.self_attn.rotary_emb.inv_freq', 'llama_model.model.layers.17.mlp.gate_proj.weight', 'llama_model.model.layers.17.mlp.down_proj.weight', 'llama_model.model.layers.17.mlp.up_proj.weight', 'llama_model.model.layers.17.input_layernorm.weight', 'llama_model.model.layers.17.post_attention_layernorm.weight', 'llama_model.model.layers.18.self_attn.q_proj.weight', 'llama_model.model.layers.18.self_attn.k_proj.weight', 'llama_model.model.layers.18.self_attn.v_proj.weight', 'llama_model.model.layers.18.self_attn.o_proj.weight', 'llama_model.model.layers.18.self_attn.rotary_emb.inv_freq', 'llama_model.model.layers.18.mlp.gate_proj.weight', 'llama_model.model.layers.18.mlp.down_proj.weight', 'llama_model.model.layers.18.mlp.up_proj.weight', 'llama_model.model.layers.18.input_layernorm.weight', 'llama_model.model.layers.18.post_attention_layernorm.weight', 'llama_model.model.layers.19.self_attn.q_proj.weight', 'llama_model.model.layers.19.self_attn.k_proj.weight', 'llama_model.model.layers.19.self_attn.v_proj.weight', 'llama_model.model.layers.19.self_attn.o_proj.weight', 'llama_model.model.layers.19.self_attn.rotary_emb.inv_freq', 'llama_model.model.layers.19.mlp.gate_proj.weight', 'llama_model.model.layers.19.mlp.down_proj.weight', 'llama_model.model.layers.19.mlp.up_proj.weight', 'llama_model.model.layers.19.input_layernorm.weight', 'llama_model.model.layers.19.post_attention_layernorm.weight', 'llama_model.model.layers.20.self_attn.q_proj.weight', 'llama_model.model.layers.20.self_attn.k_proj.weight', 'llama_model.model.layers.20.self_attn.v_proj.weight', 'llama_model.model.layers.20.self_attn.o_proj.weight', 'llama_model.model.layers.20.self_attn.rotary_emb.inv_freq', 'llama_model.model.layers.20.mlp.gate_proj.weight', 'llama_model.model.layers.20.mlp.down_proj.weight', 'llama_model.model.layers.20.mlp.up_proj.weight', 'llama_model.model.layers.20.input_layernorm.weight', 'llama_model.model.layers.20.post_attention_layernorm.weight', 'llama_model.model.layers.21.self_attn.q_proj.weight', 'llama_model.model.layers.21.self_attn.k_proj.weight', 'llama_model.model.layers.21.self_attn.v_proj.weight', 'llama_model.model.layers.21.self_attn.o_proj.weight', 'llama_model.model.layers.21.self_attn.rotary_emb.inv_freq', 'llama_model.model.layers.21.mlp.gate_proj.weight', 'llama_model.model.layers.21.mlp.down_proj.weight', 'llama_model.model.layers.21.mlp.up_proj.weight', 'llama_model.model.layers.21.input_layernorm.weight', 'llama_model.model.layers.21.post_attention_layernorm.weight', 'llama_model.model.layers.22.self_attn.q_proj.weight', 'llama_model.model.layers.22.self_attn.k_proj.weight', 'llama_model.model.layers.22.self_attn.v_proj.weight', 'llama_model.model.layers.22.self_attn.o_proj.weight', 'llama_model.model.layers.22.self_attn.rotary_emb.inv_freq', 'llama_model.model.layers.22.mlp.gate_proj.weight', 'llama_model.model.layers.22.mlp.down_proj.weight', 'llama_model.model.layers.22.mlp.up_proj.weight', 'llama_model.model.layers.22.input_layernorm.weight', 'llama_model.model.layers.22.post_attention_layernorm.weight', 'llama_model.model.layers.23.self_attn.q_proj.weight', 'llama_model.model.layers.23.self_attn.k_proj.weight', 'llama_model.model.layers.23.self_attn.v_proj.weight', 'llama_model.model.layers.23.self_attn.o_proj.weight', 'llama_model.model.layers.23.self_attn.rotary_emb.inv_freq', 'llama_model.model.layers.23.mlp.gate_proj.weight', 'llama_model.model.layers.23.mlp.down_proj.weight', 'llama_model.model.layers.23.mlp.up_proj.weight', 'llama_model.model.layers.23.input_layernorm.weight', 'llama_model.model.layers.23.post_attention_layernorm.weight', 'llama_model.model.layers.24.self_attn.q_proj.weight', 'llama_model.model.layers.24.self_attn.k_proj.weight', 'llama_model.model.layers.24.self_attn.v_proj.weight', 'llama_model.model.layers.24.self_attn.o_proj.weight', 'llama_model.model.layers.24.self_attn.rotary_emb.inv_freq', 'llama_model.model.layers.24.mlp.gate_proj.weight', 'llama_model.model.layers.24.mlp.down_proj.weight', 'llama_model.model.layers.24.mlp.up_proj.weight', 'llama_model.model.layers.24.input_layernorm.weight', 'llama_model.model.layers.24.post_attention_layernorm.weight', 'llama_model.model.layers.25.self_attn.q_proj.weight', 'llama_model.model.layers.25.self_attn.k_proj.weight', 'llama_model.model.layers.25.self_attn.v_proj.weight', 'llama_model.model.layers.25.self_attn.o_proj.weight', 'llama_model.model.layers.25.self_attn.rotary_emb.inv_freq', 'llama_model.model.layers.25.mlp.gate_proj.weight', 'llama_model.model.layers.25.mlp.down_proj.weight', 'llama_model.model.layers.25.mlp.up_proj.weight', 'llama_model.model.layers.25.input_layernorm.weight', 'llama_model.model.layers.25.post_attention_layernorm.weight', 'llama_model.model.layers.26.self_attn.q_proj.weight', 'llama_model.model.layers.26.self_attn.k_proj.weight', 'llama_model.model.layers.26.self_attn.v_proj.weight', 'llama_model.model.layers.26.self_attn.o_proj.weight', 'llama_model.model.layers.26.self_attn.rotary_emb.inv_freq', 'llama_model.model.layers.26.mlp.gate_proj.weight', 'llama_model.model.layers.26.mlp.down_proj.weight', 'llama_model.model.layers.26.mlp.up_proj.weight', 'llama_model.model.layers.26.input_layernorm.weight', 'llama_model.model.layers.26.post_attention_layernorm.weight', 'llama_model.model.layers.27.self_attn.q_proj.weight', 'llama_model.model.layers.27.self_attn.k_proj.weight', 'llama_model.model.layers.27.self_attn.v_proj.weight', 'llama_model.model.layers.27.self_attn.o_proj.weight', 'llama_model.model.layers.27.self_attn.rotary_emb.inv_freq', 'llama_model.model.layers.27.mlp.gate_proj.weight', 'llama_model.model.layers.27.mlp.down_proj.weight', 'llama_model.model.layers.27.mlp.up_proj.weight', 'llama_model.model.layers.27.input_layernorm.weight', 'llama_model.model.layers.27.post_attention_layernorm.weight', 'llama_model.model.layers.28.self_attn.q_proj.weight', 'llama_model.model.layers.28.self_attn.k_proj.weight', 'llama_model.model.layers.28.self_attn.v_proj.weight', 'llama_model.model.layers.28.self_attn.o_proj.weight', 'llama_model.model.layers.28.self_attn.rotary_emb.inv_freq', 'llama_model.model.layers.28.mlp.gate_proj.weight', 'llama_model.model.layers.28.mlp.down_proj.weight', 'llama_model.model.layers.28.mlp.up_proj.weight', 'llama_model.model.layers.28.input_layernorm.weight', 'llama_model.model.layers.28.post_attention_layernorm.weight', 'llama_model.model.layers.29.self_attn.q_proj.weight', 'llama_model.model.layers.29.self_attn.k_proj.weight', 'llama_model.model.layers.29.self_attn.v_proj.weight', 'llama_model.model.layers.29.self_attn.o_proj.weight', 'llama_model.model.layers.29.self_attn.rotary_emb.inv_freq', 'llama_model.model.layers.29.mlp.gate_proj.weight', 'llama_model.model.layers.29.mlp.down_proj.weight', 'llama_model.model.layers.29.mlp.up_proj.weight', 'llama_model.model.layers.29.input_layernorm.weight', 'llama_model.model.layers.29.post_attention_layernorm.weight', 'llama_model.model.layers.30.self_attn.q_proj.weight', 'llama_model.model.layers.30.self_attn.k_proj.weight', 'llama_model.model.layers.30.self_attn.v_proj.weight', 'llama_model.model.layers.30.self_attn.o_proj.weight', 'llama_model.model.layers.30.self_attn.rotary_emb.inv_freq', 'llama_model.model.layers.30.mlp.gate_proj.weight', 'llama_model.model.layers.30.mlp.down_proj.weight', 'llama_model.model.layers.30.mlp.up_proj.weight', 'llama_model.model.layers.30.input_layernorm.weight', 'llama_model.model.layers.30.post_attention_layernorm.weight', 'llama_model.model.layers.31.self_attn.q_proj.weight', 'llama_model.model.layers.31.self_attn.k_proj.weight', 'llama_model.model.layers.31.self_attn.v_proj.weight', 'llama_model.model.layers.31.self_attn.o_proj.weight', 'llama_model.model.layers.31.self_attn.rotary_emb.inv_freq', 'llama_model.model.layers.31.mlp.gate_proj.weight', 'llama_model.model.layers.31.mlp.down_proj.weight', 'llama_model.model.layers.31.mlp.up_proj.weight', 'llama_model.model.layers.31.input_layernorm.weight', 'llama_model.model.layers.31.post_attention_layernorm.weight', 'llama_model.model.norm.weight', 'llama_model.lm_head.weight', 'llama_model_lora.base_model.model.model.embed_tokens.weight', 'llama_model_lora.base_model.model.model.layers.0.self_attn.q_proj.weight', 'llama_model_lora.base_model.model.model.layers.0.self_attn.q_proj.lora_A.default.weight', 'llama_model_lora.base_model.model.model.layers.0.self_attn.q_proj.lora_B.default.weight', 'llama_model_lora.base_model.model.model.layers.0.self_attn.k_proj.weight', 'llama_model_lora.base_model.model.model.layers.0.self_attn.v_proj.weight', 'llama_model_lora.base_model.model.model.layers.0.self_attn.v_proj.lora_A.default.weight', 'llama_model_lora.base_model.model.model.layers.0.self_attn.v_proj.lora_B.default.weight', 'llama_model_lora.base_model.model.model.layers.0.self_attn.o_proj.weight', 'llama_model_lora.base_model.model.model.layers.0.self_attn.rotary_emb.inv_freq', 'llama_model_lora.base_model.model.model.layers.0.mlp.gate_proj.weight', 'llama_model_lora.base_model.model.model.layers.0.mlp.down_proj.weight', 'llama_model_lora.base_model.model.model.layers.0.mlp.up_proj.weight', 'llama_model_lora.base_model.model.model.layers.0.input_layernorm.weight', 'llama_model_lora.base_model.model.model.layers.0.post_attention_layernorm.weight', 'llama_model_lora.base_model.model.model.layers.1.self_attn.q_proj.weight', 'llama_model_lora.base_model.model.model.layers.1.self_attn.q_proj.lora_A.default.weight', 'llama_model_lora.base_model.model.model.layers.1.self_attn.q_proj.lora_B.default.weight', 'llama_model_lora.base_model.model.model.layers.1.self_attn.k_proj.weight', 'llama_model_lora.base_model.model.model.layers.1.self_attn.v_proj.weight', 'llama_model_lora.base_model.model.model.layers.1.self_attn.v_proj.lora_A.default.weight', 'llama_model_lora.base_model.model.model.layers.1.self_attn.v_proj.lora_B.default.weight', 'llama_model_lora.base_model.model.model.layers.1.self_attn.o_proj.weight', 'llama_model_lora.base_model.model.model.layers.1.self_attn.rotary_emb.inv_freq', 'llama_model_lora.base_model.model.model.layers.1.mlp.gate_proj.weight', 'llama_model_lora.base_model.model.model.layers.1.mlp.down_proj.weight', 'llama_model_lora.base_model.model.model.layers.1.mlp.up_proj.weight', 'llama_model_lora.base_model.model.model.layers.1.input_layernorm.weight', 'llama_model_lora.base_model.model.model.layers.1.post_attention_layernorm.weight', 'llama_model_lora.base_model.model.model.layers.2.self_attn.q_proj.weight', 'llama_model_lora.base_model.model.model.layers.2.self_attn.q_proj.lora_A.default.weight', 'llama_model_lora.base_model.model.model.layers.2.self_attn.q_proj.lora_B.default.weight', 'llama_model_lora.base_model.model.model.layers.2.self_attn.k_proj.weight', 'llama_model_lora.base_model.model.model.layers.2.self_attn.v_proj.weight', 'llama_model_lora.base_model.model.model.layers.2.self_attn.v_proj.lora_A.default.weight', 'llama_model_lora.base_model.model.model.layers.2.self_attn.v_proj.lora_B.default.weight', 'llama_model_lora.base_model.model.model.layers.2.self_attn.o_proj.weight', 'llama_model_lora.base_model.model.model.layers.2.self_attn.rotary_emb.inv_freq', 'llama_model_lora.base_model.model.model.layers.2.mlp.gate_proj.weight', 'llama_model_lora.base_model.model.model.layers.2.mlp.down_proj.weight', 'llama_model_lora.base_model.model.model.layers.2.mlp.up_proj.weight', 'llama_model_lora.base_model.model.model.layers.2.input_layernorm.weight', 'llama_model_lora.base_model.model.model.layers.2.post_attention_layernorm.weight', 'llama_model_lora.base_model.model.model.layers.3.self_attn.q_proj.weight', 'llama_model_lora.base_model.model.model.layers.3.self_attn.q_proj.lora_A.default.weight', 'llama_model_lora.base_model.model.model.layers.3.self_attn.q_proj.lora_B.default.weight', 'llama_model_lora.base_model.model.model.layers.3.self_attn.k_proj.weight', 'llama_model_lora.base_model.model.model.layers.3.self_attn.v_proj.weight', 'llama_model_lora.base_model.model.model.layers.3.self_attn.v_proj.lora_A.default.weight', 'llama_model_lora.base_model.model.model.layers.3.self_attn.v_proj.lora_B.default.weight', 'llama_model_lora.base_model.model.model.layers.3.self_attn.o_proj.weight', 'llama_model_lora.base_model.model.model.layers.3.self_attn.rotary_emb.inv_freq', 'llama_model_lora.base_model.model.model.layers.3.mlp.gate_proj.weight', 'llama_model_lora.base_model.model.model.layers.3.mlp.down_proj.weight', 'llama_model_lora.base_model.model.model.layers.3.mlp.up_proj.weight', 'llama_model_lora.base_model.model.model.layers.3.input_layernorm.weight', 'llama_model_lora.base_model.model.model.layers.3.post_attention_layernorm.weight', 'llama_model_lora.base_model.model.model.layers.4.self_attn.q_proj.weight', 'llama_model_lora.base_model.model.model.layers.4.self_attn.q_proj.lora_A.default.weight', 'llama_model_lora.base_model.model.model.layers.4.self_attn.q_proj.lora_B.default.weight', 'llama_model_lora.base_model.model.model.layers.4.self_attn.k_proj.weight', 'llama_model_lora.base_model.model.model.layers.4.self_attn.v_proj.weight', 'llama_model_lora.base_model.model.model.layers.4.self_attn.v_proj.lora_A.default.weight', 'llama_model_lora.base_model.model.model.layers.4.self_attn.v_proj.lora_B.default.weight', 'llama_model_lora.base_model.model.model.layers.4.self_attn.o_proj.weight', 'llama_model_lora.base_model.model.model.layers.4.self_attn.rotary_emb.inv_freq', 'llama_model_lora.base_model.model.model.layers.4.mlp.gate_proj.weight', 'llama_model_lora.base_model.model.model.layers.4.mlp.down_proj.weight', 'llama_model_lora.base_model.model.model.layers.4.mlp.up_proj.weight', 'llama_model_lora.base_model.model.model.layers.4.input_layernorm.weight', 'llama_model_lora.base_model.model.model.layers.4.post_attention_layernorm.weight', 'llama_model_lora.base_model.model.model.layers.5.self_attn.q_proj.weight', 'llama_model_lora.base_model.model.model.layers.5.self_attn.q_proj.lora_A.default.weight', 'llama_model_lora.base_model.model.model.layers.5.self_attn.q_proj.lora_B.default.weight', 'llama_model_lora.base_model.model.model.layers.5.self_attn.k_proj.weight', 'llama_model_lora.base_model.model.model.layers.5.self_attn.v_proj.weight', 'llama_model_lora.base_model.model.model.layers.5.self_attn.v_proj.lora_A.default.weight', 'llama_model_lora.base_model.model.model.layers.5.self_attn.v_proj.lora_B.default.weight', 'llama_model_lora.base_model.model.model.layers.5.self_attn.o_proj.weight', 'llama_model_lora.base_model.model.model.layers.5.self_attn.rotary_emb.inv_freq', 'llama_model_lora.base_model.model.model.layers.5.mlp.gate_proj.weight', 'llama_model_lora.base_model.model.model.layers.5.mlp.down_proj.weight', 'llama_model_lora.base_model.model.model.layers.5.mlp.up_proj.weight', 'llama_model_lora.base_model.model.model.layers.5.input_layernorm.weight', 'llama_model_lora.base_model.model.model.layers.5.post_attention_layernorm.weight', 'llama_model_lora.base_model.model.model.layers.6.self_attn.q_proj.weight', 'llama_model_lora.base_model.model.model.layers.6.self_attn.q_proj.lora_A.default.weight', 'llama_model_lora.base_model.model.model.layers.6.self_attn.q_proj.lora_B.default.weight', 'llama_model_lora.base_model.model.model.layers.6.self_attn.k_proj.weight', 'llama_model_lora.base_model.model.model.layers.6.self_attn.v_proj.weight', 'llama_model_lora.base_model.model.model.layers.6.self_attn.v_proj.lora_A.default.weight', 'llama_model_lora.base_model.model.model.layers.6.self_attn.v_proj.lora_B.default.weight', 'llama_model_lora.base_model.model.model.layers.6.self_attn.o_proj.weight', 'llama_model_lora.base_model.model.model.layers.6.self_attn.rotary_emb.inv_freq', 'llama_model_lora.base_model.model.model.layers.6.mlp.gate_proj.weight', 'llama_model_lora.base_model.model.model.layers.6.mlp.down_proj.weight', 'llama_model_lora.base_model.model.model.layers.6.mlp.up_proj.weight', 'llama_model_lora.base_model.model.model.layers.6.input_layernorm.weight', 'llama_model_lora.base_model.model.model.layers.6.post_attention_layernorm.weight', 'llama_model_lora.base_model.model.model.layers.7.self_attn.q_proj.weight', 'llama_model_lora.base_model.model.model.layers.7.self_attn.q_proj.lora_A.default.weight', 'llama_model_lora.base_model.model.model.layers.7.self_attn.q_proj.lora_B.default.weight', 'llama_model_lora.base_model.model.model.layers.7.self_attn.k_proj.weight', 'llama_model_lora.base_model.model.model.layers.7.self_attn.v_proj.weight', 'llama_model_lora.base_model.model.model.layers.7.self_attn.v_proj.lora_A.default.weight', 'llama_model_lora.base_model.model.model.layers.7.self_attn.v_proj.lora_B.default.weight', 'llama_model_lora.base_model.model.model.layers.7.self_attn.o_proj.weight', 'llama_model_lora.base_model.model.model.layers.7.self_attn.rotary_emb.inv_freq', 'llama_model_lora.base_model.model.model.layers.7.mlp.gate_proj.weight', 'llama_model_lora.base_model.model.model.layers.7.mlp.down_proj.weight', 'llama_model_lora.base_model.model.model.layers.7.mlp.up_proj.weight', 'llama_model_lora.base_model.model.model.layers.7.input_layernorm.weight', 'llama_model_lora.base_model.model.model.layers.7.post_attention_layernorm.weight', 'llama_model_lora.base_model.model.model.layers.8.self_attn.q_proj.weight', 'llama_model_lora.base_model.model.model.layers.8.self_attn.q_proj.lora_A.default.weight', 'llama_model_lora.base_model.model.model.layers.8.self_attn.q_proj.lora_B.default.weight', 'llama_model_lora.base_model.model.model.layers.8.self_attn.k_proj.weight', 'llama_model_lora.base_model.model.model.layers.8.self_attn.v_proj.weight', 'llama_model_lora.base_model.model.model.layers.8.self_attn.v_proj.lora_A.default.weight', 'llama_model_lora.base_model.model.model.layers.8.self_attn.v_proj.lora_B.default.weight', 'llama_model_lora.base_model.model.model.layers.8.self_attn.o_proj.weight', 'llama_model_lora.base_model.model.model.layers.8.self_attn.rotary_emb.inv_freq', 'llama_model_lora.base_model.model.model.layers.8.mlp.gate_proj.weight', 'llama_model_lora.base_model.model.model.layers.8.mlp.down_proj.weight', 'llama_model_lora.base_model.model.model.layers.8.mlp.up_proj.weight', 'llama_model_lora.base_model.model.model.layers.8.input_layernorm.weight', 'llama_model_lora.base_model.model.model.layers.8.post_attention_layernorm.weight', 'llama_model_lora.base_model.model.model.layers.9.self_attn.q_proj.weight', 'llama_model_lora.base_model.model.model.layers.9.self_attn.q_proj.lora_A.default.weight', 'llama_model_lora.base_model.model.model.layers.9.self_attn.q_proj.lora_B.default.weight', 'llama_model_lora.base_model.model.model.layers.9.self_attn.k_proj.weight', 'llama_model_lora.base_model.model.model.layers.9.self_attn.v_proj.weight', 'llama_model_lora.base_model.model.model.layers.9.self_attn.v_proj.lora_A.default.weight', 'llama_model_lora.base_model.model.model.layers.9.self_attn.v_proj.lora_B.default.weight', 'llama_model_lora.base_model.model.model.layers.9.self_attn.o_proj.weight', 'llama_model_lora.base_model.model.model.layers.9.self_attn.rotary_emb.inv_freq', 'llama_model_lora.base_model.model.model.layers.9.mlp.gate_proj.weight', 'llama_model_lora.base_model.model.model.layers.9.mlp.down_proj.weight', 'llama_model_lora.base_model.model.model.layers.9.mlp.up_proj.weight', 'llama_model_lora.base_model.model.model.layers.9.input_layernorm.weight', 'llama_model_lora.base_model.model.model.layers.9.post_attention_layernorm.weight', 'llama_model_lora.base_model.model.model.layers.10.self_attn.q_proj.weight', 'llama_model_lora.base_model.model.model.layers.10.self_attn.q_proj.lora_A.default.weight', 'llama_model_lora.base_model.model.model.layers.10.self_attn.q_proj.lora_B.default.weight', 'llama_model_lora.base_model.model.model.layers.10.self_attn.k_proj.weight', 'llama_model_lora.base_model.model.model.layers.10.self_attn.v_proj.weight', 'llama_model_lora.base_model.model.model.layers.10.self_attn.v_proj.lora_A.default.weight', 'llama_model_lora.base_model.model.model.layers.10.self_attn.v_proj.lora_B.default.weight', 'llama_model_lora.base_model.model.model.layers.10.self_attn.o_proj.weight', 'llama_model_lora.base_model.model.model.layers.10.self_attn.rotary_emb.inv_freq', 'llama_model_lora.base_model.model.model.layers.10.mlp.gate_proj.weight', 'llama_model_lora.base_model.model.model.layers.10.mlp.down_proj.weight', 'llama_model_lora.base_model.model.model.layers.10.mlp.up_proj.weight', 'llama_model_lora.base_model.model.model.layers.10.input_layernorm.weight', 'llama_model_lora.base_model.model.model.layers.10.post_attention_layernorm.weight', 'llama_model_lora.base_model.model.model.layers.11.self_attn.q_proj.weight', 'llama_model_lora.base_model.model.model.layers.11.self_attn.q_proj.lora_A.default.weight', 'llama_model_lora.base_model.model.model.layers.11.self_attn.q_proj.lora_B.default.weight', 'llama_model_lora.base_model.model.model.layers.11.self_attn.k_proj.weight', 'llama_model_lora.base_model.model.model.layers.11.self_attn.v_proj.weight', 'llama_model_lora.base_model.model.model.layers.11.self_attn.v_proj.lora_A.default.weight', 'llama_model_lora.base_model.model.model.layers.11.self_attn.v_proj.lora_B.default.weight', 'llama_model_lora.base_model.model.model.layers.11.self_attn.o_proj.weight', 'llama_model_lora.base_model.model.model.layers.11.self_attn.rotary_emb.inv_freq', 'llama_model_lora.base_model.model.model.layers.11.mlp.gate_proj.weight', 'llama_model_lora.base_model.model.model.layers.11.mlp.down_proj.weight', 'llama_model_lora.base_model.model.model.layers.11.mlp.up_proj.weight', 'llama_model_lora.base_model.model.model.layers.11.input_layernorm.weight', 'llama_model_lora.base_model.model.model.layers.11.post_attention_layernorm.weight', 'llama_model_lora.base_model.model.model.layers.12.self_attn.q_proj.weight', 'llama_model_lora.base_model.model.model.layers.12.self_attn.q_proj.lora_A.default.weight', 'llama_model_lora.base_model.model.model.layers.12.self_attn.q_proj.lora_B.default.weight', 'llama_model_lora.base_model.model.model.layers.12.self_attn.k_proj.weight', 'llama_model_lora.base_model.model.model.layers.12.self_attn.v_proj.weight', 'llama_model_lora.base_model.model.model.layers.12.self_attn.v_proj.lora_A.default.weight', 'llama_model_lora.base_model.model.model.layers.12.self_attn.v_proj.lora_B.default.weight', 'llama_model_lora.base_model.model.model.layers.12.self_attn.o_proj.weight', 'llama_model_lora.base_model.model.model.layers.12.self_attn.rotary_emb.inv_freq', 'llama_model_lora.base_model.model.model.layers.12.mlp.gate_proj.weight', 'llama_model_lora.base_model.model.model.layers.12.mlp.down_proj.weight', 'llama_model_lora.base_model.model.model.layers.12.mlp.up_proj.weight', 'llama_model_lora.base_model.model.model.layers.12.input_layernorm.weight', 'llama_model_lora.base_model.model.model.layers.12.post_attention_layernorm.weight', 'llama_model_lora.base_model.model.model.layers.13.self_attn.q_proj.weight', 'llama_model_lora.base_model.model.model.layers.13.self_attn.q_proj.lora_A.default.weight', 'llama_model_lora.base_model.model.model.layers.13.self_attn.q_proj.lora_B.default.weight', 'llama_model_lora.base_model.model.model.layers.13.self_attn.k_proj.weight', 'llama_model_lora.base_model.model.model.layers.13.self_attn.v_proj.weight', 'llama_model_lora.base_model.model.model.layers.13.self_attn.v_proj.lora_A.default.weight', 'llama_model_lora.base_model.model.model.layers.13.self_attn.v_proj.lora_B.default.weight', 'llama_model_lora.base_model.model.model.layers.13.self_attn.o_proj.weight', 'llama_model_lora.base_model.model.model.layers.13.self_attn.rotary_emb.inv_freq', 'llama_model_lora.base_model.model.model.layers.13.mlp.gate_proj.weight', 'llama_model_lora.base_model.model.model.layers.13.mlp.down_proj.weight', 'llama_model_lora.base_model.model.model.layers.13.mlp.up_proj.weight', 'llama_model_lora.base_model.model.model.layers.13.input_layernorm.weight', 'llama_model_lora.base_model.model.model.layers.13.post_attention_layernorm.weight', 'llama_model_lora.base_model.model.model.layers.14.self_attn.q_proj.weight', 'llama_model_lora.base_model.model.model.layers.14.self_attn.q_proj.lora_A.default.weight', 'llama_model_lora.base_model.model.model.layers.14.self_attn.q_proj.lora_B.default.weight', 'llama_model_lora.base_model.model.model.layers.14.self_attn.k_proj.weight', 'llama_model_lora.base_model.model.model.layers.14.self_attn.v_proj.weight', 'llama_model_lora.base_model.model.model.layers.14.self_attn.v_proj.lora_A.default.weight', 'llama_model_lora.base_model.model.model.layers.14.self_attn.v_proj.lora_B.default.weight', 'llama_model_lora.base_model.model.model.layers.14.self_attn.o_proj.weight', 'llama_model_lora.base_model.model.model.layers.14.self_attn.rotary_emb.inv_freq', 'llama_model_lora.base_model.model.model.layers.14.mlp.gate_proj.weight', 'llama_model_lora.base_model.model.model.layers.14.mlp.down_proj.weight', 'llama_model_lora.base_model.model.model.layers.14.mlp.up_proj.weight', 'llama_model_lora.base_model.model.model.layers.14.input_layernorm.weight', 'llama_model_lora.base_model.model.model.layers.14.post_attention_layernorm.weight', 'llama_model_lora.base_model.model.model.layers.15.self_attn.q_proj.weight', 'llama_model_lora.base_model.model.model.layers.15.self_attn.q_proj.lora_A.default.weight', 'llama_model_lora.base_model.model.model.layers.15.self_attn.q_proj.lora_B.default.weight', 'llama_model_lora.base_model.model.model.layers.15.self_attn.k_proj.weight', 'llama_model_lora.base_model.model.model.layers.15.self_attn.v_proj.weight', 'llama_model_lora.base_model.model.model.layers.15.self_attn.v_proj.lora_A.default.weight', 'llama_model_lora.base_model.model.model.layers.15.self_attn.v_proj.lora_B.default.weight', 'llama_model_lora.base_model.model.model.layers.15.self_attn.o_proj.weight', 'llama_model_lora.base_model.model.model.layers.15.self_attn.rotary_emb.inv_freq', 'llama_model_lora.base_model.model.model.layers.15.mlp.gate_proj.weight', 'llama_model_lora.base_model.model.model.layers.15.mlp.down_proj.weight', 'llama_model_lora.base_model.model.model.layers.15.mlp.up_proj.weight', 'llama_model_lora.base_model.model.model.layers.15.input_layernorm.weight', 'llama_model_lora.base_model.model.model.layers.15.post_attention_layernorm.weight', 'llama_model_lora.base_model.model.model.layers.16.self_attn.q_proj.weight', 'llama_model_lora.base_model.model.model.layers.16.self_attn.q_proj.lora_A.default.weight', 'llama_model_lora.base_model.model.model.layers.16.self_attn.q_proj.lora_B.default.weight', 'llama_model_lora.base_model.model.model.layers.16.self_attn.k_proj.weight', 'llama_model_lora.base_model.model.model.layers.16.self_attn.v_proj.weight', 'llama_model_lora.base_model.model.model.layers.16.self_attn.v_proj.lora_A.default.weight', 'llama_model_lora.base_model.model.model.layers.16.self_attn.v_proj.lora_B.default.weight', 'llama_model_lora.base_model.model.model.layers.16.self_attn.o_proj.weight', 'llama_model_lora.base_model.model.model.layers.16.self_attn.rotary_emb.inv_freq', 'llama_model_lora.base_model.model.model.layers.16.mlp.gate_proj.weight', 'llama_model_lora.base_model.model.model.layers.16.mlp.down_proj.weight', 'llama_model_lora.base_model.model.model.layers.16.mlp.up_proj.weight', 'llama_model_lora.base_model.model.model.layers.16.input_layernorm.weight', 'llama_model_lora.base_model.model.model.layers.16.post_attention_layernorm.weight', 'llama_model_lora.base_model.model.model.layers.17.self_attn.q_proj.weight', 'llama_model_lora.base_model.model.model.layers.17.self_attn.q_proj.lora_A.default.weight', 'llama_model_lora.base_model.model.model.layers.17.self_attn.q_proj.lora_B.default.weight', 'llama_model_lora.base_model.model.model.layers.17.self_attn.k_proj.weight', 'llama_model_lora.base_model.model.model.layers.17.self_attn.v_proj.weight', 'llama_model_lora.base_model.model.model.layers.17.self_attn.v_proj.lora_A.default.weight', 'llama_model_lora.base_model.model.model.layers.17.self_attn.v_proj.lora_B.default.weight', 'llama_model_lora.base_model.model.model.layers.17.self_attn.o_proj.weight', 'llama_model_lora.base_model.model.model.layers.17.self_attn.rotary_emb.inv_freq', 'llama_model_lora.base_model.model.model.layers.17.mlp.gate_proj.weight', 'llama_model_lora.base_model.model.model.layers.17.mlp.down_proj.weight', 'llama_model_lora.base_model.model.model.layers.17.mlp.up_proj.weight', 'llama_model_lora.base_model.model.model.layers.17.input_layernorm.weight', 'llama_model_lora.base_model.model.model.layers.17.post_attention_layernorm.weight', 'llama_model_lora.base_model.model.model.layers.18.self_attn.q_proj.weight', 'llama_model_lora.base_model.model.model.layers.18.self_attn.q_proj.lora_A.default.weight', 'llama_model_lora.base_model.model.model.layers.18.self_attn.q_proj.lora_B.default.weight', 'llama_model_lora.base_model.model.model.layers.18.self_attn.k_proj.weight', 'llama_model_lora.base_model.model.model.layers.18.self_attn.v_proj.weight', 'llama_model_lora.base_model.model.model.layers.18.self_attn.v_proj.lora_A.default.weight', 'llama_model_lora.base_model.model.model.layers.18.self_attn.v_proj.lora_B.default.weight', 'llama_model_lora.base_model.model.model.layers.18.self_attn.o_proj.weight', 'llama_model_lora.base_model.model.model.layers.18.self_attn.rotary_emb.inv_freq', 'llama_model_lora.base_model.model.model.layers.18.mlp.gate_proj.weight', 'llama_model_lora.base_model.model.model.layers.18.mlp.down_proj.weight', 'llama_model_lora.base_model.model.model.layers.18.mlp.up_proj.weight', 'llama_model_lora.base_model.model.model.layers.18.input_layernorm.weight', 'llama_model_lora.base_model.model.model.layers.18.post_attention_layernorm.weight', 'llama_model_lora.base_model.model.model.layers.19.self_attn.q_proj.weight', 'llama_model_lora.base_model.model.model.layers.19.self_attn.q_proj.lora_A.default.weight', 'llama_model_lora.base_model.model.model.layers.19.self_attn.q_proj.lora_B.default.weight', 'llama_model_lora.base_model.model.model.layers.19.self_attn.k_proj.weight', 'llama_model_lora.base_model.model.model.layers.19.self_attn.v_proj.weight', 'llama_model_lora.base_model.model.model.layers.19.self_attn.v_proj.lora_A.default.weight', 'llama_model_lora.base_model.model.model.layers.19.self_attn.v_proj.lora_B.default.weight', 'llama_model_lora.base_model.model.model.layers.19.self_attn.o_proj.weight', 'llama_model_lora.base_model.model.model.layers.19.self_attn.rotary_emb.inv_freq', 'llama_model_lora.base_model.model.model.layers.19.mlp.gate_proj.weight', 'llama_model_lora.base_model.model.model.layers.19.mlp.down_proj.weight', 'llama_model_lora.base_model.model.model.layers.19.mlp.up_proj.weight', 'llama_model_lora.base_model.model.model.layers.19.input_layernorm.weight', 'llama_model_lora.base_model.model.model.layers.19.post_attention_layernorm.weight', 'llama_model_lora.base_model.model.model.layers.20.self_attn.q_proj.weight', 'llama_model_lora.base_model.model.model.layers.20.self_attn.q_proj.lora_A.default.weight', 'llama_model_lora.base_model.model.model.layers.20.self_attn.q_proj.lora_B.default.weight', 'llama_model_lora.base_model.model.model.layers.20.self_attn.k_proj.weight', 'llama_model_lora.base_model.model.model.layers.20.self_attn.v_proj.weight', 'llama_model_lora.base_model.model.model.layers.20.self_attn.v_proj.lora_A.default.weight', 'llama_model_lora.base_model.model.model.layers.20.self_attn.v_proj.lora_B.default.weight', 'llama_model_lora.base_model.model.model.layers.20.self_attn.o_proj.weight', 'llama_model_lora.base_model.model.model.layers.20.self_attn.rotary_emb.inv_freq', 'llama_model_lora.base_model.model.model.layers.20.mlp.gate_proj.weight', 'llama_model_lora.base_model.model.model.layers.20.mlp.down_proj.weight', 'llama_model_lora.base_model.model.model.layers.20.mlp.up_proj.weight', 'llama_model_lora.base_model.model.model.layers.20.input_layernorm.weight', 'llama_model_lora.base_model.model.model.layers.20.post_attention_layernorm.weight', 'llama_model_lora.base_model.model.model.layers.21.self_attn.q_proj.weight', 'llama_model_lora.base_model.model.model.layers.21.self_attn.q_proj.lora_A.default.weight', 'llama_model_lora.base_model.model.model.layers.21.self_attn.q_proj.lora_B.default.weight', 'llama_model_lora.base_model.model.model.layers.21.self_attn.k_proj.weight', 'llama_model_lora.base_model.model.model.layers.21.self_attn.v_proj.weight', 'llama_model_lora.base_model.model.model.layers.21.self_attn.v_proj.lora_A.default.weight', 'llama_model_lora.base_model.model.model.layers.21.self_attn.v_proj.lora_B.default.weight', 'llama_model_lora.base_model.model.model.layers.21.self_attn.o_proj.weight', 'llama_model_lora.base_model.model.model.layers.21.self_attn.rotary_emb.inv_freq', 'llama_model_lora.base_model.model.model.layers.21.mlp.gate_proj.weight', 'llama_model_lora.base_model.model.model.layers.21.mlp.down_proj.weight', 'llama_model_lora.base_model.model.model.layers.21.mlp.up_proj.weight', 'llama_model_lora.base_model.model.model.layers.21.input_layernorm.weight', 'llama_model_lora.base_model.model.model.layers.21.post_attention_layernorm.weight', 'llama_model_lora.base_model.model.model.layers.22.self_attn.q_proj.weight', 'llama_model_lora.base_model.model.model.layers.22.self_attn.q_proj.lora_A.default.weight', 'llama_model_lora.base_model.model.model.layers.22.self_attn.q_proj.lora_B.default.weight', 'llama_model_lora.base_model.model.model.layers.22.self_attn.k_proj.weight', 'llama_model_lora.base_model.model.model.layers.22.self_attn.v_proj.weight', 'llama_model_lora.base_model.model.model.layers.22.self_attn.v_proj.lora_A.default.weight', 'llama_model_lora.base_model.model.model.layers.22.self_attn.v_proj.lora_B.default.weight', 'llama_model_lora.base_model.model.model.layers.22.self_attn.o_proj.weight', 'llama_model_lora.base_model.model.model.layers.22.self_attn.rotary_emb.inv_freq', 'llama_model_lora.base_model.model.model.layers.22.mlp.gate_proj.weight', 'llama_model_lora.base_model.model.model.layers.22.mlp.down_proj.weight', 'llama_model_lora.base_model.model.model.layers.22.mlp.up_proj.weight', 'llama_model_lora.base_model.model.model.layers.22.input_layernorm.weight', 'llama_model_lora.base_model.model.model.layers.22.post_attention_layernorm.weight', 'llama_model_lora.base_model.model.model.layers.23.self_attn.q_proj.weight', 'llama_model_lora.base_model.model.model.layers.23.self_attn.q_proj.lora_A.default.weight', 'llama_model_lora.base_model.model.model.layers.23.self_attn.q_proj.lora_B.default.weight', 'llama_model_lora.base_model.model.model.layers.23.self_attn.k_proj.weight', 'llama_model_lora.base_model.model.model.layers.23.self_attn.v_proj.weight', 'llama_model_lora.base_model.model.model.layers.23.self_attn.v_proj.lora_A.default.weight', 'llama_model_lora.base_model.model.model.layers.23.self_attn.v_proj.lora_B.default.weight', 'llama_model_lora.base_model.model.model.layers.23.self_attn.o_proj.weight', 'llama_model_lora.base_model.model.model.layers.23.self_attn.rotary_emb.inv_freq', 'llama_model_lora.base_model.model.model.layers.23.mlp.gate_proj.weight', 'llama_model_lora.base_model.model.model.layers.23.mlp.down_proj.weight', 'llama_model_lora.base_model.model.model.layers.23.mlp.up_proj.weight', 'llama_model_lora.base_model.model.model.layers.23.input_layernorm.weight', 'llama_model_lora.base_model.model.model.layers.23.post_attention_layernorm.weight', 'llama_model_lora.base_model.model.model.layers.24.self_attn.q_proj.weight', 'llama_model_lora.base_model.model.model.layers.24.self_attn.q_proj.lora_A.default.weight', 'llama_model_lora.base_model.model.model.layers.24.self_attn.q_proj.lora_B.default.weight', 'llama_model_lora.base_model.model.model.layers.24.self_attn.k_proj.weight', 'llama_model_lora.base_model.model.model.layers.24.self_attn.v_proj.weight', 'llama_model_lora.base_model.model.model.layers.24.self_attn.v_proj.lora_A.default.weight', 'llama_model_lora.base_model.model.model.layers.24.self_attn.v_proj.lora_B.default.weight', 'llama_model_lora.base_model.model.model.layers.24.self_attn.o_proj.weight', 'llama_model_lora.base_model.model.model.layers.24.self_attn.rotary_emb.inv_freq', 'llama_model_lora.base_model.model.model.layers.24.mlp.gate_proj.weight', 'llama_model_lora.base_model.model.model.layers.24.mlp.down_proj.weight', 'llama_model_lora.base_model.model.model.layers.24.mlp.up_proj.weight', 'llama_model_lora.base_model.model.model.layers.24.input_layernorm.weight', 'llama_model_lora.base_model.model.model.layers.24.post_attention_layernorm.weight', 'llama_model_lora.base_model.model.model.layers.25.self_attn.q_proj.weight', 'llama_model_lora.base_model.model.model.layers.25.self_attn.q_proj.lora_A.default.weight', 'llama_model_lora.base_model.model.model.layers.25.self_attn.q_proj.lora_B.default.weight', 'llama_model_lora.base_model.model.model.layers.25.self_attn.k_proj.weight', 'llama_model_lora.base_model.model.model.layers.25.self_attn.v_proj.weight', 'llama_model_lora.base_model.model.model.layers.25.self_attn.v_proj.lora_A.default.weight', 'llama_model_lora.base_model.model.model.layers.25.self_attn.v_proj.lora_B.default.weight', 'llama_model_lora.base_model.model.model.layers.25.self_attn.o_proj.weight', 'llama_model_lora.base_model.model.model.layers.25.self_attn.rotary_emb.inv_freq', 'llama_model_lora.base_model.model.model.layers.25.mlp.gate_proj.weight', 'llama_model_lora.base_model.model.model.layers.25.mlp.down_proj.weight', 'llama_model_lora.base_model.model.model.layers.25.mlp.up_proj.weight', 'llama_model_lora.base_model.model.model.layers.25.input_layernorm.weight', 'llama_model_lora.base_model.model.model.layers.25.post_attention_layernorm.weight', 'llama_model_lora.base_model.model.model.layers.26.self_attn.q_proj.weight', 'llama_model_lora.base_model.model.model.layers.26.self_attn.q_proj.lora_A.default.weight', 'llama_model_lora.base_model.model.model.layers.26.self_attn.q_proj.lora_B.default.weight', 'llama_model_lora.base_model.model.model.layers.26.self_attn.k_proj.weight', 'llama_model_lora.base_model.model.model.layers.26.self_attn.v_proj.weight', 'llama_model_lora.base_model.model.model.layers.26.self_attn.v_proj.lora_A.default.weight', 'llama_model_lora.base_model.model.model.layers.26.self_attn.v_proj.lora_B.default.weight', 'llama_model_lora.base_model.model.model.layers.26.self_attn.o_proj.weight', 'llama_model_lora.base_model.model.model.layers.26.self_attn.rotary_emb.inv_freq', 'llama_model_lora.base_model.model.model.layers.26.mlp.gate_proj.weight', 'llama_model_lora.base_model.model.model.layers.26.mlp.down_proj.weight', 'llama_model_lora.base_model.model.model.layers.26.mlp.up_proj.weight', 'llama_model_lora.base_model.model.model.layers.26.input_layernorm.weight', 'llama_model_lora.base_model.model.model.layers.26.post_attention_layernorm.weight', 'llama_model_lora.base_model.model.model.layers.27.self_attn.q_proj.weight', 'llama_model_lora.base_model.model.model.layers.27.self_attn.q_proj.lora_A.default.weight', 'llama_model_lora.base_model.model.model.layers.27.self_attn.q_proj.lora_B.default.weight', 'llama_model_lora.base_model.model.model.layers.27.self_attn.k_proj.weight', 'llama_model_lora.base_model.model.model.layers.27.self_attn.v_proj.weight', 'llama_model_lora.base_model.model.model.layers.27.self_attn.v_proj.lora_A.default.weight', 'llama_model_lora.base_model.model.model.layers.27.self_attn.v_proj.lora_B.default.weight', 'llama_model_lora.base_model.model.model.layers.27.self_attn.o_proj.weight', 'llama_model_lora.base_model.model.model.layers.27.self_attn.rotary_emb.inv_freq', 'llama_model_lora.base_model.model.model.layers.27.mlp.gate_proj.weight', 'llama_model_lora.base_model.model.model.layers.27.mlp.down_proj.weight', 'llama_model_lora.base_model.model.model.layers.27.mlp.up_proj.weight', 'llama_model_lora.base_model.model.model.layers.27.input_layernorm.weight', 'llama_model_lora.base_model.model.model.layers.27.post_attention_layernorm.weight', 'llama_model_lora.base_model.model.model.layers.28.self_attn.q_proj.weight', 'llama_model_lora.base_model.model.model.layers.28.self_attn.q_proj.lora_A.default.weight', 'llama_model_lora.base_model.model.model.layers.28.self_attn.q_proj.lora_B.default.weight', 'llama_model_lora.base_model.model.model.layers.28.self_attn.k_proj.weight', 'llama_model_lora.base_model.model.model.layers.28.self_attn.v_proj.weight', 'llama_model_lora.base_model.model.model.layers.28.self_attn.v_proj.lora_A.default.weight', 'llama_model_lora.base_model.model.model.layers.28.self_attn.v_proj.lora_B.default.weight', 'llama_model_lora.base_model.model.model.layers.28.self_attn.o_proj.weight', 'llama_model_lora.base_model.model.model.layers.28.self_attn.rotary_emb.inv_freq', 'llama_model_lora.base_model.model.model.layers.28.mlp.gate_proj.weight', 'llama_model_lora.base_model.model.model.layers.28.mlp.down_proj.weight', 'llama_model_lora.base_model.model.model.layers.28.mlp.up_proj.weight', 'llama_model_lora.base_model.model.model.layers.28.input_layernorm.weight', 'llama_model_lora.base_model.model.model.layers.28.post_attention_layernorm.weight', 'llama_model_lora.base_model.model.model.layers.29.self_attn.q_proj.weight', 'llama_model_lora.base_model.model.model.layers.29.self_attn.q_proj.lora_A.default.weight', 'llama_model_lora.base_model.model.model.layers.29.self_attn.q_proj.lora_B.default.weight', 'llama_model_lora.base_model.model.model.layers.29.self_attn.k_proj.weight', 'llama_model_lora.base_model.model.model.layers.29.self_attn.v_proj.weight', 'llama_model_lora.base_model.model.model.layers.29.self_attn.v_proj.lora_A.default.weight', 'llama_model_lora.base_model.model.model.layers.29.self_attn.v_proj.lora_B.default.weight', 'llama_model_lora.base_model.model.model.layers.29.self_attn.o_proj.weight', 'llama_model_lora.base_model.model.model.layers.29.self_attn.rotary_emb.inv_freq', 'llama_model_lora.base_model.model.model.layers.29.mlp.gate_proj.weight', 'llama_model_lora.base_model.model.model.layers.29.mlp.down_proj.weight', 'llama_model_lora.base_model.model.model.layers.29.mlp.up_proj.weight', 'llama_model_lora.base_model.model.model.layers.29.input_layernorm.weight', 'llama_model_lora.base_model.model.model.layers.29.post_attention_layernorm.weight', 'llama_model_lora.base_model.model.model.layers.30.self_attn.q_proj.weight', 'llama_model_lora.base_model.model.model.layers.30.self_attn.q_proj.lora_A.default.weight', 'llama_model_lora.base_model.model.model.layers.30.self_attn.q_proj.lora_B.default.weight', 'llama_model_lora.base_model.model.model.layers.30.self_attn.k_proj.weight', 'llama_model_lora.base_model.model.model.layers.30.self_attn.v_proj.weight', 'llama_model_lora.base_model.model.model.layers.30.self_attn.v_proj.lora_A.default.weight', 'llama_model_lora.base_model.model.model.layers.30.self_attn.v_proj.lora_B.default.weight', 'llama_model_lora.base_model.model.model.layers.30.self_attn.o_proj.weight', 'llama_model_lora.base_model.model.model.layers.30.self_attn.rotary_emb.inv_freq', 'llama_model_lora.base_model.model.model.layers.30.mlp.gate_proj.weight', 'llama_model_lora.base_model.model.model.layers.30.mlp.down_proj.weight', 'llama_model_lora.base_model.model.model.layers.30.mlp.up_proj.weight', 'llama_model_lora.base_model.model.model.layers.30.input_layernorm.weight', 'llama_model_lora.base_model.model.model.layers.30.post_attention_layernorm.weight', 'llama_model_lora.base_model.model.model.layers.31.self_attn.q_proj.weight', 'llama_model_lora.base_model.model.model.layers.31.self_attn.q_proj.lora_A.default.weight', 'llama_model_lora.base_model.model.model.layers.31.self_attn.q_proj.lora_B.default.weight', 'llama_model_lora.base_model.model.model.layers.31.self_attn.k_proj.weight', 'llama_model_lora.base_model.model.model.layers.31.self_attn.v_proj.weight', 'llama_model_lora.base_model.model.model.layers.31.self_attn.v_proj.lora_A.default.weight', 'llama_model_lora.base_model.model.model.layers.31.self_attn.v_proj.lora_B.default.weight', 'llama_model_lora.base_model.model.model.layers.31.self_attn.o_proj.weight', 'llama_model_lora.base_model.model.model.layers.31.self_attn.rotary_emb.inv_freq', 'llama_model_lora.base_model.model.model.layers.31.mlp.gate_proj.weight', 'llama_model_lora.base_model.model.model.layers.31.mlp.down_proj.weight', 'llama_model_lora.base_model.model.model.layers.31.mlp.up_proj.weight', 'llama_model_lora.base_model.model.model.layers.31.input_layernorm.weight', 'llama_model_lora.base_model.model.model.layers.31.post_attention_layernorm.weight', 'llama_model_lora.base_model.model.model.norm.weight', 'llama_model_lora.base_model.model.lm_head.weight', 'llama_proj.0.weight', 'llama_proj.0.bias', 'llama_proj.2.weight', 'llama_proj.2.bias'], unexpected_keys=[])
+answer token ids: pos: 3869 neg ids: 1939
+Prompt Pos Example 
+#Question: A user has given high ratings to the following movies: <ItemTitleList>. Additionally, we have information about the user's preferences encoded in the feature <UserID>. Using all available information, make a prediction about whether the user would enjoy the movie titled <TargetItemTitle> with the feature <TargetItemID>? Answer with "Yes" or "No". \n#Answer: Yes or No
+
+>>> CIE-R REGULARIZER (effective): cie_reg_lambda=0.1 (read from YAML key model.cie_reg_lambda)
+
+2026-08-25 09:03:55,740 [INFO] Start training
+2026-08-25 09:03:55,770 [INFO] dataset_ratios not specified, datasets will be concatenated (map-style datasets) or chained (webdataset.DataPipeline).
+2026-08-25 09:03:55,770 [INFO] Loaded 33891 records for train split from the dataset.
+2026-08-25 09:03:55,770 [INFO] Loaded 5200 records for valid split from the dataset.
+2026-08-25 09:03:55,770 [INFO] Loaded 7331 records for test split from the dataset.
+llama_proj.0.weight
+llama_proj.0.bias
+llama_proj.2.weight
+llama_proj.2.bias
+2026-08-25 09:03:55,788 [INFO] number of trainable parameters: 11147776
+2026-08-25 09:03:55,789 [INFO] Start training epoch 0, 50 iters per inner epoch.
+prompt example: <s>#Question: A user has given high ratings to the following movies: "Empire Records (1995)", "Deep End of the Ocean, The (1999)", "Beach, The (2000)", "Color Purple, The (1985)", "Erin Brockovich (2000)", "Monty Python and the Holy Grail (1974)", "Mission: Impossible 2 (2000)", "NeverEnding Story II: The Next Chapter, The (1990)", "NeverEnding Story, The (1984)", "Sister Act 2: Back in the Habit (1993)". Additionally, we have information about the user's preferences encoded in the feature <unk>. Using all available information, make a prediction about whether the user would enjoy the movie titled "Rebecca (1940)" with the feature <unk>? Answer with "Yes" or "No". \n#Answer:
+#######prmpt decoded example:  </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> </s> <s> # Question : A user has given high ratings to the following mov ies : un kow . Additionally , we have information about the user ' s prefer ences encoded in the feature  <unk> . Using all available information , make a prediction about whether the user would enjoy the movie titled " W ay of the Gun , The ( 2 0 0 0 )" with the feature  <unk> ? Answer with " Yes " or " No ". \ n # Answer :
+2026-08-25 09:04:04,552 [WARNING] `use_cache=True` is incompatible with gradient checkpointing. Setting `use_cache=False`...
+/usr/local/lib/python3.12/dist-packages/torch/_dynamo/eval_frame.py:1181: UserWarning: torch.utils.checkpoint: the use_reentrant parameter should be passed explicitly. Starting in PyTorch 2.9, calling checkpoint without use_reentrant will raise an exception. use_reentrant=False is recommended, but if you need to preserve the current default behavior, you can pass use_reentrant=True. Refer to docs for more details on the differences between the two variants.
+  return fn(*args, **kwargs)
+>>> CIE-R REGULARIZER ACTIVE in training forward: lambda=0.1 (first training step confirmed)
+Train: data epoch: [0]  [ 0/50]  eta: 0:09:51  lr: 0.000010  loss: 0.9265  time: 11.8362  data: 0.0000  max mem: 13555
+Train: data epoch: [0]  [49/50]  eta: 0:00:02  lr: 0.000253  loss: 0.9162  time: 2.8628  data: 0.0000  max mem: 13731
+Train: data epoch: [0] Total time: 0:02:17 (2.7501 s / it)
+2026-08-25 09:06:13,295 [INFO] Averaged stats: lr: 0.000131  loss: 0.687066
+2026-08-25 09:06:13,298 [INFO] Evaluating on valid.
+Evaluation  [   0/1300]  eta: 0:26:11  loss: 0.6562  acc: 0.0000  time: 1.2087  data: 0.1982  max mem: 13815
+Evaluation  [ 260/1300]  eta: 0:16:55  loss: 0.7415  acc: 0.0000  time: 0.9688  data: 0.0009  max mem: 13957
+Evaluation  [ 520/1300]  eta: 0:12:45  loss: 0.5816  acc: 0.0000  time: 0.9838  data: 0.0010  max mem: 13995
+Evaluation  [ 780/1300]  eta: 0:08:30  loss: 0.7204  acc: 0.2500  time: 0.9786  data: 0.0010  max mem: 14030
+Evaluation  [1040/1300]  eta: 0:04:15  loss: 0.5645  acc: 0.0000  time: 0.9684  data: 0.0009  max mem: 14030
+Evaluation  [1299/1300]  eta: 0:00:00  loss: 0.7639  acc: 0.0000  time: 0.9752  data: 0.0043  max mem: 14030
+Evaluation Total time: 0:21:18 (0.9832 s / it)
+only one interaction users: 48
+computed user: 283 can not users: 0
+uauc for validation Cost: 0.2929952144622803 uauc: nan
+only one interaction users: 48
+computed user: 239 can not users: 44
+ndcg for validation Cost: 0.008763551712036133 ndcg: 0.8384957411957825
+2026-08-25 09:27:31,837 [INFO] Averaged stats: loss: 0.651873  acc: 0.202500 ***auc: 0.6659557733589181 ***uauc:(np.float64(nan), [np.int64(20), np.int64(26), np.int64(33), np.int64(34), np.int64(36), np.int64(37), np.int64(39), np.int64(40), np.int64(41), np.int64(48), np.int64(49), np.int64(57), np.int64(71), np.int64(72), np.int64(73), np.int64(79), np.int64(83), np.int64(85), np.int64(87), np.int64(91), np.int64(93), np.int64(95), np.int64(104), np.int64(107), np.int64(108), np.int64(109), np.int64(110), np.int64(112), np.int64(115), np.int64(119), np.int64(121), np.int64(124), np.int64(126), np.int64(139), np.int64(142), np.int64(145), np.int64(147), np.int64(149), np.int64(153), np.int64(155), np.int64(159), np.int64(164), np.int64(165), np.int64(167), np.int64(169), np.int64(170), np.int64(171), np.int64(173), np.int64(174), np.int64(175), np.int64(177), np.int64(178), np.int64(180), np.int64(184), np.int64(185), np.int64(186), np.int64(193), np.int64(195), np.int64(197), np.int64(198), np.int64(199), np.int64(200), np.int64(204), np.int64(205), np.int64(207), np.int64(208), np.int64(210), np.int64(212), np.int64(214), np.int64(215), np.int64(217), np.int64(221), np.int64(222), np.int64(226), np.int64(227), np.int64(228), np.int64(230), np.int64(231), np.int64(237), np.int64(242), np.int64(246), np.int64(247), np.int64(249), np.int64(250), np.int64(255), np.int64(256), np.int64(260), np.int64(261), np.int64(264), np.int64(271), np.int64(273), np.int64(275), np.int64(277), np.int64(279), np.int64(280), np.int64(282), np.int64(286), np.int64(291), np.int64(292), np.int64(296), np.int64(297), np.int64(298), np.int64(300), np.int64(301), np.int64(303), np.int64(304), np.int64(308), np.int64(309), np.int64(312), np.int64(314), np.int64(325), np.int64(327), np.int64(329), np.int64(333), np.int64(336), np.int64(338), np.int64(340), np.int64(341), np.int64(345), np.int64(346), np.int64(350), np.int64(353), np.int64(356), np.int64(364), np.int64(366), np.int64(367), np.int64(368), np.int64(370), np.int64(377), np.int64(381), np.int64(382), np.int64(384), np.int64(389), np.int64(402), np.int64(415), np.int64(426), np.int64(427), np.int64(428), np.int64(433), np.int64(434), np.int64(436), np.int64(438), np.int64(441), np.int64(444), np.int64(446), np.int64(447), np.int64(449), np.int64(451), np.int64(453), np.int64(456), np.int64(458), np.int64(462), np.int64(466), np.int64(470), np.int64(472), np.int64(474), np.int64(475), np.int64(482), np.int64(484), np.int64(490), np.int64(494), np.int64(496), np.int64(498), np.int64(500), np.int64(509), np.int64(512), np.int64(515), np.int64(516), np.int64(521), np.int64(522), np.int64(523), np.int64(528), np.int64(529), np.int64(530), np.int64(531), np.int64(533), np.int64(535), np.int64(537), np.int64(540), np.int64(546), np.int64(550), np.int64(552), np.int64(558), np.int64(561), np.int64(562), np.int64(563), np.int64(566), np.int64(568), np.int64(569), np.int64(570), np.int64(575), np.int64(576), np.int64(577), np.int64(581), np.int64(583), np.int64(598), np.int64(604), np.int64(607), np.int64(608), np.int64(609), np.int64(613), np.int64(617), np.int64(624), np.int64(626), np.int64(627), np.int64(628), np.int64(629), np.int64(630), np.int64(632), np.int64(633), np.int64(637), np.int64(643), np.int64(645), np.int64(649), np.int64(650), np.int64(651), np.int64(658), np.int64(664), np.int64(665), np.int64(669), np.int64(670), np.int64(671), np.int64(672), np.int64(676), np.int64(686), np.int64(688), np.int64(690), np.int64(695), np.int64(696), np.int64(697), np.int64(698), np.int64(699), np.int64(700), np.int64(701), np.int64(702), np.int64(706), np.int64(707), np.int64(709), np.int64(712), np.int64(714), np.int64(718), np.int64(720), np.int64(721), np.int64(725), np.int64(727), np.int64(728), np.int64(733), np.int64(744), np.int64(748), np.int64(750), np.int64(752), np.int64(753), np.int64(755), np.int64(756), np.int64(758), np.int64(760), np.int64(761), np.int64(762), np.int64(767), np.int64(769), np.int64(772), np.int64(773), np.int64(774), np.int64(779), np.int64(784), np.int64(786), np.int64(788), np.int64(789), np.int64(793), np.int64(795), np.int64(797), np.int64(798), np.int64(799), np.int64(802), np.int64(803), np.int64(804), np.int64(809), np.int64(814), np.int64(816), np.int64(818), np.int64(827), np.int64(829), np.int64(833)], array([0.        , 0.6875    , 0.5       ,        nan, 0.65384615,
+       1.        , 1.        , 0.48979592, 0.96521739,        nan,
+       0.57738095, 0.75      ,        nan, 0.35416667, 0.8487395 ,
+       0.47619048, 0.82916667, 0.375     , 0.6235119 ,        nan,
+       1.        , 0.41666667, 0.72222222, 0.8       , 0.79444444,
+       0.75      , 0.93333333, 0.        ,        nan, 0.        ,
+       0.62815657, 0.76190476,        nan, 0.93333333, 0.625     ,
+       0.53333333, 0.70833333, 0.75      , 1.        , 0.75      ,
+       1.        , 0.75798212, 0.80952381,        nan,        nan,
+       0.57839721, 0.47222222, 1.        , 0.625     , 0.        ,
+       0.57076923, 1.        , 1.        ,        nan, 0.75      ,
+       0.33333333, 0.63194444,        nan, 1.        ,        nan,
+              nan, 0.        , 0.        , 0.80952381, 0.66666667,
+       0.89506173, 0.9       , 0.83333333, 0.375     , 0.69642857,
+              nan, 0.45833333, 0.56632653, 0.57142857, 1.        ,
+       0.7075    , 0.63664596, 0.80494505, 0.5       , 0.25      ,
+       0.83333333, 1.        , 0.6       , 0.63636364, 0.33333333,
+              nan, 1.        , 0.66666667, 0.5254902 , 0.0625    ,
+       0.78373016, 0.43684211, 0.76397516, 0.58333333,        nan,
+       0.5       , 0.57037037, 0.42857143, 0.98677249, 0.63194444,
+       0.60980392, 0.57291667, 0.3627451 ,        nan,        nan,
+       0.81578947, 0.78823529, 0.89915966, 0.46031746, 0.9       ,
+       0.875     , 1.        , 0.6875    ,        nan, 0.        ,
+       0.4       , 0.66666667, 0.75      , 0.70833333, 0.5       ,
+       0.61904762, 0.55555556, 1.        , 0.53703704,        nan,
+       0.765625  , 0.83333333, 0.35      , 1.        , 0.46      ,
+       0.78703704, 0.5       , 0.53480475, 0.6       , 1.        ,
+       0.33333333, 0.66666667, 1.        , 0.46666667, 0.63503164,
+       0.95238095,        nan, 0.5627451 , 1.        , 0.71403509,
+              nan, 0.92857143, 0.83333333, 0.        ,        nan,
+       0.55929038, 0.79347826, 0.        , 0.3125    , 1.        ,
+       1.        , 0.55555556, 1.        , 0.        , 0.75      ,
+       0.76842105, 0.        , 0.51428571, 0.        ,        nan,
+       0.375     ,        nan, 0.71440972, 0.83333333, 0.71428571,
+              nan,        nan, 0.5       , 0.48888889, 0.68449198,
+              nan,        nan,        nan,        nan,        nan,
+       1.        ,        nan, 0.45833333, 1.        , 0.25      ,
+       0.62222222, 0.        , 0.53846154, 0.47142857,        nan,
+       0.8125    , 0.25      , 1.        , 1.        , 0.875     ,
+       0.75      , 0.5       , 0.81568627, 0.5018315 , 0.51785714,
+       0.3452381 , 0.44444444, 0.36666667, 0.60294118, 0.58585859,
+       0.44444444, 0.67575413, 0.30909091, 0.62962963, 0.25      ,
+              nan, 0.54346638, 0.625     , 1.        , 0.5       ,
+              nan, 0.5       , 1.        , 0.54074074, 0.68181818,
+       0.5       , 0.38888889, 1.        , 0.9       , 0.66      ,
+              nan, 1.        , 0.        , 0.90909091, 0.5       ,
+       0.46      , 0.66666667, 0.66666667, 1.        , 0.22222222,
+       0.72433575, 0.48      , 0.46783626, 0.37226891, 0.38095238,
+       0.47058824, 0.5625    ,        nan, 0.72222222, 1.        ,
+       0.33333333, 0.73076923,        nan, 0.        ,        nan,
+       0.83333333, 0.66666667,        nan,        nan, 0.40625   ,
+       0.        , 0.        , 0.6       , 1.        , 0.        ,
+       1.        , 0.74615385, 0.81632653, 0.87878788, 0.925     ,
+       1.        , 1.        , 0.        , 0.14285714, 1.        ,
+       0.65384615, 0.75347222, 1.        , 0.60678351, 1.        ,
+       0.40909091, 0.93333333, 0.77310924,        nan, 0.8       ,
+              nan,        nan, 0.77272727])) ***ndcg:0.8384957411957825
+rank_0 auc: 0.6659557733589181
+2026-08-25 09:27:31,862 [INFO] Saving checkpoint at epoch 0 to /kaggle/working/collm_logs/collm-cie-r-l01/20260825090/checkpoint_best.pth (model state 44.6 MB, 4 keys).
+2026-08-25 09:27:32,128 [INFO] Start training
+2026-08-25 09:27:32,153 [INFO] Start training epoch 1, 50 iters per inner epoch.
+/usr/local/lib/python3.12/dist-packages/torch/_dynamo/eval_frame.py:1181: UserWarning: torch.utils.checkpoint: the use_reentrant parameter should be passed explicitly. Starting in PyTorch 2.9, calling checkpoint without use_reentrant will raise an exception. use_reentrant=False is recommended, but if you need to preserve the current default behavior, you can pass use_reentrant=True. Refer to docs for more details on the differences between the two variants.
+  return fn(*args, **kwargs)
+Train: data epoch: [1]  [ 0/50]  eta: 0:02:21  lr: 0.000010  loss: 0.6999  time: 2.8340  data: 0.0000  max mem: 14030
+Train: data epoch: [1]  [49/50]  eta: 0:00:02  lr: 0.000253  loss: 0.6979  time: 2.8665  data: 0.0000  max mem: 14030
+Train: data epoch: [1] Total time: 0:02:21 (2.8342 s / it)
+2026-08-25 09:29:53,861 [INFO] Averaged stats: lr: 0.000131  loss: 0.691819
+2026-08-25 09:29:53,883 [INFO] Saving checkpoint at epoch 1 to /kaggle/working/collm_logs/collm-cie-r-l01/20260825090/checkpoint_1.pth (model state 44.6 MB, 4 keys).
+2026-08-25 09:29:54,149 [INFO] Start training
+2026-08-25 09:29:54,176 [INFO] Start training epoch 2, 50 iters per inner epoch.
+Train: data epoch: [2]  [ 0/50]  eta: 0:02:15  lr: 0.000010  loss: 0.5372  time: 2.7072  data: 0.0000  max mem: 14030
+Train: data epoch: [2]  [49/50]  eta: 0:00:02  lr: 0.000253  loss: 0.6739  time: 2.8612  data: 0.0000  max mem: 14030
+Train: data epoch: [2] Total time: 0:02:23 (2.8629 s / it)
+2026-08-25 09:32:17,320 [INFO] Averaged stats: lr: 0.000131  loss: 0.663203
+2026-08-25 09:32:17,323 [INFO] Evaluating on valid.
+Evaluation  [   0/1300]  eta: 0:26:15  loss: 0.6553  acc: 0.0000  time: 1.2117  data: 0.2036  max mem: 14030
+Evaluation  [ 260/1300]  eta: 0:17:05  loss: 0.7042  acc: 0.2500  time: 0.9713  data: 0.0009  max mem: 14030
+Evaluation  [ 520/1300]  eta: 0:12:48  loss: 0.6061  acc: 0.0000  time: 0.9893  data: 0.0009  max mem: 14030
+Evaluation  [ 780/1300]  eta: 0:08:32  loss: 0.6933  acc: 0.2500  time: 0.9768  data: 0.0009  max mem: 14030
+Evaluation  [1040/1300]  eta: 0:04:16  loss: 0.5205  acc: 0.0000  time: 0.9687  data: 0.0010  max mem: 14030
+Evaluation  [1299/1300]  eta: 0:00:00  loss: 0.7117  acc: 0.0000  time: 0.9730  data: 0.0046  max mem: 14030
+Evaluation Total time: 0:21:19 (0.9840 s / it)
+only one interaction users: 48
+computed user: 283 can not users: 0
+uauc for validation Cost: 0.2877464294433594 uauc: nan
+only one interaction users: 48
+computed user: 239 can not users: 44
+ndcg for validation Cost: 0.010441064834594727 ndcg: 0.8405361784996344
+2026-08-25 09:53:36,803 [INFO] Averaged stats: loss: 0.636917  acc: 0.207115 ***auc: 0.6893709299526826 ***uauc:(np.float64(nan), [np.int64(20), np.int64(26), np.int64(33), np.int64(34), np.int64(36), np.int64(37), np.int64(39), np.int64(40), np.int64(41), np.int64(48), np.int64(49), np.int64(57), np.int64(71), np.int64(72), np.int64(73), np.int64(79), np.int64(83), np.int64(85), np.int64(87), np.int64(91), np.int64(93), np.int64(95), np.int64(104), np.int64(107), np.int64(108), np.int64(109), np.int64(110), np.int64(112), np.int64(115), np.int64(119), np.int64(121), np.int64(124), np.int64(126), np.int64(139), np.int64(142), np.int64(145), np.int64(147), np.int64(149), np.int64(153), np.int64(155), np.int64(159), np.int64(164), np.int64(165), np.int64(167), np.int64(169), np.int64(170), np.int64(171), np.int64(173), np.int64(174), np.int64(175), np.int64(177), np.int64(178), np.int64(180), np.int64(184), np.int64(185), np.int64(186), np.int64(193), np.int64(195), np.int64(197), np.int64(198), np.int64(199), np.int64(200), np.int64(204), np.int64(205), np.int64(207), np.int64(208), np.int64(210), np.int64(212), np.int64(214), np.int64(215), np.int64(217), np.int64(221), np.int64(222), np.int64(226), np.int64(227), np.int64(228), np.int64(230), np.int64(231), np.int64(237), np.int64(242), np.int64(246), np.int64(247), np.int64(249), np.int64(250), np.int64(255), np.int64(256), np.int64(260), np.int64(261), np.int64(264), np.int64(271), np.int64(273), np.int64(275), np.int64(277), np.int64(279), np.int64(280), np.int64(282), np.int64(286), np.int64(291), np.int64(292), np.int64(296), np.int64(297), np.int64(298), np.int64(300), np.int64(301), np.int64(303), np.int64(304), np.int64(308), np.int64(309), np.int64(312), np.int64(314), np.int64(325), np.int64(327), np.int64(329), np.int64(333), np.int64(336), np.int64(338), np.int64(340), np.int64(341), np.int64(345), np.int64(346), np.int64(350), np.int64(353), np.int64(356), np.int64(364), np.int64(366), np.int64(367), np.int64(368), np.int64(370), np.int64(377), np.int64(381), np.int64(382), np.int64(384), np.int64(389), np.int64(402), np.int64(415), np.int64(426), np.int64(427), np.int64(428), np.int64(433), np.int64(434), np.int64(436), np.int64(438), np.int64(441), np.int64(444), np.int64(446), np.int64(447), np.int64(449), np.int64(451), np.int64(453), np.int64(456), np.int64(458), np.int64(462), np.int64(466), np.int64(470), np.int64(472), np.int64(474), np.int64(475), np.int64(482), np.int64(484), np.int64(490), np.int64(494), np.int64(496), np.int64(498), np.int64(500), np.int64(509), np.int64(512), np.int64(515), np.int64(516), np.int64(521), np.int64(522), np.int64(523), np.int64(528), np.int64(529), np.int64(530), np.int64(531), np.int64(533), np.int64(535), np.int64(537), np.int64(540), np.int64(546), np.int64(550), np.int64(552), np.int64(558), np.int64(561), np.int64(562), np.int64(563), np.int64(566), np.int64(568), np.int64(569), np.int64(570), np.int64(575), np.int64(576), np.int64(577), np.int64(581), np.int64(583), np.int64(598), np.int64(604), np.int64(607), np.int64(608), np.int64(609), np.int64(613), np.int64(617), np.int64(624), np.int64(626), np.int64(627), np.int64(628), np.int64(629), np.int64(630), np.int64(632), np.int64(633), np.int64(637), np.int64(643), np.int64(645), np.int64(649), np.int64(650), np.int64(651), np.int64(658), np.int64(664), np.int64(665), np.int64(669), np.int64(670), np.int64(671), np.int64(672), np.int64(676), np.int64(686), np.int64(688), np.int64(690), np.int64(695), np.int64(696), np.int64(697), np.int64(698), np.int64(699), np.int64(700), np.int64(701), np.int64(702), np.int64(706), np.int64(707), np.int64(709), np.int64(712), np.int64(714), np.int64(718), np.int64(720), np.int64(721), np.int64(725), np.int64(727), np.int64(728), np.int64(733), np.int64(744), np.int64(748), np.int64(750), np.int64(752), np.int64(753), np.int64(755), np.int64(756), np.int64(758), np.int64(760), np.int64(761), np.int64(762), np.int64(767), np.int64(769), np.int64(772), np.int64(773), np.int64(774), np.int64(779), np.int64(784), np.int64(786), np.int64(788), np.int64(789), np.int64(793), np.int64(795), np.int64(797), np.int64(798), np.int64(799), np.int64(802), np.int64(803), np.int64(804), np.int64(809), np.int64(814), np.int64(816), np.int64(818), np.int64(827), np.int64(829), np.int64(833)], array([0.        , 0.66964286, 0.5       ,        nan, 0.62179487,
+       1.        , 1.        , 0.48979592, 0.94782609,        nan,
+       0.5952381 , 0.75      ,        nan, 0.4375    , 0.84453782,
+       0.53968254, 0.83862847, 0.375     , 0.61904762,        nan,
+       1.        , 0.33333333, 0.74444444, 0.78947368, 0.80555556,
+       0.75      , 0.93333333, 0.        ,        nan, 0.        ,
+       0.62626263, 0.78571429,        nan, 0.93333333, 0.625     ,
+       0.53333333, 0.73611111, 0.83333333, 1.        , 0.75      ,
+       1.        , 0.78799489, 0.82142857,        nan,        nan,
+       0.5966899 , 0.48611111, 1.        , 0.5       , 0.        ,
+       0.54769231, 1.        , 0.9       ,        nan, 1.        ,
+       0.66666667, 0.625     ,        nan, 1.        ,        nan,
+              nan, 0.        , 0.        , 0.81547619, 0.66666667,
+       0.90740741, 0.975     , 0.83333333, 0.5       , 0.67857143,
+              nan, 0.43055556, 0.59693878, 0.60714286, 1.        ,
+       0.69166667, 0.63354037, 0.81456044, 0.5       , 0.25      ,
+       0.83333333, 1.        , 0.60434783, 0.60606061, 0.66666667,
+              nan, 1.        , 0.67530658, 0.52745098, 0.125     ,
+       0.80952381, 0.40526316, 0.77763975, 0.75      ,        nan,
+       0.5       , 0.57037037, 0.57142857, 0.98677249, 0.59027778,
+       0.5372549 , 0.56445312, 0.39215686,        nan,        nan,
+       0.88596491, 0.87058824, 0.89915966, 0.42857143, 0.9       ,
+       0.875     , 1.        , 0.6875    ,        nan, 0.        ,
+       0.4       , 0.33333333, 0.75      , 0.70833333, 1.        ,
+       0.66666667, 0.55555556, 1.        , 0.54139434,        nan,
+       0.78125   , 0.83333333, 0.35      , 1.        , 0.48      ,
+       0.76851852, 0.5       , 0.53140917, 0.6       , 1.        ,
+       0.36111111, 0.66666667, 1.        , 0.46666667, 0.63053613,
+       0.95238095,        nan, 0.56078431, 1.        , 0.68070175,
+              nan, 0.96428571, 0.83333333, 0.33333333,        nan,
+       0.5620915 , 0.79347826, 0.        , 0.33333333, 1.        ,
+       0.8       , 0.55555556, 1.        , 0.5       , 0.75      ,
+       0.78947368, 0.        , 0.48571429, 0.        ,        nan,
+       0.25      ,        nan, 0.71875   , 0.83333333, 0.7244898 ,
+              nan,        nan, 0.6       , 0.48888889, 0.55614973,
+              nan,        nan,        nan,        nan,        nan,
+       1.        ,        nan, 0.47222222, 1.        , 0.25      ,
+       0.65555556, 1.        , 0.52136752, 0.47952381,        nan,
+       0.75      , 0.33333333, 1.        , 1.        , 0.875     ,
+       0.75      , 0.5       , 0.82352941, 0.47374847, 0.51785714,
+       0.32142857, 0.55555556, 0.4       , 0.56617647, 0.55555556,
+       0.44444444, 0.68275906, 0.32727273, 0.59259259, 0.5       ,
+              nan, 0.54647348, 0.625     , 1.        , 0.5       ,
+              nan, 0.41666667, 1.        , 0.51851852, 0.65909091,
+       0.5       , 0.40277778, 1.        , 0.9       , 0.72      ,
+              nan, 1.        , 0.        , 0.81818182, 0.5       ,
+       0.456     , 0.        , 0.66666667, 1.        , 0.22222222,
+       0.73294082, 0.52      , 0.42397661, 0.38151261, 0.35714286,
+       0.47058824, 0.58333333,        nan, 0.72222222, 1.        ,
+       0.33333333, 0.75      ,        nan, 0.        ,        nan,
+       0.83333333, 0.53333333,        nan,        nan, 0.421875  ,
+       0.        , 0.        , 0.6       , 1.        , 0.        ,
+       1.        , 0.74615385, 0.84693878, 0.87878788, 0.925     ,
+       1.        , 0.88888889, 0.16666667, 0.14285714, 1.        ,
+       0.75641026, 0.75347222, 1.        , 0.61335605, 1.        ,
+       0.45454545, 0.93333333, 0.79831933,        nan, 0.8       ,
+              nan,        nan, 0.77651515])) ***ndcg:0.8405361784996344
+rank_0 auc: 0.6893709299526826
+2026-08-25 09:53:36,827 [INFO] Saving checkpoint at epoch 2 to /kaggle/working/collm_logs/collm-cie-r-l01/20260825090/checkpoint_best.pth (model state 44.6 MB, 4 keys).
+2026-08-25 09:53:37,203 [INFO] Start training
+2026-08-25 09:53:37,229 [INFO] Start training epoch 3, 50 iters per inner epoch.
+/usr/local/lib/python3.12/dist-packages/torch/_dynamo/eval_frame.py:1181: UserWarning: torch.utils.checkpoint: the use_reentrant parameter should be passed explicitly. Starting in PyTorch 2.9, calling checkpoint without use_reentrant will raise an exception. use_reentrant=False is recommended, but if you need to preserve the current default behavior, you can pass use_reentrant=True. Refer to docs for more details on the differences between the two variants.
+  return fn(*args, **kwargs)
+Train: data epoch: [3]  [ 0/50]  eta: 0:02:26  lr: 0.000010  loss: 0.7488  time: 2.9202  data: 0.0000  max mem: 14030
+Train: data epoch: [3]  [49/50]  eta: 0:00:02  lr: 0.000253  loss: 0.5144  time: 2.8108  data: 0.0000  max mem: 14030
+Train: data epoch: [3] Total time: 0:02:21 (2.8326 s / it)
+2026-08-25 09:55:58,859 [INFO] Averaged stats: lr: 0.000131  loss: 0.656288
+2026-08-25 09:55:58,879 [INFO] Saving checkpoint at epoch 3 to /kaggle/working/collm_logs/collm-cie-r-l01/20260825090/checkpoint_3.pth (model state 44.6 MB, 4 keys).
+2026-08-25 09:55:59,134 [INFO] Start training
+2026-08-25 09:55:59,160 [INFO] Start training epoch 4, 50 iters per inner epoch.
+Train: data epoch: [4]  [ 0/50]  eta: 0:02:18  lr: 0.000770  loss: 0.5550  time: 2.7678  data: 0.0000  max mem: 14030
+Train: data epoch: [4]  [49/50]  eta: 0:00:02  lr: 0.000661  loss: 0.4660  time: 2.8368  data: 0.0000  max mem: 14030
+Train: data epoch: [4] Total time: 0:02:21 (2.8303 s / it)
+2026-08-25 09:58:20,676 [INFO] Averaged stats: lr: 0.000717  loss: 0.626056
+2026-08-25 09:58:20,679 [INFO] Evaluating on valid.
+Evaluation  [   0/1300]  eta: 0:26:00  loss: 0.6177  acc: 0.2500  time: 1.2001  data: 0.2004  max mem: 14030
+Evaluation  [ 260/1300]  eta: 0:16:58  loss: 0.6743  acc: 0.2500  time: 0.9706  data: 0.0008  max mem: 14030
+Evaluation  [ 520/1300]  eta: 0:12:43  loss: 0.6975  acc: 0.2500  time: 0.9878  data: 0.0009  max mem: 14030
+Evaluation  [ 780/1300]  eta: 0:08:30  loss: 0.5612  acc: 0.0000  time: 0.9761  data: 0.0009  max mem: 14030
+Evaluation  [1040/1300]  eta: 0:04:15  loss: 0.5936  acc: 0.2500  time: 0.9770  data: 0.0010  max mem: 14030
+Evaluation  [1299/1300]  eta: 0:00:00  loss: 0.6746  acc: 0.0000  time: 0.9869  data: 0.0051  max mem: 14030
+Evaluation Total time: 0:21:19 (0.9839 s / it)
+only one interaction users: 48
+computed user: 283 can not users: 0
+uauc for validation Cost: 0.3237802982330322 uauc: nan
+only one interaction users: 48
+computed user: 239 can not users: 44
+ndcg for validation Cost: 0.010827779769897461 ndcg: 0.8358649962468279
+2026-08-25 10:19:40,071 [INFO] Averaged stats: loss: 0.633032  acc: 0.181154 ***auc: 0.6913961814887897 ***uauc:(np.float64(nan), [np.int64(20), np.int64(26), np.int64(33), np.int64(34), np.int64(36), np.int64(37), np.int64(39), np.int64(40), np.int64(41), np.int64(48), np.int64(49), np.int64(57), np.int64(71), np.int64(72), np.int64(73), np.int64(79), np.int64(83), np.int64(85), np.int64(87), np.int64(91), np.int64(93), np.int64(95), np.int64(104), np.int64(107), np.int64(108), np.int64(109), np.int64(110), np.int64(112), np.int64(115), np.int64(119), np.int64(121), np.int64(124), np.int64(126), np.int64(139), np.int64(142), np.int64(145), np.int64(147), np.int64(149), np.int64(153), np.int64(155), np.int64(159), np.int64(164), np.int64(165), np.int64(167), np.int64(169), np.int64(170), np.int64(171), np.int64(173), np.int64(174), np.int64(175), np.int64(177), np.int64(178), np.int64(180), np.int64(184), np.int64(185), np.int64(186), np.int64(193), np.int64(195), np.int64(197), np.int64(198), np.int64(199), np.int64(200), np.int64(204), np.int64(205), np.int64(207), np.int64(208), np.int64(210), np.int64(212), np.int64(214), np.int64(215), np.int64(217), np.int64(221), np.int64(222), np.int64(226), np.int64(227), np.int64(228), np.int64(230), np.int64(231), np.int64(237), np.int64(242), np.int64(246), np.int64(247), np.int64(249), np.int64(250), np.int64(255), np.int64(256), np.int64(260), np.int64(261), np.int64(264), np.int64(271), np.int64(273), np.int64(275), np.int64(277), np.int64(279), np.int64(280), np.int64(282), np.int64(286), np.int64(291), np.int64(292), np.int64(296), np.int64(297), np.int64(298), np.int64(300), np.int64(301), np.int64(303), np.int64(304), np.int64(308), np.int64(309), np.int64(312), np.int64(314), np.int64(325), np.int64(327), np.int64(329), np.int64(333), np.int64(336), np.int64(338), np.int64(340), np.int64(341), np.int64(345), np.int64(346), np.int64(350), np.int64(353), np.int64(356), np.int64(364), np.int64(366), np.int64(367), np.int64(368), np.int64(370), np.int64(377), np.int64(381), np.int64(382), np.int64(384), np.int64(389), np.int64(402), np.int64(415), np.int64(426), np.int64(427), np.int64(428), np.int64(433), np.int64(434), np.int64(436), np.int64(438), np.int64(441), np.int64(444), np.int64(446), np.int64(447), np.int64(449), np.int64(451), np.int64(453), np.int64(456), np.int64(458), np.int64(462), np.int64(466), np.int64(470), np.int64(472), np.int64(474), np.int64(475), np.int64(482), np.int64(484), np.int64(490), np.int64(494), np.int64(496), np.int64(498), np.int64(500), np.int64(509), np.int64(512), np.int64(515), np.int64(516), np.int64(521), np.int64(522), np.int64(523), np.int64(528), np.int64(529), np.int64(530), np.int64(531), np.int64(533), np.int64(535), np.int64(537), np.int64(540), np.int64(546), np.int64(550), np.int64(552), np.int64(558), np.int64(561), np.int64(562), np.int64(563), np.int64(566), np.int64(568), np.int64(569), np.int64(570), np.int64(575), np.int64(576), np.int64(577), np.int64(581), np.int64(583), np.int64(598), np.int64(604), np.int64(607), np.int64(608), np.int64(609), np.int64(613), np.int64(617), np.int64(624), np.int64(626), np.int64(627), np.int64(628), np.int64(629), np.int64(630), np.int64(632), np.int64(633), np.int64(637), np.int64(643), np.int64(645), np.int64(649), np.int64(650), np.int64(651), np.int64(658), np.int64(664), np.int64(665), np.int64(669), np.int64(670), np.int64(671), np.int64(672), np.int64(676), np.int64(686), np.int64(688), np.int64(690), np.int64(695), np.int64(696), np.int64(697), np.int64(698), np.int64(699), np.int64(700), np.int64(701), np.int64(702), np.int64(706), np.int64(707), np.int64(709), np.int64(712), np.int64(714), np.int64(718), np.int64(720), np.int64(721), np.int64(725), np.int64(727), np.int64(728), np.int64(733), np.int64(744), np.int64(748), np.int64(750), np.int64(752), np.int64(753), np.int64(755), np.int64(756), np.int64(758), np.int64(760), np.int64(761), np.int64(762), np.int64(767), np.int64(769), np.int64(772), np.int64(773), np.int64(774), np.int64(779), np.int64(784), np.int64(786), np.int64(788), np.int64(789), np.int64(793), np.int64(795), np.int64(797), np.int64(798), np.int64(799), np.int64(802), np.int64(803), np.int64(804), np.int64(809), np.int64(814), np.int64(816), np.int64(818), np.int64(827), np.int64(829), np.int64(833)], array([0.        , 0.71428571, 0.5       ,        nan, 0.58974359,
+       1.        , 1.        , 0.55102041, 0.94782609,        nan,
+       0.54761905, 0.5       ,        nan, 0.5       , 0.8697479 ,
+       0.41269841, 0.84253472, 0.5       , 0.61309524,        nan,
+       1.        , 0.66666667, 0.74444444, 0.57894737, 0.49166667,
+       0.75      , 0.93333333, 0.        ,        nan, 0.        ,
+       0.58806818, 0.66666667,        nan, 0.93333333, 0.625     ,
+       0.46666667, 0.75      , 0.83333333, 1.        , 0.5625    ,
+       1.        , 0.77394636, 0.82142857,        nan,        nan,
+       0.62543554, 0.56944444, 1.        , 0.5       , 0.        ,
+       0.58384615, 1.        , 1.        ,        nan, 1.        ,
+       0.33333333, 0.54166667,        nan, 1.        ,        nan,
+              nan, 0.        , 0.        , 0.75595238, 1.        ,
+       0.89506173, 0.95      , 0.83333333, 0.5       , 0.66071429,
+              nan, 0.44444444, 0.58163265, 0.57142857, 1.        ,
+       0.76083333, 0.66770186, 0.82967033, 0.5       , 0.25      ,
+       0.83333333, 1.        , 0.4826087 , 0.63636364, 1.        ,
+              nan, 0.625     , 0.68338907, 0.54117647, 0.1875    ,
+       0.82738095, 0.40526316, 0.71925466, 0.79166667,        nan,
+       0.44444444, 0.58148148, 0.71428571, 0.81922399, 0.61111111,
+       0.38496732, 0.61848958, 0.47058824,        nan,        nan,
+       0.85087719, 0.88235294, 0.93277311, 0.44444444, 0.9       ,
+       0.875     , 0.5       , 0.70833333,        nan, 0.        ,
+       0.6       , 0.        , 0.75      , 0.69444444, 0.5       ,
+       0.61904762, 0.55555556, 1.        , 0.58605664,        nan,
+       0.75      , 0.83333333, 0.35      , 1.        , 0.44      ,
+       0.80555556, 0.5       , 0.52801358, 0.66666667, 1.        ,
+       0.25      , 0.33333333, 1.        , 0.46666667, 0.67898768,
+       0.95238095,        nan, 0.57843137, 1.        , 0.58947368,
+              nan, 0.96428571, 1.        , 0.33333333,        nan,
+       0.50980392, 0.66304348, 0.        , 0.3125    , 0.33333333,
+       0.8       , 0.58333333, 1.        , 0.        , 0.625     ,
+       0.73684211, 0.        , 0.54285714, 0.        ,        nan,
+       0.375     ,        nan, 0.60416667, 1.        , 0.71428571,
+              nan,        nan, 0.6       , 0.64444444, 0.6631016 ,
+              nan,        nan,        nan,        nan,        nan,
+       1.        ,        nan, 0.40277778, 1.        , 0.5       ,
+       0.67777778, 0.        , 0.51282051, 0.52571429,        nan,
+       0.875     , 0.5       , 1.        , 1.        , 0.91666667,
+       0.75      , 0.        , 0.61960784, 0.5018315 , 0.64285714,
+       0.6547619 , 0.44444444, 0.56666667, 0.625     , 0.57575758,
+       0.44444444, 0.66489966, 0.50909091, 0.59259259, 0.75      ,
+              nan, 0.57162384, 0.625     , 1.        , 0.5       ,
+              nan, 0.5       , 1.        , 0.57037037, 0.36363636,
+       1.        , 0.375     , 1.        , 0.7       , 0.76      ,
+              nan, 1.        , 0.        , 1.        , 0.5       ,
+       0.446     , 0.66666667, 1.        , 0.33333333, 0.33333333,
+       0.60461957, 0.44      , 0.46783626, 0.39831933, 0.54761905,
+       0.70588235, 0.60416667,        nan, 0.75      , 1.        ,
+       0.33333333, 0.73076923,        nan, 0.5       ,        nan,
+       1.        , 0.53333333,        nan,        nan, 0.4375    ,
+       0.75      , 0.        , 0.58571429, 1.        , 0.        ,
+       1.        , 0.64615385, 0.85714286, 0.87878788, 0.975     ,
+       1.        , 0.94444444, 0.5       , 0.14285714, 1.        ,
+       0.75641026, 0.76736111, 1.        , 0.56077572, 1.        ,
+       0.56060606, 0.96666667, 0.81512605,        nan, 0.8       ,
+              nan,        nan, 0.75757576])) ***ndcg:0.8358649962468279
+rank_0 auc: 0.6913961814887897
+2026-08-25 10:19:40,099 [INFO] Saving checkpoint at epoch 4 to /kaggle/working/collm_logs/collm-cie-r-l01/20260825090/checkpoint_best.pth (model state 44.6 MB, 4 keys).
+2026-08-25 10:19:40,503 [INFO] Start training
+2026-08-25 10:19:40,531 [INFO] Start training epoch 5, 50 iters per inner epoch.
+/usr/local/lib/python3.12/dist-packages/torch/_dynamo/eval_frame.py:1181: UserWarning: torch.utils.checkpoint: the use_reentrant parameter should be passed explicitly. Starting in PyTorch 2.9, calling checkpoint without use_reentrant will raise an exception. use_reentrant=False is recommended, but if you need to preserve the current default behavior, you can pass use_reentrant=True. Refer to docs for more details on the differences between the two variants.
+  return fn(*args, **kwargs)
+Train: data epoch: [5]  [ 0/50]  eta: 0:02:16  lr: 0.000659  loss: 0.4105  time: 2.7214  data: 0.0000  max mem: 14030
+Train: data epoch: [5]  [49/50]  eta: 0:00:02  lr: 0.000542  loss: 0.5195  time: 2.8049  data: 0.0000  max mem: 14030
+Train: data epoch: [5] Total time: 0:02:21 (2.8375 s / it)
+2026-08-25 10:22:02,409 [INFO] Averaged stats: lr: 0.000601  loss: 0.606991
+2026-08-25 10:22:02,433 [INFO] Saving checkpoint at epoch 5 to /kaggle/working/collm_logs/collm-cie-r-l01/20260825090/checkpoint_5.pth (model state 44.6 MB, 4 keys).
+2026-08-25 10:22:02,721 [INFO] Saving checkpoint at epoch 5 to /kaggle/working/collm_logs/collm-cie-r-l01/20260825090/checkpoint_5.pth (model state 44.6 MB, 4 keys).
+2026-08-25 10:22:03,160 [INFO] Start training
+2026-08-25 10:22:03,191 [INFO] Start training epoch 6, 50 iters per inner epoch.
+Train: data epoch: [6]  [ 0/50]  eta: 0:02:14  lr: 0.000540  loss: 0.4833  time: 2.6971  data: 0.0000  max mem: 14030
+Train: data epoch: [6]  [49/50]  eta: 0:00:02  lr: 0.000423  loss: 0.8381  time: 2.8768  data: 0.0000  max mem: 14030
+Train: data epoch: [6] Total time: 0:02:23 (2.8665 s / it)
+2026-08-25 10:24:26,517 [INFO] Averaged stats: lr: 0.000481  loss: 0.659632
+2026-08-25 10:24:26,519 [INFO] Evaluating on valid.
+Evaluation  [   0/1300]  eta: 0:26:41  loss: 0.6635  acc: 0.0000  time: 1.2319  data: 0.2207  max mem: 14030
+Evaluation  [ 260/1300]  eta: 0:17:03  loss: 0.6984  acc: 0.2500  time: 0.9641  data: 0.0011  max mem: 14030
+Evaluation  [ 520/1300]  eta: 0:12:48  loss: 0.4868  acc: 0.2500  time: 0.9919  data: 0.0010  max mem: 14030
+Evaluation  [ 780/1300]  eta: 0:08:33  loss: 0.6566  acc: 0.0000  time: 0.9817  data: 0.0010  max mem: 14030
+Evaluation  [1040/1300]  eta: 0:04:16  loss: 0.6793  acc: 0.2500  time: 0.9758  data: 0.0010  max mem: 14030
+Evaluation  [1299/1300]  eta: 0:00:00  loss: 0.6561  acc: 0.0000  time: 0.9870  data: 0.0051  max mem: 14030
+Evaluation Total time: 0:21:23 (0.9873 s / it)
+only one interaction users: 48
+computed user: 283 can not users: 0
+uauc for validation Cost: 0.3398168087005615 uauc: nan
+only one interaction users: 48
+computed user: 239 can not users: 44
+ndcg for validation Cost: 0.012109518051147461 ndcg: 0.8294560854376833
+2026-08-25 10:45:50,456 [INFO] Averaged stats: loss: 0.654130  acc: 0.212500 ***auc: 0.6562256717763577 ***uauc:(np.float64(nan), [np.int64(20), np.int64(26), np.int64(33), np.int64(34), np.int64(36), np.int64(37), np.int64(39), np.int64(40), np.int64(41), np.int64(48), np.int64(49), np.int64(57), np.int64(71), np.int64(72), np.int64(73), np.int64(79), np.int64(83), np.int64(85), np.int64(87), np.int64(91), np.int64(93), np.int64(95), np.int64(104), np.int64(107), np.int64(108), np.int64(109), np.int64(110), np.int64(112), np.int64(115), np.int64(119), np.int64(121), np.int64(124), np.int64(126), np.int64(139), np.int64(142), np.int64(145), np.int64(147), np.int64(149), np.int64(153), np.int64(155), np.int64(159), np.int64(164), np.int64(165), np.int64(167), np.int64(169), np.int64(170), np.int64(171), np.int64(173), np.int64(174), np.int64(175), np.int64(177), np.int64(178), np.int64(180), np.int64(184), np.int64(185), np.int64(186), np.int64(193), np.int64(195), np.int64(197), np.int64(198), np.int64(199), np.int64(200), np.int64(204), np.int64(205), np.int64(207), np.int64(208), np.int64(210), np.int64(212), np.int64(214), np.int64(215), np.int64(217), np.int64(221), np.int64(222), np.int64(226), np.int64(227), np.int64(228), np.int64(230), np.int64(231), np.int64(237), np.int64(242), np.int64(246), np.int64(247), np.int64(249), np.int64(250), np.int64(255), np.int64(256), np.int64(260), np.int64(261), np.int64(264), np.int64(271), np.int64(273), np.int64(275), np.int64(277), np.int64(279), np.int64(280), np.int64(282), np.int64(286), np.int64(291), np.int64(292), np.int64(296), np.int64(297), np.int64(298), np.int64(300), np.int64(301), np.int64(303), np.int64(304), np.int64(308), np.int64(309), np.int64(312), np.int64(314), np.int64(325), np.int64(327), np.int64(329), np.int64(333), np.int64(336), np.int64(338), np.int64(340), np.int64(341), np.int64(345), np.int64(346), np.int64(350), np.int64(353), np.int64(356), np.int64(364), np.int64(366), np.int64(367), np.int64(368), np.int64(370), np.int64(377), np.int64(381), np.int64(382), np.int64(384), np.int64(389), np.int64(402), np.int64(415), np.int64(426), np.int64(427), np.int64(428), np.int64(433), np.int64(434), np.int64(436), np.int64(438), np.int64(441), np.int64(444), np.int64(446), np.int64(447), np.int64(449), np.int64(451), np.int64(453), np.int64(456), np.int64(458), np.int64(462), np.int64(466), np.int64(470), np.int64(472), np.int64(474), np.int64(475), np.int64(482), np.int64(484), np.int64(490), np.int64(494), np.int64(496), np.int64(498), np.int64(500), np.int64(509), np.int64(512), np.int64(515), np.int64(516), np.int64(521), np.int64(522), np.int64(523), np.int64(528), np.int64(529), np.int64(530), np.int64(531), np.int64(533), np.int64(535), np.int64(537), np.int64(540), np.int64(546), np.int64(550), np.int64(552), np.int64(558), np.int64(561), np.int64(562), np.int64(563), np.int64(566), np.int64(568), np.int64(569), np.int64(570), np.int64(575), np.int64(576), np.int64(577), np.int64(581), np.int64(583), np.int64(598), np.int64(604), np.int64(607), np.int64(608), np.int64(609), np.int64(613), np.int64(617), np.int64(624), np.int64(626), np.int64(627), np.int64(628), np.int64(629), np.int64(630), np.int64(632), np.int64(633), np.int64(637), np.int64(643), np.int64(645), np.int64(649), np.int64(650), np.int64(651), np.int64(658), np.int64(664), np.int64(665), np.int64(669), np.int64(670), np.int64(671), np.int64(672), np.int64(676), np.int64(686), np.int64(688), np.int64(690), np.int64(695), np.int64(696), np.int64(697), np.int64(698), np.int64(699), np.int64(700), np.int64(701), np.int64(702), np.int64(706), np.int64(707), np.int64(709), np.int64(712), np.int64(714), np.int64(718), np.int64(720), np.int64(721), np.int64(725), np.int64(727), np.int64(728), np.int64(733), np.int64(744), np.int64(748), np.int64(750), np.int64(752), np.int64(753), np.int64(755), np.int64(756), np.int64(758), np.int64(760), np.int64(761), np.int64(762), np.int64(767), np.int64(769), np.int64(772), np.int64(773), np.int64(774), np.int64(779), np.int64(784), np.int64(786), np.int64(788), np.int64(789), np.int64(793), np.int64(795), np.int64(797), np.int64(798), np.int64(799), np.int64(802), np.int64(803), np.int64(804), np.int64(809), np.int64(814), np.int64(816), np.int64(818), np.int64(827), np.int64(829), np.int64(833)], array([0.5       , 0.5625    , 0.33333333,        nan, 0.49358974,
+       0.66666667, 1.        , 0.3877551 , 0.8       ,        nan,
+       0.60714286, 0.5       ,        nan, 0.54166667, 0.83193277,
+       0.58730159, 0.83003472, 0.25      , 0.72470238,        nan,
+       0.66666667, 0.33333333, 0.75555556, 0.55789474, 0.5       ,
+       1.        , 0.93333333, 0.        ,        nan, 0.        ,
+       0.65151515, 0.78571429,        nan, 0.93333333, 0.1875    ,
+       0.46666667, 0.61111111, 0.83333333, 1.        , 0.46875   ,
+       1.        , 0.79310345, 0.82936508,        nan,        nan,
+       0.60278746, 0.54166667, 1.        , 0.25      , 0.        ,
+       0.52961538, 1.        , 0.8       ,        nan, 1.        ,
+       0.66666667, 0.61805556,        nan, 0.        ,        nan,
+              nan, 0.5       , 0.        , 0.63095238, 1.        ,
+       0.91358025, 0.975     , 1.        , 0.5       , 0.67857143,
+              nan, 0.43055556, 0.62244898, 0.57142857, 0.9       ,
+       0.74666667, 0.67391304, 0.81593407, 0.5       , 0.5       ,
+       0.66666667, 0.        , 0.55652174, 0.54545455, 0.        ,
+              nan, 1.        , 0.67837235, 0.56862745, 0.125     ,
+       0.81150794, 0.45263158, 0.64906832, 0.875     ,        nan,
+       0.5       , 0.44444444, 0.57142857, 0.77513228, 0.60416667,
+       0.60686275, 0.57356771, 0.51470588,        nan,        nan,
+       0.50877193, 0.85882353, 0.69747899, 0.25396825, 0.775     ,
+       0.875     , 1.        , 0.54166667,        nan, 0.        ,
+       0.6       , 0.33333333, 0.75      , 0.625     , 1.        ,
+       0.71428571, 0.44444444, 1.        , 0.56971678,        nan,
+       0.46875   , 0.33333333, 0.9       , 1.        , 0.5       ,
+       0.80555556, 0.66666667, 0.6188455 , 0.46666667, 0.5       ,
+       0.33333333, 0.33333333, 1.        , 0.46666667, 0.51681652,
+       0.95238095,        nan, 0.69019608, 1.        , 0.57894737,
+              nan, 0.96428571, 1.        , 0.33333333,        nan,
+       0.56395892, 0.58695652, 0.        , 0.35416667, 1.        ,
+       0.6       , 0.56944444, 1.        , 1.        , 1.        ,
+       0.71578947, 0.        , 0.42857143, 0.        ,        nan,
+       0.375     ,        nan, 0.61805556, 1.        , 0.2244898 ,
+              nan,        nan, 0.6       , 0.6       , 0.52406417,
+              nan,        nan,        nan,        nan,        nan,
+       1.        ,        nan, 0.47222222, 0.        , 0.5       ,
+       0.73333333, 1.        , 0.78632479, 0.37714286,        nan,
+       0.4375    , 0.41666667, 1.        , 1.        , 0.625     ,
+       0.75      , 0.        , 0.74509804, 0.52319902, 0.76785714,
+       0.48809524, 0.66666667, 0.43333333, 0.39705882, 0.62626263,
+       0.38888889, 0.6089865 , 0.67272727, 0.59259259, 0.5       ,
+              nan, 0.53061782, 0.75      , 1.        , 0.5       ,
+              nan, 0.66666667, 1.        , 0.58518519, 0.59090909,
+       1.        , 0.48611111, 1.        , 0.8       , 0.66      ,
+              nan, 0.33333333, 0.        , 0.90909091, 0.5       ,
+       0.348     , 1.        , 0.33333333, 0.        , 0.33333333,
+       0.625     , 0.44      , 0.47953216, 0.36554622, 0.54761905,
+       0.58823529, 0.47916667,        nan, 0.61111111, 1.        ,
+       0.        , 0.86538462,        nan, 0.5       ,        nan,
+       0.66666667, 0.4       ,        nan,        nan, 0.28125   ,
+       0.25      , 0.5       , 0.64285714, 0.        , 1.        ,
+       1.        , 0.48205128, 0.86734694, 0.87878788, 0.425     ,
+       1.        , 0.33333333, 0.33333333, 0.14285714, 1.        ,
+       0.85897436, 0.68402778, 1.        , 0.52986043, 0.33333333,
+       0.51515152, 0.96666667, 0.78571429,        nan, 1.        ,
+              nan,        nan, 0.80492424])) ***ndcg:0.8294560854376833
+rank_0 auc: 0.6562256717763577
+2026-08-25 10:45:50,488 [INFO] Start training
+2026-08-25 10:45:50,520 [INFO] Start training epoch 7, 50 iters per inner epoch.
+/usr/local/lib/python3.12/dist-packages/torch/_dynamo/eval_frame.py:1181: UserWarning: torch.utils.checkpoint: the use_reentrant parameter should be passed explicitly. Starting in PyTorch 2.9, calling checkpoint without use_reentrant will raise an exception. use_reentrant=False is recommended, but if you need to preserve the current default behavior, you can pass use_reentrant=True. Refer to docs for more details on the differences between the two variants.
+  return fn(*args, **kwargs)
+Train: data epoch: [7]  [ 0/50]  eta: 0:02:28  lr: 0.000421  loss: 0.4803  time: 2.9782  data: 0.0000  max mem: 14030
+Train: data epoch: [7]  [49/50]  eta: 0:00:02  lr: 0.000312  loss: 0.5954  time: 2.8391  data: 0.0000  max mem: 14030
+Train: data epoch: [7] Total time: 0:02:21 (2.8399 s / it)
+2026-08-25 10:48:12,514 [INFO] Averaged stats: lr: 0.000366  loss: 0.584633
+2026-08-25 10:48:12,539 [INFO] Saving checkpoint at epoch 7 to /kaggle/working/collm_logs/collm-cie-r-l01/20260825090/checkpoint_7.pth (model state 44.6 MB, 4 keys).
+2026-08-25 10:48:12,824 [INFO] Pruned old periodic checkpoint /kaggle/working/collm_logs/collm-cie-r-l01/20260825090/checkpoint_1.pth (keeping 3 most recent).
+2026-08-25 10:48:12,853 [INFO] Start training
+2026-08-25 10:48:12,884 [INFO] Start training epoch 8, 50 iters per inner epoch.
+Train: data epoch: [8]  [ 0/50]  eta: 0:02:19  lr: 0.000310  loss: 0.6143  time: 2.7959  data: 0.0000  max mem: 14030
+Train: data epoch: [8]  [49/50]  eta: 0:00:02  lr: 0.000216  loss: 0.5333  time: 2.8512  data: 0.0000  max mem: 14030
+Train: data epoch: [8] Total time: 0:02:22 (2.8559 s / it)
+2026-08-25 10:50:35,680 [INFO] Averaged stats: lr: 0.000262  loss: 0.604527
+2026-08-25 10:50:35,683 [INFO] Evaluating on valid.
+Evaluation  [   0/1300]  eta: 0:26:37  loss: 0.6260  acc: 0.0000  time: 1.2285  data: 0.2146  max mem: 14030
+Evaluation  [ 260/1300]  eta: 0:17:02  loss: 0.4417  acc: 0.2500  time: 0.9682  data: 0.0011  max mem: 14030
+Evaluation  [ 520/1300]  eta: 0:12:46  loss: 0.5798  acc: 0.2500  time: 0.9868  data: 0.0010  max mem: 14030
+Evaluation  [ 780/1300]  eta: 0:08:31  loss: 0.5741  acc: 0.0000  time: 0.9713  data: 0.0011  max mem: 14030
+Evaluation  [1040/1300]  eta: 0:04:16  loss: 0.6209  acc: 0.2500  time: 0.9784  data: 0.0010  max mem: 14030
+Evaluation  [1299/1300]  eta: 0:00:00  loss: 0.5665  acc: 0.0000  time: 0.9885  data: 0.0051  max mem: 14030
+Evaluation Total time: 0:21:19 (0.9841 s / it)
+only one interaction users: 48
+computed user: 283 can not users: 0
+uauc for validation Cost: 0.33515334129333496 uauc: nan
+only one interaction users: 48
+computed user: 239 can not users: 44
+ndcg for validation Cost: 0.010820865631103516 ndcg: 0.8399788505397309
+2026-08-25 11:11:55,363 [INFO] Averaged stats: loss: 0.634797  acc: 0.160000 ***auc: 0.6878160766618474 ***uauc:(np.float64(nan), [np.int64(20), np.int64(26), np.int64(33), np.int64(34), np.int64(36), np.int64(37), np.int64(39), np.int64(40), np.int64(41), np.int64(48), np.int64(49), np.int64(57), np.int64(71), np.int64(72), np.int64(73), np.int64(79), np.int64(83), np.int64(85), np.int64(87), np.int64(91), np.int64(93), np.int64(95), np.int64(104), np.int64(107), np.int64(108), np.int64(109), np.int64(110), np.int64(112), np.int64(115), np.int64(119), np.int64(121), np.int64(124), np.int64(126), np.int64(139), np.int64(142), np.int64(145), np.int64(147), np.int64(149), np.int64(153), np.int64(155), np.int64(159), np.int64(164), np.int64(165), np.int64(167), np.int64(169), np.int64(170), np.int64(171), np.int64(173), np.int64(174), np.int64(175), np.int64(177), np.int64(178), np.int64(180), np.int64(184), np.int64(185), np.int64(186), np.int64(193), np.int64(195), np.int64(197), np.int64(198), np.int64(199), np.int64(200), np.int64(204), np.int64(205), np.int64(207), np.int64(208), np.int64(210), np.int64(212), np.int64(214), np.int64(215), np.int64(217), np.int64(221), np.int64(222), np.int64(226), np.int64(227), np.int64(228), np.int64(230), np.int64(231), np.int64(237), np.int64(242), np.int64(246), np.int64(247), np.int64(249), np.int64(250), np.int64(255), np.int64(256), np.int64(260), np.int64(261), np.int64(264), np.int64(271), np.int64(273), np.int64(275), np.int64(277), np.int64(279), np.int64(280), np.int64(282), np.int64(286), np.int64(291), np.int64(292), np.int64(296), np.int64(297), np.int64(298), np.int64(300), np.int64(301), np.int64(303), np.int64(304), np.int64(308), np.int64(309), np.int64(312), np.int64(314), np.int64(325), np.int64(327), np.int64(329), np.int64(333), np.int64(336), np.int64(338), np.int64(340), np.int64(341), np.int64(345), np.int64(346), np.int64(350), np.int64(353), np.int64(356), np.int64(364), np.int64(366), np.int64(367), np.int64(368), np.int64(370), np.int64(377), np.int64(381), np.int64(382), np.int64(384), np.int64(389), np.int64(402), np.int64(415), np.int64(426), np.int64(427), np.int64(428), np.int64(433), np.int64(434), np.int64(436), np.int64(438), np.int64(441), np.int64(444), np.int64(446), np.int64(447), np.int64(449), np.int64(451), np.int64(453), np.int64(456), np.int64(458), np.int64(462), np.int64(466), np.int64(470), np.int64(472), np.int64(474), np.int64(475), np.int64(482), np.int64(484), np.int64(490), np.int64(494), np.int64(496), np.int64(498), np.int64(500), np.int64(509), np.int64(512), np.int64(515), np.int64(516), np.int64(521), np.int64(522), np.int64(523), np.int64(528), np.int64(529), np.int64(530), np.int64(531), np.int64(533), np.int64(535), np.int64(537), np.int64(540), np.int64(546), np.int64(550), np.int64(552), np.int64(558), np.int64(561), np.int64(562), np.int64(563), np.int64(566), np.int64(568), np.int64(569), np.int64(570), np.int64(575), np.int64(576), np.int64(577), np.int64(581), np.int64(583), np.int64(598), np.int64(604), np.int64(607), np.int64(608), np.int64(609), np.int64(613), np.int64(617), np.int64(624), np.int64(626), np.int64(627), np.int64(628), np.int64(629), np.int64(630), np.int64(632), np.int64(633), np.int64(637), np.int64(643), np.int64(645), np.int64(649), np.int64(650), np.int64(651), np.int64(658), np.int64(664), np.int64(665), np.int64(669), np.int64(670), np.int64(671), np.int64(672), np.int64(676), np.int64(686), np.int64(688), np.int64(690), np.int64(695), np.int64(696), np.int64(697), np.int64(698), np.int64(699), np.int64(700), np.int64(701), np.int64(702), np.int64(706), np.int64(707), np.int64(709), np.int64(712), np.int64(714), np.int64(718), np.int64(720), np.int64(721), np.int64(725), np.int64(727), np.int64(728), np.int64(733), np.int64(744), np.int64(748), np.int64(750), np.int64(752), np.int64(753), np.int64(755), np.int64(756), np.int64(758), np.int64(760), np.int64(761), np.int64(762), np.int64(767), np.int64(769), np.int64(772), np.int64(773), np.int64(774), np.int64(779), np.int64(784), np.int64(786), np.int64(788), np.int64(789), np.int64(793), np.int64(795), np.int64(797), np.int64(798), np.int64(799), np.int64(802), np.int64(803), np.int64(804), np.int64(809), np.int64(814), np.int64(816), np.int64(818), np.int64(827), np.int64(829), np.int64(833)], array([0.        , 0.78571429, 0.5       ,        nan, 0.64102564,
+       1.        , 1.        , 0.36734694, 0.94782609,        nan,
+       0.5952381 , 0.125     ,        nan, 0.52083333, 0.8487395 ,
+       0.44444444, 0.84201389, 0.5       , 0.5766369 ,        nan,
+       1.        , 0.16666667, 0.76666667, 0.61052632, 0.53888889,
+       0.75      , 0.86666667, 0.        ,        nan, 0.        ,
+       0.64646465, 0.57142857,        nan, 0.93333333, 0.4375    ,
+       0.53333333, 0.79166667, 0.83333333, 1.        , 0.65625   ,
+       1.        , 0.77650064, 0.8452381 ,        nan,        nan,
+       0.66376307, 0.59722222, 1.        , 0.5       , 0.        ,
+       0.61615385, 1.        , 1.        ,        nan, 0.75      ,
+       0.66666667, 0.75      ,        nan, 1.        ,        nan,
+              nan, 0.        , 1.        , 0.73809524, 0.83333333,
+       0.89506173, 1.        , 1.        , 0.5       , 0.64285714,
+              nan, 0.47222222, 0.56632653, 0.5       , 1.        ,
+       0.7675    , 0.65838509, 0.80494505, 0.        , 0.25      ,
+       0.83333333, 0.        , 0.60869565, 0.6969697 , 0.        ,
+              nan, 0.125     , 0.68171683, 0.51960784, 0.3125    ,
+       0.83333333, 0.42105263, 0.61428571, 0.79166667,        nan,
+       0.61111111, 0.54074074, 0.5       , 0.88977072, 0.70138889,
+       0.65098039, 0.54166667, 0.45588235,        nan,        nan,
+       0.86842105, 0.88235294, 0.69747899, 0.42857143, 0.85      ,
+       0.875     , 1.        , 0.72916667,        nan, 0.        ,
+       0.6       , 1.        , 0.75      , 0.66666667, 0.5       ,
+       0.61904762, 0.55555556, 1.        , 0.58278867,        nan,
+       0.796875  , 0.83333333, 0.25      , 1.        , 0.6       ,
+       0.75925926, 0.5       , 0.475382  , 0.53333333, 0.75      ,
+       0.31944444, 1.        , 1.        , 0.46666667, 0.62803863,
+       0.95238095,        nan, 0.52156863, 1.        , 0.60701754,
+              nan, 0.96428571, 1.        , 0.5       ,        nan,
+       0.54598506, 0.56521739, 1.        , 0.33333333, 1.        ,
+       0.8       , 0.57638889, 1.        , 0.5       , 0.875     ,
+       0.66315789, 1.        , 0.45714286, 0.        ,        nan,
+       0.375     ,        nan, 0.69618056, 1.        , 0.67346939,
+              nan,        nan, 0.6       , 0.64444444, 0.40641711,
+              nan,        nan,        nan,        nan,        nan,
+       0.66666667,        nan, 0.51388889, 1.        , 0.        ,
+       0.78888889, 1.        , 0.52991453, 0.49047619,        nan,
+       0.5       , 0.5       , 1.        , 1.        , 0.625     ,
+       0.75      , 0.        , 0.66666667, 0.47191697, 0.67857143,
+       0.57142857, 0.55555556, 0.43333333, 0.52941176, 0.64646465,
+       0.55555556, 0.65461315, 0.52727273, 0.59259259, 0.5       ,
+              nan, 0.54401312, 0.75      , 1.        , 0.5       ,
+              nan, 0.41666667, 1.        , 0.56296296, 0.59090909,
+       1.        , 0.45833333, 1.        , 0.6       , 0.7       ,
+              nan, 1.        , 0.        , 1.        , 0.5       ,
+       0.456     , 0.66666667, 1.        , 0.33333333, 0.44444444,
+       0.57623792, 0.36      , 0.49415205, 0.33361345, 0.61904762,
+       0.61764706, 0.625     ,        nan, 0.72222222, 0.75      ,
+       0.33333333, 0.69230769,        nan, 0.        ,        nan,
+       0.33333333, 0.26666667,        nan,        nan, 0.5       ,
+       0.25      , 0.5       , 0.68571429, 1.        , 1.        ,
+       0.        , 0.56666667, 0.87755102, 0.90909091, 0.9       ,
+       1.        , 0.61111111, 0.        , 0.14285714, 1.        ,
+       0.82051282, 0.71527778, 1.        , 0.57026939, 0.        ,
+       0.48484848, 0.96666667, 0.79831933,        nan, 0.86666667,
+              nan,        nan, 0.76704545])) ***ndcg:0.8399788505397309
+rank_0 auc: 0.6878160766618474
+2026-08-25 11:11:55,396 [INFO] Start training
+2026-08-25 11:11:55,432 [INFO] Start training epoch 9, 50 iters per inner epoch.
+/usr/local/lib/python3.12/dist-packages/torch/_dynamo/eval_frame.py:1181: UserWarning: torch.utils.checkpoint: the use_reentrant parameter should be passed explicitly. Starting in PyTorch 2.9, calling checkpoint without use_reentrant will raise an exception. use_reentrant=False is recommended, but if you need to preserve the current default behavior, you can pass use_reentrant=True. Refer to docs for more details on the differences between the two variants.
+  return fn(*args, **kwargs)
+Train: data epoch: [9]  [ 0/50]  eta: 0:02:18  lr: 0.000215  loss: 0.5131  time: 2.7780  data: 0.0000  max mem: 14030
+Train: data epoch: [9]  [49/50]  eta: 0:00:02  lr: 0.000143  loss: 0.3416  time: 2.8357  data: 0.0000  max mem: 14030
+Train: data epoch: [9] Total time: 0:02:22 (2.8413 s / it)
+2026-08-25 11:14:17,496 [INFO] Averaged stats: lr: 0.000177  loss: 0.524800
+2026-08-25 11:14:17,521 [INFO] Saving checkpoint at epoch 9 to /kaggle/working/collm_logs/collm-cie-r-l01/20260825090/checkpoint_9.pth (model state 44.6 MB, 4 keys).
+2026-08-25 11:14:17,809 [INFO] Pruned old periodic checkpoint /kaggle/working/collm_logs/collm-cie-r-l01/20260825090/checkpoint_3.pth (keeping 3 most recent).
+2026-08-25 11:14:17,837 [INFO] Start training
+2026-08-25 11:14:17,866 [INFO] Start training epoch 10, 50 iters per inner epoch.
+Train: data epoch: [10]  [ 0/50]  eta: 0:02:19  lr: 0.000142  loss: 0.4509  time: 2.7872  data: 0.0000  max mem: 14030
+Train: data epoch: [10]  [49/50]  eta: 0:00:02  lr: 0.000096  loss: 0.5025  time: 2.8343  data: 0.0000  max mem: 14030
+Train: data epoch: [10] Total time: 0:02:22 (2.8562 s / it)
+2026-08-25 11:16:40,679 [INFO] Averaged stats: lr: 0.000117  loss: 0.499410
+2026-08-25 11:16:40,681 [INFO] Evaluating on valid.
+Evaluation  [   0/1300]  eta: 0:26:22  loss: 0.6176  acc: 0.2500  time: 1.2173  data: 0.2123  max mem: 14030
+Evaluation  [ 260/1300]  eta: 0:17:07  loss: 0.4631  acc: 0.2500  time: 0.9708  data: 0.0011  max mem: 14030
+Evaluation  [ 520/1300]  eta: 0:12:49  loss: 0.6208  acc: 0.2500  time: 0.9986  data: 0.0010  max mem: 14030
+Evaluation  [ 780/1300]  eta: 0:08:33  loss: 0.5802  acc: 0.2500  time: 0.9860  data: 0.0010  max mem: 14030
+Evaluation  [1040/1300]  eta: 0:04:16  loss: 0.5576  acc: 0.2500  time: 0.9748  data: 0.0011  max mem: 14030
+Evaluation  [1299/1300]  eta: 0:00:00  loss: 0.6117  acc: 0.0000  time: 0.9887  data: 0.0051  max mem: 14030
+Evaluation Total time: 0:21:22 (0.9864 s / it)
+only one interaction users: 48
+computed user: 283 can not users: 0
+uauc for validation Cost: 0.349323034286499 uauc: nan
+only one interaction users: 48
+computed user: 239 can not users: 44
+ndcg for validation Cost: 0.010817527770996094 ndcg: 0.8501255661122643
+2026-08-25 11:38:03,460 [INFO] Averaged stats: loss: 0.623468  acc: 0.217308 ***auc: 0.7033422626838625 ***uauc:(np.float64(nan), [np.int64(20), np.int64(26), np.int64(33), np.int64(34), np.int64(36), np.int64(37), np.int64(39), np.int64(40), np.int64(41), np.int64(48), np.int64(49), np.int64(57), np.int64(71), np.int64(72), np.int64(73), np.int64(79), np.int64(83), np.int64(85), np.int64(87), np.int64(91), np.int64(93), np.int64(95), np.int64(104), np.int64(107), np.int64(108), np.int64(109), np.int64(110), np.int64(112), np.int64(115), np.int64(119), np.int64(121), np.int64(124), np.int64(126), np.int64(139), np.int64(142), np.int64(145), np.int64(147), np.int64(149), np.int64(153), np.int64(155), np.int64(159), np.int64(164), np.int64(165), np.int64(167), np.int64(169), np.int64(170), np.int64(171), np.int64(173), np.int64(174), np.int64(175), np.int64(177), np.int64(178), np.int64(180), np.int64(184), np.int64(185), np.int64(186), np.int64(193), np.int64(195), np.int64(197), np.int64(198), np.int64(199), np.int64(200), np.int64(204), np.int64(205), np.int64(207), np.int64(208), np.int64(210), np.int64(212), np.int64(214), np.int64(215), np.int64(217), np.int64(221), np.int64(222), np.int64(226), np.int64(227), np.int64(228), np.int64(230), np.int64(231), np.int64(237), np.int64(242), np.int64(246), np.int64(247), np.int64(249), np.int64(250), np.int64(255), np.int64(256), np.int64(260), np.int64(261), np.int64(264), np.int64(271), np.int64(273), np.int64(275), np.int64(277), np.int64(279), np.int64(280), np.int64(282), np.int64(286), np.int64(291), np.int64(292), np.int64(296), np.int64(297), np.int64(298), np.int64(300), np.int64(301), np.int64(303), np.int64(304), np.int64(308), np.int64(309), np.int64(312), np.int64(314), np.int64(325), np.int64(327), np.int64(329), np.int64(333), np.int64(336), np.int64(338), np.int64(340), np.int64(341), np.int64(345), np.int64(346), np.int64(350), np.int64(353), np.int64(356), np.int64(364), np.int64(366), np.int64(367), np.int64(368), np.int64(370), np.int64(377), np.int64(381), np.int64(382), np.int64(384), np.int64(389), np.int64(402), np.int64(415), np.int64(426), np.int64(427), np.int64(428), np.int64(433), np.int64(434), np.int64(436), np.int64(438), np.int64(441), np.int64(444), np.int64(446), np.int64(447), np.int64(449), np.int64(451), np.int64(453), np.int64(456), np.int64(458), np.int64(462), np.int64(466), np.int64(470), np.int64(472), np.int64(474), np.int64(475), np.int64(482), np.int64(484), np.int64(490), np.int64(494), np.int64(496), np.int64(498), np.int64(500), np.int64(509), np.int64(512), np.int64(515), np.int64(516), np.int64(521), np.int64(522), np.int64(523), np.int64(528), np.int64(529), np.int64(530), np.int64(531), np.int64(533), np.int64(535), np.int64(537), np.int64(540), np.int64(546), np.int64(550), np.int64(552), np.int64(558), np.int64(561), np.int64(562), np.int64(563), np.int64(566), np.int64(568), np.int64(569), np.int64(570), np.int64(575), np.int64(576), np.int64(577), np.int64(581), np.int64(583), np.int64(598), np.int64(604), np.int64(607), np.int64(608), np.int64(609), np.int64(613), np.int64(617), np.int64(624), np.int64(626), np.int64(627), np.int64(628), np.int64(629), np.int64(630), np.int64(632), np.int64(633), np.int64(637), np.int64(643), np.int64(645), np.int64(649), np.int64(650), np.int64(651), np.int64(658), np.int64(664), np.int64(665), np.int64(669), np.int64(670), np.int64(671), np.int64(672), np.int64(676), np.int64(686), np.int64(688), np.int64(690), np.int64(695), np.int64(696), np.int64(697), np.int64(698), np.int64(699), np.int64(700), np.int64(701), np.int64(702), np.int64(706), np.int64(707), np.int64(709), np.int64(712), np.int64(714), np.int64(718), np.int64(720), np.int64(721), np.int64(725), np.int64(727), np.int64(728), np.int64(733), np.int64(744), np.int64(748), np.int64(750), np.int64(752), np.int64(753), np.int64(755), np.int64(756), np.int64(758), np.int64(760), np.int64(761), np.int64(762), np.int64(767), np.int64(769), np.int64(772), np.int64(773), np.int64(774), np.int64(779), np.int64(784), np.int64(786), np.int64(788), np.int64(789), np.int64(793), np.int64(795), np.int64(797), np.int64(798), np.int64(799), np.int64(802), np.int64(803), np.int64(804), np.int64(809), np.int64(814), np.int64(816), np.int64(818), np.int64(827), np.int64(829), np.int64(833)], array([0.        , 0.77678571, 0.5       ,        nan, 0.57692308,
+       0.83333333, 1.        , 0.42857143, 0.95652174,        nan,
+       0.57142857, 0.125     ,        nan, 0.625     , 0.85294118,
+       0.57142857, 0.83940972, 0.5       , 0.59598214,        nan,
+       1.        , 0.5       , 0.75555556, 0.61052632, 0.55555556,
+       0.75      , 0.86666667, 1.        ,        nan, 0.        ,
+       0.65530303, 0.57142857,        nan, 0.93333333, 0.5625    ,
+       0.53333333, 0.77777778, 0.83333333, 1.        , 0.671875  ,
+       1.        , 0.77969349, 0.82539683,        nan,        nan,
+       0.66027875, 0.66666667, 1.        , 0.5       , 0.        ,
+       0.63615385, 1.        , 0.8       ,        nan, 1.        ,
+       0.66666667, 0.74305556,        nan, 1.        ,        nan,
+              nan, 0.        , 1.        , 0.78571429, 0.91666667,
+       0.88888889, 1.        , 1.        , 0.5       , 0.66071429,
+              nan, 0.51388889, 0.57653061, 0.46428571, 1.        ,
+       0.78291667, 0.67391304, 0.81318681, 0.5       , 0.25      ,
+       0.83333333, 0.5       , 0.59565217, 0.6969697 , 0.33333333,
+              nan, 0.5       , 0.67948718, 0.51372549, 0.375     ,
+       0.83333333, 0.46315789, 0.67763975, 0.83333333,        nan,
+       0.61111111, 0.57777778, 0.5       , 0.91358025, 0.6875    ,
+       0.65718954, 0.56380208, 0.45588235,        nan,        nan,
+       0.86842105, 0.87058824, 0.94957983, 0.34126984, 0.875     ,
+       0.875     , 1.        , 0.72916667,        nan, 0.        ,
+       0.7       , 1.        , 0.75      , 0.90277778, 0.5       ,
+       0.71428571, 0.55555556, 0.5       , 0.53921569,        nan,
+       0.734375  , 0.83333333, 0.5       , 1.        , 0.5       ,
+       0.76851852, 0.5       , 0.41595925, 0.6       , 0.75      ,
+       0.30555556, 0.66666667, 1.        , 0.4       , 0.66233766,
+       0.95238095,        nan, 0.54313725, 1.        , 0.69473684,
+              nan, 0.96428571, 1.        , 0.5       ,        nan,
+       0.54131653, 0.60326087, 1.        , 0.29166667, 1.        ,
+       0.8       , 0.5625    , 1.        , 0.        , 0.75      ,
+       0.73684211, 0.        , 0.42857143, 0.        ,        nan,
+       0.375     ,        nan, 0.72135417, 1.        , 0.65306122,
+              nan,        nan, 0.6       , 0.51111111, 0.47058824,
+              nan,        nan,        nan,        nan,        nan,
+       0.66666667,        nan, 0.54166667, 1.        , 0.        ,
+       0.76666667, 1.        , 0.47008547, 0.50142857,        nan,
+       0.875     , 0.5       , 1.        , 1.        , 0.875     ,
+       0.75      , 0.        , 0.70980392, 0.49267399, 0.75      ,
+       0.46428571, 0.55555556, 0.46666667, 0.68382353, 0.57575758,
+       0.55555556, 0.6873659 , 0.65454545, 0.59259259, 0.5       ,
+              nan, 0.53854565, 0.75      , 1.        , 0.5       ,
+              nan, 0.75      , 1.        , 0.53333333, 0.65909091,
+       1.        , 0.47222222, 1.        , 0.5       , 0.72      ,
+              nan, 1.        , 0.        , 1.        , 0.5       ,
+       0.456     , 0.66666667, 1.        , 0.33333333, 0.44444444,
+       0.59088164, 0.36      , 0.43274854, 0.30336134, 0.57142857,
+       0.55882353, 0.58333333,        nan, 0.72222222, 0.75      ,
+       0.33333333, 0.61538462,        nan, 0.        ,        nan,
+       0.66666667, 0.4       ,        nan,        nan, 0.5625    ,
+       0.5       , 0.5       , 0.67142857, 1.        , 1.        ,
+       1.        , 0.57692308, 0.89795918, 0.93939394, 0.825     ,
+       1.        , 0.83333333, 0.16666667, 0.14285714, 1.        ,
+       0.84615385, 0.76041667, 1.        , 0.62074002, 0.        ,
+       0.53030303, 0.96666667, 0.85714286,        nan, 0.86666667,
+              nan,        nan, 0.79734848])) ***ndcg:0.8501255661122643
+rank_0 auc: 0.7033422626838625
+2026-08-25 11:38:03,493 [INFO] Saving checkpoint at epoch 10 to /kaggle/working/collm_logs/collm-cie-r-l01/20260825090/checkpoint_best.pth (model state 44.6 MB, 4 keys).
+2026-08-25 11:38:03,930 [INFO] Start training
+2026-08-25 11:38:03,962 [INFO] Start training epoch 11, 50 iters per inner epoch.
+/usr/local/lib/python3.12/dist-packages/torch/_dynamo/eval_frame.py:1181: UserWarning: torch.utils.checkpoint: the use_reentrant parameter should be passed explicitly. Starting in PyTorch 2.9, calling checkpoint without use_reentrant will raise an exception. use_reentrant=False is recommended, but if you need to preserve the current default behavior, you can pass use_reentrant=True. Refer to docs for more details on the differences between the two variants.
+  return fn(*args, **kwargs)
+Train: data epoch: [11]  [ 0/50]  eta: 0:02:18  lr: 0.000096  loss: 0.4987  time: 2.7618  data: 0.0000  max mem: 14030
+Train: data epoch: [11]  [49/50]  eta: 0:00:02  lr: 0.000080  loss: 0.5701  time: 2.8180  data: 0.0000  max mem: 14030
+Train: data epoch: [11] Total time: 0:02:21 (2.8399 s / it)
+2026-08-25 11:40:25,958 [INFO] Averaged stats: lr: 0.000085  loss: 0.549339
+2026-08-25 11:40:25,985 [INFO] Saving checkpoint at epoch 11 to /kaggle/working/collm_logs/collm-cie-r-l01/20260825090/checkpoint_11.pth (model state 44.6 MB, 4 keys).
+2026-08-25 11:40:26,277 [INFO] Pruned old periodic checkpoint /kaggle/working/collm_logs/collm-cie-r-l01/20260825090/checkpoint_5.pth (keeping 3 most recent).
+2026-08-25 11:40:26,302 [INFO] Saving checkpoint at epoch 11 to /kaggle/working/collm_logs/collm-cie-r-l01/20260825090/checkpoint_11.pth (model state 44.6 MB, 4 keys).
+2026-08-25 11:40:26,712 [INFO] Training stopped: max_epoch reached. Best epoch: 10, best agg_metrics: 0.7033422626838625.
+2026-08-25 11:40:26,713 [INFO] Training time 2:36:35
