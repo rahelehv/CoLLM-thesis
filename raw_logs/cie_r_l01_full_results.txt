@@ -3,11 +3,12 @@ Source: Kaggle session 20260829074, resumed from checkpoint_43 after crash.
 Env: single T4, max_epoch 50, eval_freq 4, cosine LR horizon=max_epoch, seed 42,
 cie_reg_lambda 0.1 confirmed active, trainable 11.1M (llama_proj 4 keys), ~51 min GPU.
 
-Valid AUC trajectory (eval_freq=4; first session epochs 0-43 not pasted, best recovered):
+Valid AUC trajectory (eval_freq=4; full official log now in raw_logs/cier_full_train_official_log.txt):
   BEST (from runner state): 0.7252266946846632 @ epoch 36
   resumed segment evals:
     epoch 44: 0.7208337125869693  ndcg 0.8605038026725559
     epoch 48: 0.7185229257523588  ndcg 0.8611430361188328
+  best-eval NDCG @36: 0.865 (from official log; tail values above are post-best)
   Final: Training stopped max_epoch reached. Best epoch 36, best 0.7252266946846632.
 
 Comparison vs baselines (same max_epoch=50, eval_freq=4 family):
