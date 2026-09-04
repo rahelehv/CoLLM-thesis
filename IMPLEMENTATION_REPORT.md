@@ -1,15 +1,16 @@
 # CoLLM Implementation Report: From Paper to Reproduced Baseline
 
 **Project:** LoRA-tuned LLM + Collaborative Filtering embeddings projected into the LLM embedding space (CoLLM, arXiv 2310.19488), ML-1M / Matrix Factorization pipeline.
-**Period:** 2026-08-08 (repo fork) through 2026-08-15 (final evaluation).
-**Status:** Baseline reproduction COMPLETE (Phases 1-4) + Option C Control done (0.72569 @28, no gain from 1→4 tokens) + CIE-G done (0.72136 @28, —0.004 vs. baseline, gated affine not supported). CIE-X next. Results comparable to (and on AUC exceeding) the paper's Table II.
+**Period:** 2026-08-08 (repo fork) through 2026-09-03 (MiCA test eval).
+**Status:** Baseline reproduction COMPLETE (Phases 1-4) + Option C Control/CIE-G/CIE-X all done (all null/negative) + CIE-A killed by diagnostic + CIE-R done (null) + **MiCA done (positive: test 0.7420/0.8710, valid 0.73223/0.8734)**. Results comparable to (and on AUC exceeding) the paper's Table II.
 
 This report is written to serve three purposes at once: (1) a deep technical record for the author's own understanding, (2) a reference for the thesis advisor and committee to probe any decision, and (3) raw material to adapt into the implementation chapter of the thesis. It deliberately includes the messy parts — the wrong turns, the dead ends, and the reasoning behind every choice — because that is what makes it defensible in a thesis defense.
 
-All commit hashes and dates are exact and pulled from `git log`. All metrics, timings, config values, and freeze-flag settings in Sections 3-6 were verified against the raw run logs in `raw_logs/` (Phase 1-4 cell outputs and official `log.txt` dumps). Two verification caveats, stated plainly:
+All commit hashes and dates are exact and pulled from `git log`. All metrics, timings, config values, and freeze-flag settings in Sections 3-6 were verified against the raw run logs in `raw_logs/` (Phase 1-4 cell outputs and official `log.txt` dumps). The post-baseline experiments (CIE-A kill-switch, CIE-R sweep + full run, MiCA stages + eval) are verified against the evidence files in `raw_logs/` (`cie_r_*_results.txt`, `step_*_unittest.txt`), which transcribe the Kaggle console/log values, cross-checked across `MEMORY.md`, `INNOVATION.md`, and commit history. Two verification caveats, stated plainly (plus a third for the newer sections):
 
 - **Config change *history*** (e.g. `max_epoch` 200→80, batch 16→4 / 64→16→8→4) comes from commit diffs; the logs confirm only the **final values actually used at runtime** (`batch_size_train=4`, `batch_size_eval=4`, `max_epoch=80`, ...).
 - **Debugging narratives** in Sections 2 and 4-6 (exact error messages for OOM / `grad_fn` / NaN / JSON / the `cput` typo, NaN magnitudes, the lost 8.5 h run, the 18 GB download) are reconstructed from commit history and session notes, **not** from these run logs — the logs capture only the final successful runs. Where a value is a runtime result it is quoted from the logs; where it is a narrative detail it is flagged as such.
+- **Provenance tiers for the post-baseline numbers.** Tier 1 (raw `log.txt`/cell dumps in `raw_logs/`): Phases 1-4. Tier 2 (Kaggle console/log transcribed into `raw_logs/*.txt` summaries + local unit-test outputs): CIE-R sweep/full/eval, Step-0 kill-switch, MiCA unit test. Tier 3 (no raw log file preserved; cross-file consistency across MEMORY.md + INNOVATION.md + commit messages only): Option C Control/CIE-G/CIE-X exact decimals, MiCA stage-1/2/eval metrics. The exact-decimal values in Tier 3 are mutually consistent across all three files and the recording commits, but a defense should treat them as reported-with-audit-trail rather than re-derivable from a dump.
 
 ---
 
@@ -47,7 +48,7 @@ The full dataflow at evaluation time:
 
 The entire project runs on **Kaggle notebooks**, not local hardware. This drove a huge number of decisions:
 
-- **Hardware:** 2x NVIDIA T4 (16 GB each), exposed via `CUDA_VISIBLE_DEVICES=0,1`. A Vicuna-7B in fp16 is ~13 GB+, so it fits on **one** T4 with room to spare for LoRA + the mapping layer, but only with a small batch and gradient checkpointing (Section 4). We deliberately ran **single-GPU** (`world_size=1`, `distributed=False`): DDP in this repo replicates the full model per GPU (no activation sharding), so two GPUs give no memory savings and add NCCL sync overhead. Single-GPU is a *defensible simplification* for a thesis, but note it differs from the paper's likely multi-GPU setting (see Section 9).
+- **Hardware:** 2x NVIDIA T4 (16 GB each), exposed via `CUDA_VISIBLE_DEVICES=0,1`. A Vicuna-7B in fp16 is ~13 GB+, so it fits on **one** T4 with room to spare for LoRA + the mapping layer, but only with a small batch and gradient checkpointing (Section 4). We deliberately ran **single-GPU** (`world_size=1`, `distributed=False`): DDP in this repo replicates the full model per GPU (no activation sharding), so two GPUs give no memory savings and add NCCL sync overhead. Single-GPU is a *defensible simplification* for a thesis, but note it differs from the paper's likely multi-GPU setting (see Section 10).
 - **Quota:** 30 GPU-hours/week, ~9 h max session. This forced: (a) `eval_freq=2` to cut validation cost, (b) checkpoint/resume everywhere, (c) tiny checkpoints (LoRA + trainable only), (d) an automatic checkpoint-sync tool (which then proved unreliable — Section 4.9), and (e) manual checkpoint backup discipline.
 - **Session persistence:** `/kaggle/working` resets between sessions. The 18 GB Vicuna download and dataset unzip must be repeated each fresh session. This is exactly why losing an 8.5 h run to a session timeout (Section 4.8) was so painful and why every subsequent fix added persistence.
 - **No conda:** Kaggle has no conda by default and the repo's `environment.yml` (Python 3.9 + cudatoolkit + torch 1.12.1) cannot be activated as-is. This forced the manual pip-based environment reconstruction in Section 2.
@@ -399,7 +400,7 @@ Port `u_dcg`/`compute_dcg` into the active `rec_base_task.py`, compute NDCG alon
 Definition details (from `rec_base_task_ndcg.py`, verbatim): per-user NDCG over the *ranked* (by descending predicted logit) list of that user's evaluation samples, DCG with `1/log2(rank+1)` weights, IDCG from the user's positive count; users with <2 samples or a single class are excluded (`u_dcg` returns -1 → skipped). 
 
 ### Caveat (important for the thesis)
-This NDCG is **our own implementation on our evaluation protocol** (per-user over all their test samples, ranking by binary-class logit), **not verified against the paper's exact NDCG protocol**. The paper's NDCG likely comes from a different ranking setup (possibly top-k over a candidate set, or a different per-user aggregation). So the Phase-4 NDCG is *directionally comparable* but not protocol-identical — this is spelled out honestly in Section 9.
+This NDCG is **our own implementation on our evaluation protocol** (per-user over all their test samples, ranking by binary-class logit), **not verified against the paper's exact NDCG protocol**. The paper's NDCG likely comes from a different ranking setup (possibly top-k over a candidate set, or a different per-user aggregation). So the Phase-4 NDCG is *directionally comparable* but not protocol-identical — this is spelled out honestly in Section 10.
 
 ## 6.3 The warm/cold builder bug (commit `8d10dc3`, 2026-08-15)
 
@@ -526,7 +527,51 @@ Test whether *joint contextualisation* of the collaborative sequence helps: inst
 
 Joint MHA fusion in this lightweight form (single 4-head layer, 256-d) **does not help and degrades** vs. the independent per-ID mapping. The 10.5 MB model has ~4× fewer CIE params than CIE-G and may be *under-capacity* for the fusion task; the late peak at 48 (vs. 28 for all other variants) is consistent with needing more training/width to learn the attention, yet still plateauing 0.025 below baseline. Alternatives to test: wider/deeper fusion, query-based pooling (Perceiver-style learned queries), or history-aware prompting. As a thesis result, the two negative CIE variants are valuable: they show (a) the baseline CIE is already near-optimal for the single-token budget, and (b) capacity alone (Control) and the two tested structural fixes do not beat it — the bottleneck, if any, lies elsewhere (e.g. prompt design, `proj_token_num`, or LoRA scope).
 
-## 6.8 MiCA Stage 1 — Minor Component Adaptation (in progress)
+## 6.8 Option C verdict — architectural complexity does not help the CIE
+
+The three structural attempts form a coherent negative result, not three unrelated failures. Each tested a distinct, pre-registered hypothesis about what might limit the baseline CIE (`Linear(256→2560) → ReLU → Linear(2560→4096)`, one collaborative embedding → one text-token embedding):
+
+| Variant | Hypothesis ("why we thought it might work") | Change vs baseline | Valid AUC (best epoch) | Delta vs baseline |
+|---|---|---|---|---|
+| Control (`proj_token_num` 1→4) | The bottleneck is *capacity*: one token is too few slots to carry collaborative information; more tokens + proportionally more parameters should help | 4 tokens per embedding, same 2-layer MLP shape | 0.7256933808225703 @28 | **+0.00003 (null)** |
+| CIE-G (affine + gated ReLU-MLP) | The bottleneck is *geometry*: the ReLU destroys MF's dot-product structure; a pure affine path with a learnable gate (`affine + sigmoid(gate)·MLP`) should preserve it | Same 1-token budget, split mapping | 0.7213615742542488 @28 | **−0.0043** |
+| CIE-X (joint 4-head MHA fusion) | The bottleneck is *independence*: user/history/target are mapped in isolation; letting them attend over each other before projection should contextualize them | 256-d self-attention + FFN, then affine to LLM space | 0.7004266250752259 @48 | **−0.025** |
+
+Three patterns emerge. First, **capacity is not the constraint**: quadrupling the token budget changed nothing (+0.00003), so the mapping is not parameter-starved. Second, **the ReLU is not the constraint either**: CIE-G's geometry-preserving path slightly *hurt*, which rules out the most natural "MLP damages dot-product structure" story. Third, and most informative, **added fusion machinery under-fits**: CIE-X has ~4× fewer CIE params (10.5 MB/14 keys vs 48.8 MB/7 keys for CIE-G), peaks 20 epochs later than every other variant (48 vs 28), and still plateaus 0.025 below baseline — the signature of a model that cannot exploit its own expressiveness on this much data, not of one that overfits.
+
+The conclusion, stated as a principle for everything that follows: **at ML-1M scale (~839 users, ~3.7k items), the baseline 2-layer MLP is already a sufficient translator from MF space to LLM token space, and making the translator fancier only adds optimization burden.** This matches the broader small-data literature: Rendle et al. showed a well-tuned dot product beats learned MLP similarities for combining embeddings (arXiv 2005.09683), and Ferrari Dacrema et al. documented how fancier neural recommenders routinely lose to simple, well-tuned methods (RecSys 2019). The bottleneck — if any — lies outside the mapping's architecture: in the training signal, its conditioning, or the LLM-side adaptation. The next three sections test those three axes in order.
+
+## 6.9 CIE-A kill-switch — a near-zero-cost diagnostic that predicted failure
+
+Before spending ~8 GPU-hours on the first of those axes (better *conditioning* via a closed-form anchored initialization of the CIE), we ran a diagnostic designed to kill the idea cheaply if its premise was false. The premise: MF item embeddings and Vicuna's title-text embeddings share enough linear structure that a ridge map between them is a meaningful starting point for the CIE (the "anchored initialization" or CIE-A proposal).
+
+`step0_ridge_killswitch.py` (repo root) implements the test with no training: load the 3256×256 MF item matrix from the committed Phase-1 weights, embed all 3,255 titled items once with frozen Vicuna (mean-pooled last-layer states), then fit 5-fold out-of-fold ridge regression MF→text and report (a) OOF R² and (b) Spearman ρ between the two spaces' pairwise cosine-similarity structures. The statistical machinery was validated locally in three mock regimes first: null signal → R² ≈ −0.005, ρ ≈ 0.001 (correctly zero); injected linear signal at 0.3 → R² = 0.261, ρ = 0.737 (detected); at 0.9 → R² = 0.882, ρ = 0.963 (recovered near theory).
+
+The real measurement, on Kaggle under the validated stack (transformers 4.28.0, vendored fork, 3255/3255 items): **OOF R² (var-weighted) = 0.0079, Spearman ρ = 0.0272, Pearson = 0.0275, recall@10 = 0.0142 (chance ≈ 0.0067), best α = 1e4 (the grid maximum — the ridge shrugging toward "fit nothing")**. These sit ~10× closer to the null calibration than to even weak signal. MF's interaction-only geometry and Vicuna's title-text geometry are essentially linearly unrelated — which, in retrospect, is unsurprising: the MF encoder never sees a title, and base-LM last-layer pooling of short titles clusters more lexically than semantically.
+
+Per the pre-agreed protocol (no fixed thresholds; numbers + interpretation reported, user decides), CIE-A was **closed without spending the 8 GPU-hours**. Cost of the answer: ~0.3–0.5 GPU-h. This is recorded as a methodology strength, not just a negative: the kill-switch pattern (cheap falsification before expensive confirmation) is the correct response to a compute budget of 30 GPU-h/week, and it is what the next section's λ-proxy design copies.
+
+## 6.10 CIE-R — relational-consistency regularization (near-neutral)
+
+With architecture (Option C) and conditioning (CIE-A) both exhausted, the remaining non-PEFT axis was *signal*: keep the validated MLP mapping exactly, but give it a denser training objective. During stage-2 training only, CIE-R (`minigpt4/models/minigpt4rec_cie_r.py`, registered `mini_gpt4rec_cie_r`) collects the batch's raw MF embeddings `[user; history…; target]` and their projected LLM-space counterparts and adds `L_rel = MSE` between the off-diagonal entries of the two pairwise cosine-similarity matrices: total loss = BCE + λ·L_rel, gradients into `llama_proj` only, no new inference parameters (checkpoint keys stay `llama_proj.*`, so `merge_stage_ckpts.py` works unchanged).
+
+Notably, this revives the authors' own dormant idea: the repo ships `consitence_loss()` (`minigpt4rec_v2.py:27-42`, a softmax-similarity MSE) with its call site commented out (`minigpt4rec_v2.py:747`). Our version formalizes it in distance-wise RKD form (Park et al., CVPR 2019). No verified prior applies relational consistency specifically to CF→LLM token projection in a discriminative setting — the closest verified relatives (DMRec, EasyRec, CL³M-Rec) are generative or contrastive — so the instantiation itself, win or lose, is a defensible contribution.
+
+Because the cosine LR schedule's horizon is `max_epoch`, a 12-epoch proxy anneals far faster than the 80/50-epoch runs, so proxy absolutes cannot be compared against the baseline curve — the three λ arms (identical schedules, seed 42) were judged against each other instead:
+
+| Arm | Trajectory (ep0→ep10, eval_freq 2) | Best | NDCG |
+|---|---|---|---|
+| λ=0.01 (≈control) | 0.6604 / 0.6697 / 0.6637 / 0.6664 / 0.6692 | **0.67133 @10** | 0.842–0.844 |
+| λ=0.1 | 0.6660 / 0.6894 / 0.6914 / 0.6562 / 0.6878 | **0.70334 @10 (+0.032)** | 0.8501 |
+| λ=1.0 | 0.6740 / 0.6629 / **0.69300 @4** / 0.6875 / 0.6677 / 0.6713 | 0.69300 @4 (then decay) | 0.8453 |
+
+λ=0.1 won by the pre-agreed ±0.003 rule and λ=1.0 showed the predicted over-regularization signature (fastest start, then decay to control level). Both arms peaked at the last eval — the truncated horizon undersampled all arms equally, noted as a caveat at the time.
+
+The full run (`collm_cie_r_l01_full.yaml`, max_epoch 50, eval_freq 4 — the same horizon family as Control/CIE-G) reached **best valid AUC 0.7252266946846632 @36** (resume tail 0.72083@44 / 0.71852@48, NDCG 0.8605–0.8611) vs baseline 0.72567 @28 — **delta −0.00044, null**. The proxy's +0.032 washed out over the full horizon: the regularizer accelerated *early* fitting but did not raise the final ceiling. Test eval via the `checkpoint_39` proxy (the true @36 best was lost to a session wipe; 39 is −0.004 away) gave valid 0.72050 / test 0.71852, NDCG 0.86838/0.86837 — no improvement over baseline, consistent with the valid tie. Evidence: `raw_logs/cie_r_{l001,l01,l1}_proxy_results.txt`, `raw_logs/cie_r_l01_full_results.txt`, local unit test 23/23 (`unit_test_cie_r.py`, `raw_logs/step_cie_r_local_unittest.txt`).
+
+Interpretation: regularizing toward MF's geometry neither helps nor (at λ=0.1) hurts the final optimum. Combined with §6.8, the mapping's *form* and its *training signal* are both exhausted as improvement axes on this setup. What remains is the third axis: the LLM-side adaptation itself.
+
+## 6.11 MiCA Stage 1 — Minor Component Adaptation (done)
 
 **Status (2026-08-31):** MiCA Stage 1 trained to `best_epoch: 64, best_agg_metrics: 0.6889447800271994` (1:34:34, `mini_gpt4rec_mica`, `r=8`, 2.1M trainable). For thesis transparency, the following incident is recorded:
 
@@ -534,9 +579,9 @@ Joint MHA fusion in this lightweight form (single 4-head layer, 256-d) **does no
 
 **Recovered checkpoint (epochs 56-64, resumed from 55, 1:40:56):** **0.6887475928839792 @64** (NDCG 0.8578966047949523, 8.4 MB, 64 keys) vs original **0.6889447800271994 @64** → Δ -0.000197, well within the expected 0.001-0.003 range. **Reproducibility check passed** — the 9-epoch forward-only resume from checkpoint_55 is effectively identical despite missing RNG/shuffle state, confirming determinism.
 
-## 6.9 MiCA Stage 2 + test eval — a genuine positive (2026-09-03)
+## 6.12 MiCA Stage 2 + test eval — a genuine positive (2026-09-03)
 
-Stage 2 on the frozen MiCA backbone (`collm_mica_finetune_mf_ood.yaml`: `freeze_proj=False`, `freeze_lora=True`, ID prompt) reached **best valid AUC 0.7322250564574408 @20** vs LoRA baseline 0.72567 → **+0.0066**. Merge used `merge_stage_ckpts.py` unmodified; log evidence confirms the disjoint union (missing_keys = base + `lora_B.*` only; `lora_A.*` and `llama_proj.*` all loaded) and `MiCA: patched 64 lora_B … / MiCA from_config: active` before `Load MiniGPT4Rec Checkpoint`, so B was correctly rebuilt from SVD rather than left at peft-default zero.
+Stage 2 on the frozen MiCA backbone (`collm_mica_finetune_mf_ood.yaml`: `freeze_proj=False`, `freeze_lora=True` — which freezes MiCA's A as well, after the `fdfb477` fix to an over-strict trainability assert that briefly broke Stage-2 construction — ID prompt, same entry `train_collm_mf_din_mica.py`) reached **best valid AUC 0.7322250564574408 @20** vs LoRA baseline 0.72567 → **+0.0066**. Checkpoint_best was backed up (Kaggle Model + local) this time. Merge used `merge_stage_ckpts.py` unmodified; log evidence confirms the disjoint union (missing_keys = base + `lora_B.*` only; `lora_A.*` and `llama_proj.*` all loaded) and `MiCA: patched 64 lora_B … / MiCA from_config: active` before `Load MiniGPT4Rec Checkpoint`, so B was correctly rebuilt from SVD rather than left at peft-default zero.
 
 Test eval (`collm_mica_eval_mf_ood.yaml`, 1833 test + 1300 valid batches, ~40 min):
 
@@ -549,7 +594,7 @@ Test eval (`collm_mica_eval_mf_ood.yaml`, 1833 test + 1300 valid batches, ~40 mi
 
 Valid reproduces the stage-2 best *exactly* (0.7322250564574408), confirming merge + eval consistency — the same pattern as Phase 4. UAUC nan on test (287 users computed) is the same per-user artifact seen in every phase (Section 6.4), not a model failure.
 
-**Interpretation:** unlike Control/CIE-G/CIE-X/CIE-R (null or negative), MiCA is the first variant to beat the LoRA baseline on more metrics than it loses — 3 of 4 own-baseline comparisons positive (test AUC within noise), both NDCGs up, and it matches/exceeds the paper on both Table II numbers. All at ~50% of LoRA's trainable params (2.1M vs 4.2M). This is the novel-contribution result the thesis needed.
+**Why MiCA likely helped where the CIE-focused attempts didn't:** it operates on a different mechanism entirely — the PEFT method for the LLM itself, not the mapping layer. Stage 1 with MiCA already beat LoRA Stage 1 by +0.027 (0.68875 @64 vs 0.662 @10, and it kept improving to epoch 64 where LoRA plateaued at epoch 10), so Stage 2 started from a strictly better semantic backbone, and the frozen-then-mapped division of labor from §5.1 did the rest. The paper's own rationale (minor singular directions as an underutilized, low-interference subspace) is consistent with this — but stated honestly, our evidence is behavioral (higher ceiling, later peak, half the parameters), not a probe of singular spectra, which we did not measure. The contested literature bounds the claim accordingly: intermediate components sometimes beat minor ones, and PiSSA/MiLoRA have underperformed vanilla LoRA off-SFT objectives (see INNOVATION.md §2.1) — so "minor is universally better" cannot be claimed from one dataset and one seed. What *can* be claimed: on this pipeline, MiCA ≥ LoRA on 3 of 4 own-baseline comparisons at exactly half the trainable PEFT parameters (2,097,152 vs 4,194,304 = 64 vs 128 matrices of 4096×8), and it matches or exceeds the paper on both Table II numbers. That is the novel-contribution result.
 
 ---
 
@@ -593,6 +638,17 @@ Comprehensive table: file | what changed | why | phase. All commits verified in 
 | `MEMORY.md`, `IMPLEMENTATION_REPORT.md` §6.6 | CIE-G result: `best_valid_auc 0.72136 @28` (`-0.0043` vs baseline/Control) — gated affine not supported | Negative result narrows space for CIE-X | Option C | (2026-08-23) |
 | `minigpt4/models/minigpt4rec_cie.py` (CIE-X), `train_configs/collm_cie_x_{finetune,eval}.yaml` | CIE-X `mini_gpt4rec_cie_x`: joint 4-head MHA over `[user,history,target]` + FFN + final Linear(256→4096) (override `encode_recdata_v2`) | Test joint fusion (Option C Phase 2) | Option C | `8ef84df` |
 | `MEMORY.md`, `IMPLEMENTATION_REPORT.md` §6.7 | CIE-X result: `best_valid_auc 0.70043 @48` (`-0.025` vs baseline, `-0.021` vs CIE-G, 10.5 MB/14 keys) — joint fusion degrades, late peak | Capacity-limited negative result; baseline remains best | Option C | (2026-08-23) |
+| `step0_ridge_killswitch.py` (new), `INNOVATION.md` (new) | Offline kill-switch: OOF ridge MF→Vicuna-title embeddings + similarity-structure metrics, with mock-calibrated null/signal regimes; ideation doc with verified citations | Falsify CIE-A conditioning hypothesis before spending GPU | CIE-A | `09248d2` |
+| `minigpt4/models/minigpt4rec_cie.py` | `CIE-R ready` / `from_config` log disambiguation (constructor-default vs effective λ) | Fix misleading λ logging exposed by first proxy run | CIE-R | `1f70a0c` |
+| `minigpt4/models/minigpt4rec_cie_r.py` (new), `train_collm_mf_din_cie_r.py` (new), `train_configs/collm_cie_r_{l001,l01,l1}_proxy.yaml` + `collm_cie_r_l01_{full,full_eval}.yaml` (new) | CIE-R `mini_gpt4rec_cie_r`: baseline MLP + BCE + λ·MSE_offdiag(S_raw,S_proj), grads to `llama_proj` only; proxy sweep (λ ∈ {0.01,0.1,1.0}, max_epoch 12) + full run (max_epoch 50) + test eval | Test signal-not-capacity via regularization; revive authors' dormant consistency loss | CIE-R | `9be4369`, `dae4c8d`, `15a6aa8`, `209fdad` |
+| `unit_test_cie_r.py` (new), `raw_logs/step_cie_r_local_unittest.txt` (new), `parse_cie_r_proxies.py` (new) | Loss-math unit test 23/23 (identical→0, independent→large, gradient flow, determinism) + proxy-log comparison table/CSV tool | Verify shipped loss source without GPU; readable proxy verdicts | CIE-R | `9be4369`, `dae4c8d` |
+| `train_collm_mf_din_cie.py`, `train_collm_mf_din_cie_r.py` | `REGISTERS:` docstring headers | Disambiguate entry-script registry scope (cie vs cie_r) | CIE-R | `dda4f07` |
+| `minigpt4/models/minigpt4rec_mica.py` (new), `train_collm_mf_din_mica.py` (new), `train_configs/collm_mica_pretrain_mf_ood.yaml` + `collm_mica_finetune_mf_ood.yaml` + `collm_mica_eval_mf_ood.yaml` (new) | MiCA `mini_gpt4rec_mica`: vendored SVD minor-component init on peft 0.3 (B=U[:,-r:] frozen, A=0 trained); stage-1/2/eval configs | PEFT-axis improvement without touching pins | MiCA | `9a720c9`, `96e69db`, `44da155` |
+| `minigpt4/models/minigpt4rec_mica.py` | Remove `lora_A`-trainable assert (keep B-frozen assert) | Fix Stage-2 breakage: A is correctly frozen under `freeze_lora=True` | MiCA | `fdfb477` |
+| `unit_test_mica.py` (new), `raw_logs/step_mica_local_unittest.txt` (new) | SVD minor-selection + peft-overwrite simulation checks | Verify MiCA recipe without GPU | MiCA | `9a720c9` |
+| `minigpt4/runners/runner_base.py` | `cumulative_time` persisted in checkpoints + segment/total logging | Accurate GPU-hour accounting across multi-session resumes | infra | `fca77ab` |
+| `minigpt4/models/minigpt4rec_v2.py` | `mode \in` → `mode in` docstring (SyntaxWarning) | Hygiene | infra | `209fdad` |
+| `MEMORY.md`, `IMPLEMENTATION_REPORT.md` §§6.8–6.12, `raw_logs/cie_r_*_results.txt` | Option-C verdict, kill-switch, CIE-R, MiCA results + incident/recovery notes | Complete thesis record of negatives and positive | all | `0a71ae5`–`7109f2f` |
 
 Files **not** modified (deliberately): `modeling_llama.py` (the vendored fork is the *correct* implementation; the bug was the environment, not the file), the `_lgcn`/`_sasrec` entrypoints and `*_lgcn`/`*_sasrec` configs (deferred until needed), `minigpt4rec_v2_qwen.py` (Qwen configs are not runnable as-is; out of scope), and `dataset/*.ipynb` (preprocessing was already correct; we used its outputs).
 
@@ -637,7 +693,19 @@ The `cput` typo and the dormant NDCG implementation were both latent bugs in pat
 
 ---
 
-# 9. Limitations and Honest Caveats
+# 9. Overall Synthesis — what five attempts taught us about improving CoLLM
+
+Across Control, CIE-G, CIE-X, CIE-R, and MiCA, the pattern is sharper than "one win, four losses": the *axis* of intervention predicts the outcome.
+
+**What consistently failed: making the CIE mapping fancier.** Control (+0.00003), CIE-G (−0.0043), and CIE-X (−0.025) show that neither capacity, nor geometry preservation, nor joint attention moves the needle at ML-1M scale — and the more expressive the mapping, the worse it does. CIE-R's null (−0.00044) extends the verdict from the mapping's *form* to its *training signal*: even a principled, well-tuned regularizer toward the collaborative geometry changes the early trajectory but not the final optimum. The consistent explanation, supported by the small-data literature (§6.8), is that a 2-layer MLP is already a sufficient statistic-translator between a 256-d interaction space and a 4096-d token space at this data scale; everything beyond that is optimization burden with no extra information to exploit.
+
+**What worked: changing how the LLM itself is adapted.** MiCA's gains concentrate exactly where a PEFT change should show up: Stage 1 text-only ranking (+0.027, and still improving at epoch 64 where LoRA had plateaued at epoch 10), which then transfers through the unchanged frozen-then-mapped pipeline into fused gains on 3 of 4 metrics. The mechanism is different in kind, not degree — subspace selection inside the backbone rather than a better bridge into it.
+
+**Parameter efficiency, stated exactly.** LoRA r=8 on `q_proj`/`v_proj` trains 128 matrices of 4096×8 = **4,194,304** parameters. MiCA trains only the A side: 64 × 4096×8 = **2,097,152** — precisely half, for equal-or-better ranking quality. The B side (another 2.1M values) exists but is frozen SVD output, never updated and never saved. For a thesis, this is the cleanest sentence in the whole project: *half the trainable PEFT parameters, better results on 3 of 4 metrics.*
+
+**Honest limitations on the synthesis itself.** (a) **Single seed throughout** (seed 42, one run per variant): there are no variance estimates, so deltas of ±0.001–0.004 (Control, CIE-G, MiCA test AUC) cannot be distinguished from run noise — only the larger gaps (CIE-X −0.025, MiCA Stage-1 +0.027, valid NDCG +0.0089) are robust to this objection. A defense should concede this upfront and frame small deltas as ties. (b) **ML-1M only**: no Amazon-Book replication of any variant, so generality across dataset scales is untested — particularly relevant because the entire "simple suffices" argument is scale-dependent. (c) **Exact vs reconstructed checkpoints**: most results are exact (all baselines; Control/CIE-G/CIE-X periodics; MiCA Stage-2 best; MiCA eval). Two are reconstructed: MiCA Stage-1's canonical checkpoint is the 55→64 resume (Δ −0.000197 from the lost original — verified near-identical), and CIE-R's test eval used the checkpoint_39 proxy (−0.004 from the lost @36 best). Neither affects its verdict (MiCA positive by margin ≫ 0.0002; CIE-R null either way). (d) The pre-existing caveats (§10, items 1–10) still apply: unofficial Vicuna mirror, own NDCG protocol, nan UAUC, single-GPU, manual env pinning.
+
+# 10. Limitations and Honest Caveats
 
 These must be stated plainly in the thesis. None invalidate the headline result, but each bounds its strength.
 
@@ -663,7 +731,7 @@ These must be stated plainly in the thesis. None invalidate the headline result,
 
 ---
 
-# 10. Quick-Reference Results Table
+# 11. Quick-Reference Results Table (all variants)
 
 | Phase | Config / entrypoint | Key metric | Notes |
 |---|---|---|---|
@@ -678,5 +746,8 @@ These must be stated plainly in the thesis. None invalidate the headline result,
 | **MiCA Stage-1** | `collm_mica_pretrain_mf_ood.yaml` (`mini_gpt4rec_mica`, B frozen/U_minor, A trained) | best_valid_auc = **0.68875** (epoch 64, recovered) | 1:40:56, 2.1M params (½ LoRA); `+0.027` vs. LoRA Stage-1 0.662 |
 | **MiCA Stage-2** | `collm_mica_finetune_mf_ood.yaml` (CIE on frozen MiCA) | best_valid_auc = **0.73223** (epoch 20) | `+0.0066` vs. LoRA Stage-2; best valid yet |
 | **MiCA test eval** | `collm_mica_eval_mf_ood.yaml` (merged MiCA ckpt) | test AUC **0.7420**, NDCG **0.8710**; valid AUC 0.73223 / NDCG 0.8734 | ~40 min; ties/beats LoRA baseline 3/4, exceeds paper AUC, matches paper NDCG |
+| **CIE-A kill-switch** | `step0_ridge_killswitch.py` (no training) | OOF R² **0.0079**, Spearman ρ **0.0272** (null) | ~0.4 GPU-h; idea closed before spending 8 GPU-h — methodology win |
+| **CIE-R proxies** | `collm_cie_r_l{001,01,1}_proxy.yaml` (`mini_gpt4rec_cie_r`, max_epoch 12) | λ=0.01: **0.67133@10**; λ=0.1: **0.70334@10**; λ=1.0: **0.69300@4** | ~2.6h each; λ=0.1 picked; absolutes not comparable to 50-epoch runs (LR-horizon confound) |
+| **CIE-R full + test eval** | `collm_cie_r_l01_{full,full_eval}.yaml` (λ=0.1) | valid **0.72523@36**; test **0.71852** / NDCG 0.8684 (ckpt_39 proxy) | −0.00044 vs baseline (null); test eval −0.025 on proxy — no ceiling lift |
 
-**Bottom line:** The full CoLLM pipeline (MF → LoRA text-only → CIE mapping → evaluation) was successfully built, debugged, and reproduced against the paper on ML-1M, with results in the same range as reported — even exceeding the paper on AUC — and with a documented, reproducible environment and a reusable diagnostic toolchain.
+**Bottom line:** The full CoLLM pipeline (MF → LoRA text-only → CIE mapping → evaluation) was successfully built, debugged, and reproduced against the paper on ML-1M, with results in the same range as reported — even exceeding the paper on AUC — and with a documented, reproducible environment and a reusable diagnostic toolchain. Beyond reproduction, five improvement attempts established a clear pattern: CIE-mapping complexity (Control, CIE-G, CIE-X) and mapping-signal regularization (CIE-R) are null-to-negative at this scale, a falsified conditioning hypothesis (CIE-A) was killed by a 0.4 GPU-h diagnostic before spending 8 GPU-h, and changing the PEFT method itself (MiCA, half the trainable params) is the one intervention that beat the baseline — the thesis's novel contribution.
