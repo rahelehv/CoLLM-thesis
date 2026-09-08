@@ -12,9 +12,16 @@ import omegaconf
 import random 
 import time
 import os
+import warnings
 # os.environ["CUDA_VISIBLE_DEVICES"]="7"
 
-def uAUC_me(user, predict, label):
+warnings.filterwarnings("ignore", message="Only one class is present in y_true")
+
+# Kaggle paths: set COLLM_ML1M_DIR (dir with *_ood2.pkl) and COLLM_OUTPUT_DIR (dir for the .pth).
+ML1M_DATA_DIR = os.environ.get("COLLM_ML1M_DIR", "/kaggle/working/ml-1m/")
+LGCN_SAVE_DIR = os.environ.get("COLLM_OUTPUT_DIR", "/kaggle/working/")
+
+def uAUC_me(user, predict, label, verbose=True):
     if not isinstance(predict,np.ndarray):
         predict = np.array(predict)
     if not isinstance(label,np.ndarray):
@@ -44,7 +51,8 @@ def uAUC_me(user, predict, label):
         total_num += counts[k]
         
         k+=1
-    print("only one interaction users:",only_one_interaction)
+    if verbose:
+        print("only one interaction users:",only_one_interaction)
     auc=[]
     only_one_class = 0
 
@@ -59,9 +67,11 @@ def uAUC_me(user, predict, label):
             # print("only one class")
         
     auc_for_user = np.array(auc)
-    print("computed user:", auc_for_user.shape[0], "can not users:", only_one_class)
+    if verbose:
+        print("computed user:", auc_for_user.shape[0], "can not users:", only_one_class)
     uauc = auc_for_user.mean()
-    print("uauc for validation Cost:", time.time()-start_time,'uauc:', uauc)
+    if verbose:
+        print("uauc for validation Cost:", time.time()-start_time,'uauc:', uauc)
     return uauc, computed_u, auc_for_user
 
 
@@ -126,14 +136,33 @@ class early_stoper(object):
                 self.reach_count += 1
                 return False
 
+    def state_dict(self):
+        return {
+            "best_metric": self.best_metric,
+            "reach_count": self.reach_count,
+            "patience": self.patience,
+        }
+
+    def load_state_dict(self, ckpt):
+        self.best_metric = ckpt.get("best_metric")
+        self.reach_count = ckpt.get("reach_count", 0)
+        self.patience = ckpt.get("patience", self.patience)
+
     def is_stop(self):
         if self.reach_count>=self.patience:
             return True
         else:
             return False
 
+def _atomic_torch_save(obj, path):
+    # Atomic save (tmp file + os.replace) so a crash/session-kill can never
+    # leave a half-written .pth behind. Same pattern as the CoLLM runner.
+    tmp = path + ".tmp"
+    torch.save(obj, tmp)
+    os.replace(tmp, path)
+
 # set random seed   
-def run_a_trail(train_config,log_file=None, save_mode=False,save_file=None,need_train=True,warm_or_cold=None):
+def run_a_trail(train_config,log_file=None, save_mode=False,save_file=None,need_train=True,warm_or_cold=None,resume=False,print_every=10,ckpt_freq=10):
     seed=2023
     random.seed(seed)
     np.random.seed(seed)
@@ -150,11 +179,14 @@ def run_a_trail(train_config,log_file=None, save_mode=False,save_file=None,need_
 
     # load dataset
     # data_dir = "/home/zyang/LLM/MiniGPT-4/dataset/ml-100k/"
-    # data_dir = "/home/sist/zyang/LLM/datasets/ml-100k/"
-    data_dir = "/data/zyang/datasets/ml-1m/"
+    # data_dir = "/home/sist/zyang/LLM/datasets/ml-1m/"
+    data_dir = ML1M_DATA_DIR
     train_data = pd.read_pickle(data_dir+"train_ood2.pkl")[['uid','iid','label']].values
     valid_data = pd.read_pickle(data_dir+"valid_ood2.pkl")[['uid','iid','label']].values
     test_data = pd.read_pickle(data_dir+"test_ood2.pkl")[['uid','iid','label']].values
+
+    user_num = max(train_data[:,0].max(), valid_data[:,0].max(), test_data[:,0].max()) + 1
+    item_num = max(train_data[:,1].max(), valid_data[:,1].max(), test_data[:,1].max()) + 1
 
     if warm_or_cold is not None:
         if warm_or_cold == 'warm':
@@ -177,15 +209,14 @@ def run_a_trail(train_config,log_file=None, save_mode=False,save_file=None,need_
     #     "batch_size":1024
     # }
 
-    user_num = train_data[:,0].max() + 1
-    item_num = train_data[:,1].max() + 1
+    print("user nums:", user_num, "item nums:", item_num)
 
     lgcn_config={
         "user_num": int(user_num),
         "item_num": int(item_num),
         "embedding_size": int(train_config['embedding_size']),
         "embed_size": int(train_config['embedding_size']),
-        "data_path": '/home/zyang/code-2022/RecUnlearn/data/',
+        "data_path": ML1M_DATA_DIR, # unused by GnnDataset (it takes data_dir positionally); kept for parity
         "dataset": 'ml-1m', #'yahoo-s622-01' #'yahoo-small2' #'yahooR3-iid-001'
         "layer_size": '[64,64]',
 
@@ -214,9 +245,11 @@ def run_a_trail(train_config,log_file=None, save_mode=False,save_file=None,need_
     # model = MatrixFactorization(mf_config).cuda()
     model = LightGCN(lgcn_config).cuda()
     model._set_graph(gnndata.Graph)
-    
+    print("model device:", next(model.parameters()).device)
+
     opt = torch.optim.Adam(model.parameters(),lr=train_config['lr'], weight_decay=train_config['wd'])
     early_stop = early_stoper(ref_metric='valid_auc',incerase=True,patience=train_config['patience'])
+    ckpt_path = os.path.splitext(save_file)[0] + "_resume.pth" if save_file else None
     # trainig part
     criterion = nn.BCEWithLogitsLoss()
 
@@ -257,7 +290,39 @@ def run_a_trail(train_config,log_file=None, save_mode=False,save_file=None,need_
         return 
     
 
-    for epoch in range(train_config['epoch']):
+    start_epoch = 0
+    if resume and ckpt_path is not None and os.path.exists(ckpt_path):
+        ckpt = torch.load(ckpt_path, map_location="cpu", weights_only=False)
+        if ckpt.get("done"):
+            print("resume: training already finished (epoch {}, reason: {}). Skipping.".format(ckpt["epoch"], ckpt.get("stop_reason")))
+            print("resume: best result:", ckpt.get("best_metric"))
+            return
+        model.load_state_dict(ckpt["model"])
+        opt.load_state_dict(ckpt["optimizer"])
+        early_stop.load_state_dict(ckpt)
+        start_epoch = ckpt["epoch"] + 1
+        print("resumed checkpoint at epoch {}; best_valid_auc={}; early_count={}".format(
+            ckpt["epoch"], (ckpt.get("best_metric") or {}).get("valid_auc"), early_stop.reach_count))
+
+    def _save_ckpt(epoch, done=False, reason=None):
+        if ckpt_path is None:
+            return
+        _atomic_torch_save({
+            "model": model.state_dict(),
+            "optimizer": opt.state_dict(),
+            "epoch": epoch,
+            "done": done,
+            "stop_reason": reason,
+            "best_metric": early_stop.best_metric,
+            "reach_count": early_stop.reach_count,
+            "patience": early_stop.patience,
+            "train_config": train_config,
+        }, ckpt_path)
+
+    last_epoch = start_epoch
+    stop_reason = None
+    for epoch in range(start_epoch, train_config['epoch']):
+        last_epoch = epoch
         model.train()
         for bacth_id, batch_data in enumerate(train_data_loader):
             batch_data = batch_data.cuda()
@@ -279,7 +344,7 @@ def run_a_trail(train_config,log_file=None, save_mode=False,save_file=None,need_
                 label.extend(batch_data[:,-1].cpu().numpy())
                 users.extend(batch_data[:,0].cpu().numpy())
             valid_auc = roc_auc_score(label,pre)
-            valid_uauc,_,_ = uAUC_me(users, pre, label)
+            valid_uauc,_,_ = uAUC_me(users, pre, label, verbose=(epoch % print_every == 0))
             pre=[]
             label = []
             users = []
@@ -290,23 +355,37 @@ def run_a_trail(train_config,log_file=None, save_mode=False,save_file=None,need_
                 label.extend(batch_data[:,-1].cpu().numpy())
                 users.extend(batch_data[:,0].cpu().numpy())
             test_auc = roc_auc_score(label,pre)
-            test_uauc,_,_ = uAUC_me(users, pre, label)
+            test_uauc,_,_ = uAUC_me(users, pre, label, verbose=(epoch % print_every == 0))
             updated = early_stop.update({'valid_auc':valid_auc, 'valid_uauc': valid_uauc,'test_auc':test_auc, 'test_uauc': test_uauc,'epoch':epoch})
             if updated and save_mode:
-                torch.save(model.state_dict(),save_file)
+                _atomic_torch_save(model.state_dict(),save_file)
 
 
-            print("epoch:{}, valid_auc:{}, valid_uauc:{}, test_auc:{}, test_uauc:{}, early_count:{}".format(epoch, valid_auc, valid_uauc, test_auc, test_uauc, early_stop.reach_count))
+            if epoch % print_every == 0:
+                print("epoch:{}, valid_auc:{}, valid_uauc:{}, test_auc:{}, test_uauc:{}, early_count:{}".format(epoch, valid_auc, valid_uauc, test_auc, test_uauc, early_stop.reach_count))
+            if epoch % ckpt_freq == 0:
+                _save_ckpt(epoch)
             if early_stop.is_stop():
                 print("early stop is reached....!")
+                stop_reason = "early_stop (valid_auc made no improvement for {} eval epochs)".format(early_stop.patience)
+                _save_ckpt(epoch, done=True, reason=stop_reason)
                 # print("best results:", early_stop.best_metric)
                 break
             if epoch>500 and early_stop.best_metric[early_stop.ref_metric] < 0.52:
                 print("training reaches to 500 epoch but the valid_auc is still less than 0.52")
+                stop_reason = "low_auc_guard (epoch>500 and valid_auc<0.52)"
+                _save_ckpt(epoch, done=True, reason=stop_reason)
                 break
+    if stop_reason is None:
+        stop_reason = "finished all {} epochs with no early stop".format(train_config['epoch'])
+        _save_ckpt(last_epoch, done=True, reason=stop_reason)
+    best = early_stop.best_metric or {}
+    print("Training stopped due to: {}, at epoch {}, best_valid_auc={}".format(stop_reason, last_epoch, best.get("valid_auc")))
     print("train_config:", train_config,"\nbest result:",early_stop.best_metric) 
     if log_file is not None:
+        print("Training stopped due to: {}, at epoch {}, best_valid_auc={}".format(stop_reason, last_epoch, best.get("valid_auc")), file=log_file)
         print("train_config:", train_config, "best result:", early_stop.best_metric, file=log_file)
+        log_file.flush()
 
 
 
@@ -381,14 +460,14 @@ def run_a_trail(train_config,log_file=None, save_mode=False,save_file=None,need_
 #     f.close()
 
 
-# # with prtrain version:
+# save-best training run: authors' reference recipe (lr=1e-2, wd=1e-4, d=64, 2 GCN
+# layers), no warm/cold eval. Paths come from COLLM_ML1M_DIR / COLLM_OUTPUT_DIR.
 if __name__=='__main__':
     # lr_ = [1e-1,1e-2,1e-3]
     lr_=[1e-2] #1e-2
     dw_ = [1e-4]
     # embedding_size_ = [32, 64, 128, 156, 512]
     embedding_size_ = [64]
-    save_path = "/data/zyang/LLM/PretrainedModels/lgcn/"
     f=None
     for lr in lr_:
         for wd in dw_:
@@ -403,13 +482,10 @@ if __name__=='__main__':
                     "batch_size":1024,
                     "gcn_layer": 2
                 }
-                # print(train_config)
-                # if os.path.exists(save_path + "best_model_d" + str(embedding_size)+ 'lr-'+ str(lr) + "wd"+str(wd) + ".pth"):
-                #     save_path += "best_model_d" + str(embedding_size)+ 'lr-'+ str(lr) + "wd"+str(wd) + ".pth"
-                # else:
-                #     save_path += "best_model_d" + str(embedding_size) + ".pth"
-                save_path += "0918-OODv2_lgcn_ml1m_best_model_d64lr-0.01wd0.0001.pth"
-                run_a_trail(train_config=train_config, log_file=f, save_mode=True, save_file=save_path, need_train=False, warm_or_cold=None)
+                print(train_config)
+                save_file = os.path.join(LGCN_SAVE_DIR, "0918-OODv2_lgcn_ml1m_best_model_d" + str(embedding_size)+ 'lr-'+ str(lr) + "wd"+str(wd) + ".pth")
+                print("save path: ", save_file)
+                run_a_trail(train_config=train_config, log_file=f, save_mode=True, save_file=save_file, need_train=True, warm_or_cold=None, resume=True)
     if f is not None:
         f.close()
         

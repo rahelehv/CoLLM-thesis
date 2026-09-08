@@ -93,8 +93,15 @@ Rule of thumb: the YAML's `model.arch` must be registered by the entry script yo
 - Total eval 0:39:51 (+ startup ≈ 1h); cumulative-time tracker from fca77ab works (`Training time 0:39:51 / Cumulative 0:39:51` on fresh run).
 - VERDICT: MiCA ≥ LoRA baseline on 3/4 metrics within noise, strictly better on both NDCGs and valid AUC, at ~50% PEFT params. Genuine positive thesis contribution.
 
+## Multi-encoder prep (LightGCN/SASRec/DIN) — DONE, not run (2026-09-08)
+- Same MF reliability pattern ported to the untrained encoders, additive only (no MF/LoRA/MiCA/CIE file touched; `git status` clean of them).
+- Baselines: `baseline_train_lightgcn_ood.py` + `baseline_train_sasrec.py` hardened in place (env paths, warn-suppress, throttled uAUC, resume/atomic ckpt, stop-reason, train-by-default `__main__` with authors' recipes). NEW `baseline_train_din_ood.py` (no DIN trainer existed; seq plumbing from SASRec + `RecEncoder_DIN`, BCELoss since DIN outputs post-sigmoid probs, default lr=1e-4/wd=1e-4/d=192/drop=0.2/maxlen=10 from authors' stale-config filename).
+- LATENT BUG FOUND (never triggered — this script had never been run): original `baseline_train_sasrec.py` used bare `int(embedding_size)` for `hidden_units` → NameError on any training run. Fixed to `train_config['embedding_size']`; also removed a bare `try/except: pass` around `.cuda()` that would have masked real errors.
+- Entries: `train_collm_lgcn.py` / `train_collm_sasrec.py` hardened (warning filters, fixed default cfg-path, env data dir); NEW `train_collm_din.py` (DIN shares SASRec's `movie_ood_sasrec` dataset).
+- Configs: 6 new YAMLs (`collm_{finetune,eval}_{lgcn,sasrec,din}_ood.yaml`) mirroring the MF trio (eval_freq 2, max_epoch 80, save_ckpt_keep via runner, use_grad_checkpoint, batch 4/4, single-GPU, env paths). NO per-encoder stage-1: Stage 1 is text-only/encoder-independent, so all reuse `COLLM_STAGE1_CKPT` (documented in each finetune YAML). 8-bit (`low_resource`/`device_8bit`) left opt-in/default-off: frozen encoders are a few MB (LightGCN graph on CPU), ~0 GPU delta vs MF, so the MF fp16+grad-checkpoint verdict stands.
+- Verified: `py_compile` on all 6 scripts, all 6 YAMLs parse with expected rec_model/freeze/eval keys. Amazon variants deliberately skipped (ML-1M thesis scope).
+
 ## Not yet started
-- LightGCN/SASRec baseline scripts: same logging/checkpoint improvements as MF are planned but deferred until actually needed.
 - Full report: TODO -- a separate detailed report (not in MEMORY.md) will be requested next; MEMORY.md stays short/factual.
 
 ## Kaggle setup notes

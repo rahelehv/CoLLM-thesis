@@ -11,8 +11,15 @@ import os
 # os.environ['CURL_CA_BUNDLE'] = ''
 # os.environ["CUDA_VISIBLE_DEVICES"]="4"
 import random
+import warnings
 
 import numpy as np
+
+warnings.filterwarnings("ignore", message="Only one class is present in y_true")
+warnings.filterwarnings("ignore", category=FutureWarning)
+warnings.filterwarnings("ignore", category=DeprecationWarning)
+warnings.filterwarnings("ignore", category=UserWarning, module="transformers")
+warnings.filterwarnings("ignore", category=UserWarning, module="peft")
 import torch
 import torch.backends.cudnn as cudnn
 
@@ -43,7 +50,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description="Training")
 
     # parser.add_argument("--cfg-path", required=True, help="path to configuration file.")
-    parser.add_argument("--cfg-path", default='train_configs/minigpt4rec_pretrain_lgcn_ood_cc.yaml', help="path to configuration file.")
+    parser.add_argument("--cfg-path", default='train_configs/collm_finetune_lgcn_ood.yaml', help="path to configuration file.")
     parser.add_argument(
         "--options",
         nargs="+",
