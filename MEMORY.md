@@ -93,6 +93,14 @@ Rule of thumb: the YAML's `model.arch` must be registered by the entry script yo
 - Total eval 0:39:51 (+ startup ≈ 1h); cumulative-time tracker from fca77ab works (`Training time 0:39:51 / Cumulative 0:39:51` on fresh run).
 - VERDICT: MiCA ≥ LoRA baseline on 3/4 metrics within noise, strictly better on both NDCGs and valid AUC, at ~50% PEFT params. Genuine positive thesis contribution.
 
+## MiCA Stage-2 trainable-MF — NEXT (configs ready, sequential, config 2 first)
+- Idea (paper-sanctioned: Table II note + §IV-B Ω={φ,ψ} option): jointly fine-tune the MF encoder in Stage 2 on the MiCA backbone. Reference: frozen+pretrained = existing 0.7322 valid / 0.7420 test, no new run.
+- Config-only change (verified by code inspection, no model/runner edits): `freeze_rec` flows from_config→constructor (v2.py:1123/1154→102); `pretrained_path: "not_have"` skips loading (v2.py:95, same sentinel as Phase 2 stage-1 with MF); ckpt-reload guard correctly skipped when unfrozen (v2.py:1180); optimizer/checkpoint-filter pick up unfrozen tables automatically; encoder stays fp32 (`rec_precision` unused); merge stays disjoint (stage-2 gains 2 rec keys, still no overlap with stage-1 A keys); same eval yaml reused via env var.
+- New yamls: `collm_mica_finetune_mf_ood_unfrozen.yaml` (freeze_rec False + warm start, out `collm-mica-stage2-unfrozen`) and `collm_mica_finetune_mf_ood_scratch.yaml` (freeze_rec False + `"not_have"`, out `collm-mica-stage2-scratch`). Only intended lines differ from base (verified by diff + YAML-parse assertions).
+- Risk: config 2 LOW (warm start at Phase-1 optimum, same 1e-3 LR, early-stop bounded, worst case ≈ frozen); config 3 risk is underfitting-in-budget/wasted hours, not overfitting. No code safeguards needed; kill rule for config 3: stop manually if valid AUC < ~0.66 by epoch ~20.
+- Cost: ~6.5–7h each (Vicuna-dominated, +1–2% for 1M sparse tables), sequential across 2 sessions. Startup check: trainable-param count must grow ~1.05M vs frozen run.
+- NEXT: launch config 2 (`train_collm_mf_din_mica.py --cfg-path ..._unfrozen.yaml`); config 3 gated on config 2 beating frozen.
+
 ## Multi-encoder prep (LightGCN/SASRec/DIN) — DONE, not run (2026-09-08)
 - Same MF reliability pattern ported to the untrained encoders, additive only (no MF/LoRA/MiCA/CIE file touched; `git status` clean of them).
 - Baselines: `baseline_train_lightgcn_ood.py` + `baseline_train_sasrec.py` hardened in place (env paths, warn-suppress, throttled uAUC, resume/atomic ckpt, stop-reason, train-by-default `__main__` with authors' recipes). NEW `baseline_train_din_ood.py` (no DIN trainer existed; seq plumbing from SASRec + `RecEncoder_DIN`, BCELoss since DIN outputs post-sigmoid probs, default lr=1e-4/wd=1e-4/d=192/drop=0.2/maxlen=10 from authors' stale-config filename).
