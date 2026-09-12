@@ -93,13 +93,13 @@ Rule of thumb: the YAML's `model.arch` must be registered by the entry script yo
 - Total eval 0:39:51 (+ startup ≈ 1h); cumulative-time tracker from fca77ab works (`Training time 0:39:51 / Cumulative 0:39:51` on fresh run).
 - VERDICT: MiCA ≥ LoRA baseline on 3/4 metrics within noise, strictly better on both NDCGs and valid AUC, at ~50% PEFT params. Genuine positive thesis contribution.
 
-## MiCA Stage-2 trainable-MF — NEXT (configs ready, sequential, config 2 first)
-- Idea (paper-sanctioned: Table II note + §IV-B Ω={φ,ψ} option): jointly fine-tune the MF encoder in Stage 2 on the MiCA backbone. Reference: frozen+pretrained = existing 0.7322 valid / 0.7420 test, no new run.
+## MiCA Stage-2 trainable-MF — config 2 DONE (2026-09-12), config 3 parked
+- Idea (paper-sanctioned: Table II note + §IV-B Ω={φ,ψ} option): jointly fine-tune the MF encoder in Stage 2 on the MiCA backbone. Reference: frozen+pretrained = 0.7322 valid / 0.7420 test.
 - Config-only change (verified by code inspection, no model/runner edits): `freeze_rec` flows from_config→constructor (v2.py:1123/1154→102); `pretrained_path: "not_have"` skips loading (v2.py:95, same sentinel as Phase 2 stage-1 with MF); ckpt-reload guard correctly skipped when unfrozen (v2.py:1180); optimizer/checkpoint-filter pick up unfrozen tables automatically; encoder stays fp32 (`rec_precision` unused); merge stays disjoint (stage-2 gains 2 rec keys, still no overlap with stage-1 A keys); same eval yaml reused via env var.
 - New yamls: `collm_mica_finetune_mf_ood_unfrozen.yaml` (freeze_rec False + warm start, out `collm-mica-stage2-unfrozen`) and `collm_mica_finetune_mf_ood_scratch.yaml` (freeze_rec False + `"not_have"`, out `collm-mica-stage2-scratch`). Only intended lines differ from base (verified by diff + YAML-parse assertions).
-- Risk: config 2 LOW (warm start at Phase-1 optimum, same 1e-3 LR, early-stop bounded, worst case ≈ frozen); config 3 risk is underfitting-in-budget/wasted hours, not overfitting. No code safeguards needed; kill rule for config 3: stop manually if valid AUC < ~0.66 by epoch ~20.
-- Cost: ~6.5–7h each (Vicuna-dominated, +1–2% for 1M sparse tables), sequential across 2 sessions. Startup check: trainable-param count must grow ~1.05M vs frozen run.
-- NEXT: launch config 2 (`train_collm_mf_din_mica.py --cfg-path ..._unfrozen.yaml`); config 3 gated on config 2 beating frozen.
+- CONFIG 2 RESULT: **best 0.7351329728827588 @20 (valid)**, NDCG@best 0.86798, cumulative 5:30:46 (resumed from checkpoint_15; first segment ~1:43). Startup check passed exactly: trainable 12,196,096 = 11,147,776 CIE + 1,048,320 MF tables; checkpoint 48.8 MB / 6 keys (4 proj + 2 rec). Beats frozen 0.7322250564574408 by **+0.0029** — small, inside single-seed noise band, but positive with no overfitting blowup (later evals 0.69–0.734, train loss declined steadily). Checkpoint_best backed up.
+- CONFIG 3 DECISION: **parked, not run**. With only +0.0029 from warm-start joint tuning, from-scratch faces strictly harder optimization with underfitting-in-budget as the likely outcome; ~7h better spent on config-2 test eval (~1h).
+- NEXT: merge (stage-1 A + config-2 best) + test eval via existing `collm_mica_eval_mf_ood.yaml`.
 
 ## Multi-encoder prep (LightGCN/SASRec/DIN) — DONE, not run (2026-09-08)
 - Same MF reliability pattern ported to the untrained encoders, additive only (no MF/LoRA/MiCA/CIE file touched; `git status` clean of them).
