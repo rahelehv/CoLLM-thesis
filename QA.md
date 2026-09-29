@@ -243,3 +243,39 @@ Eval: same to logits_, no_grad → AUC/UAUC/NDCG
 | valid | UAUC | nan (44/283) | NaN | :218-220,224; nanmean 0.6949 | Yes |
 
 **Thesis wording:** "Phase-4 `test_splits=['test','valid']` on author OOD2 artifacts (`test_ood2.pkl` 7331 rows; `valid_small_ood2.pkl` 5200 rows): test AUC 0.7434/NDCG 0.8663, valid AUC 0.7257/NDCG 0.8646. UAUC (`uAUC_me`, macro `np.mean`) is `NaN` because 63/44 single-class users return `NaN` without raising and poison the mean (test `nanmean` 0.6836) — a metric-handling artifact. The paper (0.7295/0.6875/0.8714) underspecifies UAUC exposed-set/filtering/NaN handling and NDCG K/candidates/aggregation, so only AUC is strictly commensurable; UAUC is not comparable as computed and NDCG is directional."
+
+---
+
+## Q8 — Evaluation-only metric audit (MF Test NDCG + diagnostic UAUC)
+
+### Question
+> Without retraining or changing the pipeline, compute (1) MF Test NDCG from the existing best MF checkpoint on `test_ood2.pkl` using the current repo NDCG implementation, and (2) diagnostic UAUC (`nanmean`, NaNs ignored) for MF Test / Final Test / Final Validation while preserving official `NaN`. Investigate exactly why NaNs occur, verify NDCG consistency, and keep the main results table unchanged.
+
+### Answer
+**Constraint honored:** no retraining, no pipeline change. Standalone eval-only scripts in `C:/Users/ASUS/AppData/Local/Temp/opencode/` (`mf_audit.py`, `parse_final.py`); repo code untouched.
+
+**1. MF Test NDCG:**
+* Raw `0.8443383858354733`, rounded `0.8443`.
+* Checkpoint `weights/0912_ml1m_oodv2_best_model_d256lr-0.001wd0.0001.pth` (raw `state_dict`: `user_embedding.weight [839,256]`, `item_embedding.weight [3256,256]`). Recomputed global Test AUC from it is `0.649366087184006`, exactly matching `raw_logs/phase1_mf_cell_output.txt:412`, proving checkpoint identity.
+* Dataset `test_ood2.pkl` (from `collm-datasets/ml-1m.zip`): 7331 interactions (3998×1, 3333×0), 320 users — same file as `baseline_train_mf_ood.py:147`.
+* Scoring: raw dot-product logit `sum(user_emb * item_emb)` (`rec_base_models.py:86-90`), same as training eval (`baseline_train_mf_ood.py:298-315`); labels binary 0/1.
+* NDCG impl: current `minigpt4/tasks/rec_base_task.py:69-123` (`u_dcg`/`compute_dcg`), identical call as Final eval: binary relevance, per-user desc-score ranking, full-list (no top-K), `DCG=Σ rel/log2(rank+2)`, `IDCG=Σ_{i≤P}1/log2(i+2)`, skip `count==1` and `u_dcg==-1` (single-class/len<2), macro `mean()`.
+* Users: included 224, excluded 96 (33 single-interaction + 63 multi single-class).
+
+**2. UAUC diagnostic recalculation (official preserved):**
+
+| Model | Split | Official UAUC | Diagnostic UAUC (NaNs ignored) | Valid per-user | NaN per-user | Excluded single-interaction |
+|---|---|---:|---:|---:|---:|---:|
+| MF | Test | NaN | 0.6354 (`0.6354343795924502`) | 224 | 63 | 33 |
+| Final CoLLM | Validation | NaN | 0.6949 (`0.6949198833054393`) | 239 | 44 | 48 |
+| Final CoLLM | Test | NaN | 0.6836 (`0.6835598120535714`) | 224 | 63 | 33 |
+
+* MF Test: parsed from regenerated predictions (baseline logs keep no per-user array). Total 320 users; multi 287 (both-class 224, single-class 63).
+* Final Test/Valid: parsed exact per-user arrays from `raw_logs/phase4_eval_cell_output.txt:146-152,218-224` (`***uauc:(nan,[ids],array([...]))` spanning to `***ndcg:`). Test total 320 (multi 287: 224/63); Valid total 331 (multi 283: 239/44). Global AUC/NDCG unchanged (Test 0.7434193394326927/0.8662500381601485; Valid 0.7256668021338382/0.8646289411144484).
+* Aggregation: official `auc_for_user.mean()` (`rec_base_task.py:65`); diagnostic `np.nanmean(auc_for_user)`.
+
+**3. Why NaNs:** `sklearn 1.8.0 roc_auc_score` on single-class input **returns `nan` with warning** (`Only one class is present in y_true`) instead of raising (runtime-verified). Repo `try/except` (`rec_base_task.py:55-61`, twin `baseline_train_mf_ood.py:63-71`) never fires, `nan` is appended, `can not users` stays 0, `mean()` is poisoned. Constant predictions would give 0.5; NaN predictions would raise (not observed).
+
+**4. NDCG consistency:** MF and Final use the byte-identical `compute_dcg` path; MF counts (224 kept / 63+33 excluded) mirror its UAUC valid/NaN/single split, confirming the same user sets. Paper NDCG protocol remains unspecified (per Q6), so `0.8443` vs paper MF `0.8447` is mutually consistent but directional only.
+
+**5. Interpretation:** Official `NaN` results stand and the main table is unchanged. Diagnostics answer only "mean over both-class multi-interaction users." They are not the paper's UAUC and must not replace official values in any comparison.
