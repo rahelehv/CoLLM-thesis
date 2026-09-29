@@ -212,3 +212,34 @@ Eval: same to logits_, no_grad → AUC/UAUC/NDCG
 **Verdict: Option B — Partially verified.** Formula + per-user full-list setup match; K/candidates/aggregation/filtering/tie authorship unverifiable. Compare 0.8663 vs 0.8714 only directionally.
 
 **Thesis wording:** "We compute binary full-list macro-averaged per-user NDCG over all test-split interactions ranked by the Yes-logit (1/log2(rank+1), IDCG from positive count; <2-sample/single-class users excluded), ported verbatim from dormant `rec_base_task_ndcg.py`. The paper specifies NDCG only by citation without K/candidate/aggregation details and the file was never wired in, so Table II equivalence cannot be proven; we report directional comparability."
+
+---
+
+## Q7 — Final evaluation results audit (TEST vs VALID, dataset provenance, UAUC NaN)
+
+### Question
+> Perform a forensic audit of the final CoLLM evaluation results on ML-1M using the authors' preprocessed OOD2 files (`train_ood2.pkl`, `valid_ood2.pkl`, `test_ood2.pkl`, possibly `valid_small_ood2.pkl`) with eval config `evaluate: True, test_splits: ["test","valid"]`, merged Stage-1+Stage-2 checkpoint. Verify which log lines belong to TEST vs VALID, exact dataset files per split (prove `valid → valid_small_ood2.pkl`), dataset provenance, full UAUC NaN trace (arrays, grouping, single-interaction/single-class handling, `mean` vs `nanmean`, first NaN origin, exact users), comparison with paper UAUC wording/`0.6875` reproducibility, independent AUC/NDCG verification and NDCG reconciliation (`0.8646` vs `0.8663`), verified results table, Table II protocol equivalence per metric, and thesis-safe wording. Audit only, change no code. Answer Q1–Q10 on attribution, sources, provenance, NaN cause/origin, paper `0.6875`, AUC/NDCG trust, Table II justification, and thesis statements, citing paths/lines/logs. Mark unverified items explicitly.
+
+### Answer
+**Executive conclusion:** `0.7434/0.8663` are TEST, `0.7256668/0.8646289` are VALID (proven by order + batch counts). We evaluate author-provided OOD2 artifacts unmodified. UAUC is `NaN` because `uAUC_me` (`rec_base_task.py:25-67`) appends per-user `roc_auc_score` values including `NaN` then calls `np.mean` (`:65`, not `nanmean`); first `NaN` appears at `roc_auc_score(label_i, pre_i)` (`:56`) returning `nan` with suppressed `UndefinedMetricWarning` for single-class multi-interaction users (try/except never fires, `can not users: 0`). Paper `0.6875` is irreproducible from in-repo variants (`mean=nan`, test `nanmean=0.6836`, valid `0.6949`); paper underspecifies exposed-set/filtering/NaN handling. AUC/NDCG as computed are trustworthy; NDCG remains protocol Option B; Table II comparison needs qualifications.
+
+**TEST vs VALID trace:** `collm_eval_mf_ood.yaml:70-73` + `runner_base.py:500-507` evaluates `test_splits` in order. `rec_pair_builder.py:101-141`: `valid→valid_small`, `test→test`. `phase4_eval_cell_output.txt:3-10` sizes train `(33891,7)`, `valid_small (5200,7)`, `test (7331,7)`; `:133-135` dataloaders same. Line 131 `Evaluating on test` → `:138-144` 1833 batches (7331/4) → `:146-152` TEST `33 single / 287 computed / 0 can-not / nan`, `224 / 63 NDCG 0.8662500381601485`, `***auc: 0.7434193394326927`, `:210` rank_0 same. Lines `:211-217` VALID 1300 batches (5200/4) → `:218-224` `48 / 283 / 0 / nan`, `239 / 44 NDCG 0.8646289411144484`, `***auc: 0.7256668021338382`, `:281` rank_0 same, `:282` `Training time 0:45:54`. Quoted tail is VALID. Rounding is plain 4-decimal.
+
+**Dataset provenance/splits:** `collm-datasets/ml-1m.zip` holds exactly the 4 OOD2 files; `train (33891,9) 740 users`, `valid (10401,9)`, `test (7331,9) 320 users`, `valid_small (5200,9) 331 users`, label means ~0.53–0.55. Counts match logs. README §3 + AGENTS.md:19,41,51 confirm author-provided preprocessed source, unzipped to `/kaggle/working/ml-1m/`. No regeneration or row removal before metrics (only history truncation to 10 + padding in `__getitem__:283-290`); no negative sampling; `test_warm_cold_ood2.pkl` only when requested (`:129-137`, `8d10dc3`), excluded here.
+
+**UAUC forensics:** Inputs are full-split `UserID`/Yes-logit/label arrays (`:240-267`, same for distributed `all_gather :276-285` and single-process path used here). Grouping `:29-48` skips `count==1` (33 test / 48 valid). Per user `:55-58` calls `roc_auc_score` and appends even `nan`; `:63-65` `np.mean` poisons. Direct sklearn check: single-class returns `nan` with warning (suppressed in `train_collm_mf_din.py:11`), constant predictions give 0.5, NaN predictions raise (would increment `can-not`, but it is 0). Dataset proof: test nan-users (uid 7 `[1,1]`, 66 `[0,0,0,0]`, 75, 90, 91) are exactly the 63 multi-row single-class users (33 singles excluded; 63+33 singles account for 320 users); valid 44/44 (uid 34, 48, 71). NDCG on same splits excludes these via explicit `-1` (224/239 kept), confirming the sets. Parsed arrays: test 63/287 `nan`, `nanmean 0.6835598`; valid 44/283, `nanmean 0.6949199`.
+
+**Paper comparison:** Paper UAUC = per-user over exposed items averaged; exposed-set, filtering, NaN rule unspecified. No in-repo variant yields `0.6875`. AUC protocol matches (global ROC); NDCG per prior audit is binary full-list macro NDCG, protocol Option B.
+
+**Verified table:**
+
+| Split | Metric | Raw log | Report | Source | Verified? |
+|---|---|---:|---:|---|---|
+| test | AUC | 0.7434193394326927 | 0.7434 | cell_output:152,210 (1833) | Yes |
+| test | NDCG | 0.8662500381601485 | 0.8663 | :151,209 (224 users) | As computed; protocol B |
+| test | UAUC | nan (63/287) | NaN | :146-148,152; nanmean 0.6836 | Yes (`mean` artifact) |
+| valid | AUC | 0.7256668021338382 | 0.7257 | :224,281 (1300) | Yes |
+| valid | NDCG | 0.8646289411144484 | 0.8646 | :223,280 (239 users) | As computed; protocol B |
+| valid | UAUC | nan (44/283) | NaN | :218-220,224; nanmean 0.6949 | Yes |
+
+**Thesis wording:** "Phase-4 `test_splits=['test','valid']` on author OOD2 artifacts (`test_ood2.pkl` 7331 rows; `valid_small_ood2.pkl` 5200 rows): test AUC 0.7434/NDCG 0.8663, valid AUC 0.7257/NDCG 0.8646. UAUC (`uAUC_me`, macro `np.mean`) is `NaN` because 63/44 single-class users return `NaN` without raising and poison the mean (test `nanmean` 0.6836) — a metric-handling artifact. The paper (0.7295/0.6875/0.8714) underspecifies UAUC exposed-set/filtering/NaN handling and NDCG K/candidates/aggregation, so only AUC is strictly commensurable; UAUC is not comparable as computed and NDCG is directional."
