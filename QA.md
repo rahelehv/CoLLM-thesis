@@ -279,3 +279,21 @@ Eval: same to logits_, no_grad → AUC/UAUC/NDCG
 **4. NDCG consistency:** MF and Final use the byte-identical `compute_dcg` path; MF counts (224 kept / 63+33 excluded) mirror its UAUC valid/NaN/single split, confirming the same user sets. Paper NDCG protocol remains unspecified (per Q6), so `0.8443` vs paper MF `0.8447` is mutually consistent but directional only.
 
 **5. Interpretation:** Official `NaN` results stand and the main table is unchanged. Diagnostics answer only "mean over both-class multi-interaction users." They are not the paper's UAUC and must not replace official values in any comparison.
+
+---
+
+## Q9 — Historical UAUC / scikit-learn version audit
+
+### Question
+> Determine whether the UAUC `NaN` is caused by the current scikit-learn version. Inspect original env files (`requirements.txt`, `environment.yml`, setup/Docker/README/history) for the pinned sklearn version; establish historical `roc_auc_score([1,1],[0.2,0.3])` behavior (raise vs `NaN`, change point, official release-note evidence); verify Scenario A (older: raises → skipped → numerical mean) vs Scenario B (newer: returns `NaN` → appended → `NaN` mean); answer whether authors plausibly got numerical UAUC via the exception path with strict Confirmed / Strongly-supported / Unknown grading, checking whether historical skipping reproduces paper `0.6875`; recommend thesis option A (NaN only) / B (NaN + parenthetical diagnostic) / C (filtered as main) / D. Evidence-based, no generic ROC-AUC explanation.
+
+### Answer
+**1. Original environment — confirmed:** `requirements.txt:33` and `environment.yml:47` pin **`scikit-learn==1.2.2`**, present since upstream init `66ddd4d`, never changed. No setup/Docker override. Current run env is sklearn **1.8.0** (verified).
+
+**2. Historical behavior — confirmed via official sources + local test:** Pre-change code raised `ValueError("Only one class present in y_true...")` (issue #16568, 2020 snippet; #30079 expected traceback). PR #27412 (Sep 2023, merged Oct 2024, milestone 1.6) replaced `ValueError` with `UndefinedMetricWarning` (+0.0); issue #30079 → PR #30103 (Oct 2024) changed 0.0 → **`np.nan`**; current `main` `_ranking.py` warns + `return np.nan`. Since 1.2.2 (Mar 2023) predates the change, it raised — strongly supported by version ordering + old-code evidence (1.2.2 source itself not executed). Local 1.8.0 test: single-positive and single-negative both return `nan` with `UndefinedMetricWarning`.
+
+**3. Scenarios verified correct:** Repo (`rec_base_task.py:53-65`, identical in all `baseline_train_*_ood*.py`) tries `roc_auc_score`, appends on success, `except` counts `only_one_class`, final `np.array(auc).mean()` (repo-wide grep: no `nanmean`/filter). Scenario A (1.2.2): single-class raises → excluded (224 test users) → finite mean. Scenario B (1.8.0): returns `nan` (warning suppressed in `train_collm_mf_din.py:11`) → appended → `can not users: 0` → `mean` poisoned → `NaN`. Matches logs (63/44 NaNs) and dataset single-class counts.
+
+**4. Paper `0.6875`:** Confirmed that the original env would skip single-class users and return finite. Strongly supported that the finite-mean rule equals test `nanmean` **0.6836** (valid 0.6949). **Unknown / not proven** that this explains exact `0.6875` (Δ 0.004; no in-repo variant yields it; paper underspecifies exposed-set/filtering). Do not claim definite explanation.
+
+**5. Recommendation: B.** Report literal `NaN` as official plus parenthetical diagnostic (`nanmean` 0.684 test / 0.695 valid, N=224/239). A hides reconstructive signal; C overclaims paper equivalence (0.004 gap + underspecification); B preserves literal reproduction while documenting the version mechanism.
