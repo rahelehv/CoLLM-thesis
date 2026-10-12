@@ -297,3 +297,23 @@ Eval: same to logits_, no_grad → AUC/UAUC/NDCG
 **4. Paper `0.6875`:** Confirmed that the original env would skip single-class users and return finite. Strongly supported that the finite-mean rule equals test `nanmean` **0.6836** (valid 0.6949). **Unknown / not proven** that this explains exact `0.6875` (Δ 0.004; no in-repo variant yields it; paper underspecifies exposed-set/filtering). Do not claim definite explanation.
 
 **5. Recommendation: B.** Report literal `NaN` as official plus parenthetical diagnostic (`nanmean` 0.684 test / 0.695 valid, N=224/239). A hides reconstructive signal; C overclaims paper equivalence (0.004 gap + underspecification); B preserves literal reproduction while documenting the version mechanism.
+
+---
+
+## Q10 — Relationship between `train_collm_mf_din.py` and `train_collm_din.py`
+
+### Question
+> Establish why the repo had `train_collm_mf_din.py` and later added `train_collm_din.py`: rename, copy, refactor, or genuinely different pipeline? Use git history (`log`/`diff`/`blame`), direct entry-point comparison (imports/registration, `--cfg-path`, config/runner/task init, hard-coded assumptions), MF vs DIN selection (implementations, `rec_model` field, registry path, per-script restrictions), and thesis mapping (ML-1M + MF + Vicuna-7B; pretrain/finetune/eval YAMLs; intended entry per stage; DIN relevance; logs vs documented commands). Output sections A–F with paths/lines/hashes; separate verified vs inferred vs not-verified; no file changes/commits/experiments.
+
+### Answer
+**A. Executive summary:** `train_collm_mf_din.py` is upstream-original (init `66ddd4d`); `train_collm_din.py` is a fork-new file in `32c5ebd` (2026-09-08), not a rename — verified by init listing vs new-file diff. They are near-identical boilerplate; only functional deltas are default `--cfg-path`, dataset-config key (`movie_ood` vs `movie_ood_sasrec`), one extra `GnnDataset` import, and docstring. Neither hard-codes an architecture; YAML `rec_model` selects (`rec_model.py:68-80`: `"MF"` → `MatrixFactorization`, `"DIN"` → `RecEncoder_DIN`; `minigpt4rec_v2.py:1120` reads it). Thesis MF stages use `train_collm_mf_din.py` (`rec_model: "MF"`); `train_collm_din.py` scaffolds the never-run DIN family (`rec_model: "DIN"`, "no runs" per message/MEMORY/report, no DIN logs).
+
+**B. Git timeline:** `66ddd4d` (2023-11-19 init) ships `train_collm_mf_din.py` + `train_collm_lgcn.py` + `train_collm_sasrec.py`, no `train_collm_din.py`. `69d369f`/`d783524` touch `train_collm_mf_din.py` only. `32c5ebd` (2026-09-08, "Prep LightGCN/SASRec/DIN pipelines (no runs); fix latent SASRec embedding_size NameError") creates `train_collm_din.py` (147 lines, new file) + `baseline_train_din_ood.py` + DIN/LGCN/SASRec finetune/eval YAMLs. No rename/move/delete of either file.
+
+**C. Entry-point comparison:** Both do `Config → setup_task → build_datasets → build_model → get_runner_class → runner.train()` with wildcard registration imports (`mf_din:32-36`, `din:45-49`) of the same `mini_gpt4rec_v2`. Deltas: default cfg (`minigpt4rec_pretrain_ood_cc.yaml` nonexistent vs `collm_finetune_din_ood.yaml`), `user_num`/`item_num` lookup (`datasets_cfg.movie_ood` vs `movie_ood_sasrec`, same `*_ood2.pkl` names; `mf_din:106-113`, `din:124-130`), extra `GnnDataset` import (`din:35`, use not verified), docstring. Effectively identical except dataset-family key.
+
+**D. MF vs DIN selection:** MF `rec_base_models.py:66-84`, DIN `:854 RecEncoder_DIN` (`all_encode`); branch `rec_model.py:68-80`; `minigpt4rec_v2.py:92-93,1120` stores/reads `rec_model_type`; DIN/sequence branches `:324-330`. Both scripts register `mini_gpt4rec_v2` (`:51`); MF YAMLs set `rec_model: "MF"`, DIN YAMLs `"DIN"`. Filename does not restrict; config + dataset family does.
+
+**E. Thesis mapping:** Stage 1 `collm_pretrain_mf_ood.yaml` / Stage 2 `collm_finetune_mf_ood.yaml` / eval `collm_eval_mf_ood.yaml` all `rec_model: "MF"` → `train_collm_mf_din.py` (agrees with construction; Phase-2–4 logs/dumps + `MEMORY.md:69`). DIN configs/entry have no execution evidence (commit "(no runs)", `MEMORY.md:108` DONE-not-run, report code-ready-only, empty `raw_logs/` DIN search). Documented DIN launch in docstring is not execution proof.
+
+**F. Evidence/uncertainties:** Verified: init/new-file status, line-level deltas, selection path, YAML values, DIN-not-run (message + MEMORY + report + logs). Inferred: extra import inert; DIN entry would work if launched (only compile/parse verified). Not verified: any `train_collm_din.py` execution; relevance of stale MF default cfg path; author intent behind `mf_din` name.
