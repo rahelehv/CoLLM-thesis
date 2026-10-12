@@ -317,3 +317,25 @@ Eval: same to logits_, no_grad → AUC/UAUC/NDCG
 **E. Thesis mapping:** Stage 1 `collm_pretrain_mf_ood.yaml` / Stage 2 `collm_finetune_mf_ood.yaml` / eval `collm_eval_mf_ood.yaml` all `rec_model: "MF"` → `train_collm_mf_din.py` (agrees with construction; Phase-2–4 logs/dumps + `MEMORY.md:69`). DIN configs/entry have no execution evidence (commit "(no runs)", `MEMORY.md:108` DONE-not-run, report code-ready-only, empty `raw_logs/` DIN search). Documented DIN launch in docstring is not execution proof.
 
 **F. Evidence/uncertainties:** Verified: init/new-file status, line-level deltas, selection path, YAML values, DIN-not-run (message + MEMORY + report + logs). Inferred: extra import inert; DIN entry would work if launched (only compile/parse verified). Not verified: any `train_collm_din.py` execution; relevance of stale MF default cfg path; author intent behind `mf_din` name.
+
+---
+
+## Q11 — Purpose and runtime behavior of `user_num: -100` / `item_num: -100`
+
+### Question
+> Establish from code and execution evidence why `-100` is used in `rec_config: {user_num: -100, item_num: -100, ...}`: placeholder/sentinel or legacy default, and how real counts reach the recommender. Search all `user_num`/`item_num`/`-100` references; trace from `train_collm_mf_din.py` / `train_collm_mf_din_mica.py` through dataset construction and recomputation into `build_model`, `init_rec_encoder`, MF constructors with order/paths/lines; explain overwrite conditions, failure mode if not overwritten (`nn.Embedding(-100,256)`), and relation to `ignore_index=-100`; compare MF/MiCA S1/S2/eval/unfrozen and DIN/SASRec paths; verify final `839`/`3256` and `[839,256]`/`[3256,256]` in logs; separate verified vs inferred; no training/file changes.
+
+### Answer
+**Conclusion:** `rec_config` `-100` is a must-overwrite placeholder; every CoLLM entry unconditionally replaces it with `max(uid)+1` / `max(iid)+1` from the OOD2 pickles (839/3256 ML-1M) before `build_model`, and only that value reaches `nn.Embedding`. Top-level `model.user_num/item_num: -100` is a separate never-read legacy key (stays `-100` in logs). Loss-mask `-100` (`ignore_index`) is an unrelated convention in another namespace.
+
+**Trace:** YAML `-100` (all four keys since `66ddd4d`) → `train_collm_mf_din.py:100-101` datasets → `:111-115` read `train/valid/test_ood2.pkl` → `:117-118` overwrite `rec_config` only → `:119` print → `:121` `build_model` → `minigpt4rec_v2.py:1120-1125 from_config` → `:1150-1153` constructor → `rec_model.py:68-80 init_rec_encoder` → `rec_base_models.py:72-73 Embedding(839,256)/Embedding(3256,256)` → `:74` print. Same in `mica.py:81-89`, `din:128-135`, `sasrec:130-131`, CIE variants, LGCN via `GnnDataset` (`lgcn:115-117`, different data key).
+
+**Log proof** (`phase4_eval_cell_output.txt`): top-level `:74,101` still `-100` (unused) vs `rec_config :95,97` 3256/839 and `:106` "creat MF model, user num: 839 item num: 3256". Shapes follow from constructor; Phase-1 `d256` weights match.
+
+| Stage/config | Initial | Overwrite | Final | Evidence |
+|---|---|---|---|---|
+| MF/MiCA S1/S2/eval/unfrozen, CIE | -100/-100 | entry assignment pre-`build_model` | 839/3256 | YAMLs + entries + log above |
+| Top-level `model.*` | -100/-100 | nowhere (no reader) | -100 | log `:74,101` |
+| DIN/SASRec (sasrec key), LGCN (`GnnDataset`) | -100/-100 | same pattern, other data key | recomputed (not run) | entries/YAMLs |
+
+**Claims:** No `if` guard (unconditional); no in-model safeguard (direct use — `Embedding(-100,256)` would fail, never exercised); `ignore_index` uses (`v2.py:612,718`, `modeling_llama.py:647`) target labels, unconnected. **Uncertainties (inferred, undocumented):** why `-100` vs `-1`/`None`; upstream no-overwrite behavior; top-level keys' original purpose.
