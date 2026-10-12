@@ -339,3 +339,21 @@ Eval: same to logits_, no_grad → AUC/UAUC/NDCG
 | DIN/SASRec (sasrec key), LGCN (`GnnDataset`) | -100/-100 | same pattern, other data key | recomputed (not run) | entries/YAMLs |
 
 **Claims:** No `if` guard (unconditional); no in-model safeguard (direct use — `Embedding(-100,256)` would fail, never exercised); `ignore_index` uses (`v2.py:612,718`, `modeling_llama.py:647`) target labels, unconnected. **Uncertainties (inferred, undocumented):** why `-100` vs `-1`/`None`; upstream no-overwrite behavior; top-level keys' original purpose.
+
+---
+
+## Q12 — `valid` vs `valid_small` validation protocol audit
+
+### Question
+> Investigate why `valid_splits: ["valid"]` loads `valid_small_ood2.pkl` (5,200 rows) instead of `valid_ood2.pkl` (10,401 rows): builder/YAML/logs/preprocessing/runner checkpoint logic; file shapes, generator, subset type/reproducibility, same split across S1/S2/final eval, selection metric, hard-code vs config, discrepancies. Check the original paper (arXiv:2310.19488, TKDE 2025) for validation/valid_small/splits/selection/early-stopping/GPU-time discussion with exact citations. Assess bias vs uncertainty, overfitting, robustness checks, and whether this is a reproduction discrepancy. Forensic follow-up: paper temporal windows, `valid_small` origin (upstream vs fork), Kaggle-causation evidence grading, run-by-run table, thesis wording (EN + FA), next step, unknowns. Read-only; no training/modifications.
+
+### Answer
+**A. Direct answer:** All runs use 5,200 validation rows because upstream code hard-codes it — `MoiveOODBuilder.build_datasets` (`rec_pair_builder.py:121-123`) maps dict key `'valid'` to annotation stem `'valid_small'` → `MoiveOOData:220` appends `_ood2.pkl`. The file is a reproducible row-subsample (`processing_ood.ipynb` cell 45: `valid_.sample(frac=0.5,random_state=2023)`, full temporal window preserved). Kaggle causation is **unknown** (no commit/note/log ties halving to Kaggle; sampling + mapping predate the fork in `66ddd4d`). Paper states only ML-1M 10/5/5 temporal months (§V-A p.2334; `pdftotext` grep zero for `valid_small`/counts/selection/early-stop/GPU-time). I changed nothing about this mapping (only `eval_freq`, a separate knob); every S1/S2/final `valid` metric and best checkpoint (S1 @10 0.662, S2 @28 0.72567, MiCA-S1 @64, MiCA-S2 @20) is on the same 5,200-row AUC selection (`runner_base.py:432-437`, `rec_base_task.py:312`).
+
+**B. Timeline:** Upstream `66ddd4d` already contains both the sampling cell and builder mapping (verified via `git show 66ddd4d:`); fork diff `66ddd4d→HEAD` touches only warm/cold gating (`8d10dc3`). All logged runs show `valid_small (5200,7)` → 1,300 batches; full `valid_ood2.pkl` never loaded. ArXiv LaTeX source not retrieved (PDF text only) — stated limitation.
+
+**C. Paper vs implementation:** Temporal windows match (paper 10/5/5; notebook slots 14-24/24-29/29-34). Validation N, subset, sampling, checkpoint metric, final-eval split: paper not specified; repo uses 5,200-half for selection and reporting; fork runs identical. File counts: train 33,891 / valid 10,401 (356 users) / small 5,200 (331) / test 7,331 (320); label means 0.5368/0.5283/0.5306/0.5454.
+
+**D. Runs:** MF-S1, MF-S2, MiCA-S1/recovery, MiCA-S2, final eval — all `valid_small_ood2.pkl`, 5,200 rows, best on valid AUC; final-eval `valid` reproduces Stage-2 best exactly; no full-valid run exists.
+
+**E. Thesis wording (EN):** "Validation uses author-provided `valid_small_ood2.pkl` (N=5,200; reproducible 50% row-subsample, seed 2023) because the builder hard-codes it; full `valid_ood2.pkl` (N=10,401) is shipped but unused. Best checkpoints maximize global valid AUC on that subset. The paper specifies only the five-month window, so this is the implemented protocol, not the paper's." **(FA):** «اعتبارسنجی روی `valid_small_ood2.pkl` با ۵۲۰۰ نمونه انجام شد؛ زیرنمونه‌ای ۵۰٪ و بازتولیدپذیر از پنج‌ماه اعتبارسنجی که سازنده به‌صورت ثابت به `valid` نگاشت کرده و فایل کامل استفاده نشد. بهترین چک‌پوینت بیشینهٔ AUC روی همین زیرمجموعه است. مقاله فقط بازهٔ زمانی را می‌گوید.» Kaggle rationale stays **unknown** — cite only `eval_freq=2` as documented cost cut. **Next:** score existing best checkpoints once on full valid (no retraining). **Gaps:** why 50%/2023/`#0915`, authors' original split, quantitative best-epoch shift.
