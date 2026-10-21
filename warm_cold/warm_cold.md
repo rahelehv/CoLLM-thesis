@@ -6,15 +6,16 @@
 - Dataset: ML-1M, author-provided `test_ood2.pkl`.
 - Branch: `feat/vb2-warm-cold-infra`.
 - Implemented commits: `89b942c`, `ed2c4ff`, `7708a72`.
-- Results reported here: MF, CoLLM-LoRA, and CoLLM-MICA. The MF values were
-  verified from the result files; the CoLLM values are **taken from the Kaggle
-  console output; pending verification against the downloaded result files**.
-- All three acceptance gates reported PASS in that run.
+- Results reported here: MF, CoLLM-LoRA, and CoLLM-MICA. All values were
+  verified from the downloaded result files and independently recomputed from
+  the exported prediction CSVs; see Section 5.7.
+- All three acceptance gates passed in the exported run and on recomputation.
+- The prediction run recorded
+  `git_commit=87afe6960d858e2da5bf703354678072e8d0bd1b`; the report was updated
+  at commit `8b98345`.
 
 Numbers in this report are taken from repository files, the supplied Kaggle run
-log, or the Kaggle console output. The CoLLM values are explicitly marked as
-pending file verification until those result files are provided. No value has
-been estimated or filled in.
+log, or the downloaded result files. No value has been estimated or filled in.
 
 ---
 
@@ -29,9 +30,9 @@ The intended model set is:
 
 | Model | Checkpoint | Status |
 |---|---|---|
-| MF | `weights/0912_ml1m_oodv2_best_model_d256lr-0.001wd0.0001.pth` | **Done** (verified from result files) |
-| CoLLM-LoRA | merged stage-2 LoRA checkpoint (`COLLM_STAGE2_CKPT`) | **Done** (Kaggle console; pending result-file verification) |
-| CoLLM-MICA | frozen merged checkpoint `merged_mica_s12.pth` (`COLLM_MICA_STAGE2_CKPT`) | **Done** (Kaggle console; pending result-file verification) |
+| MF | `weights/0912_ml1m_oodv2_best_model_d256lr-0.001wd0.0001.pth` | **Done** (verified from result files; recomputed) |
+| CoLLM-LoRA | merged stage-2 LoRA checkpoint (`COLLM_STAGE2_CKPT`) | **Done** (verified from result files; recomputed) |
+| CoLLM-MICA | frozen merged checkpoint `merged_mica_s12.pth` (`COLLM_MICA_STAGE2_CKPT`) | **Done** (verified from result files; recomputed) |
 
 Scope limits:
 
@@ -258,9 +259,8 @@ get a gate.
 | CoLLM-MICA | overall | `0.7419987742` |
 
 The MF anchors were verified from the result files. The CoLLM anchors are
-pre-registered overall-AUC gates; all three reported PASS in the Kaggle run.
-The observed CoLLM values are taken from the Kaggle console output and remain
-pending verification against the downloaded result files.
+pre-registered overall-AUC gates; all three passed in the exported run and were
+reproduced exactly in the local recomputation described in Section 5.7.
 
 ### 4.5 CoLLM export: determinism, single process, resume
 
@@ -351,8 +351,10 @@ Branch: `feat/vb2-warm-cold-infra`.
 
 ### 5.1 Environment and tests
 
-The reported run is a Kaggle session using the Python 3.12 pinned image, as
-supplied in the session log. The unit-test summary was:
+The reported run is a Kaggle session using the Python 3.12 pinned image. The
+export metadata records Python `3.12.13`, torch `2.10.0+cu128`, transformers
+`4.28.0`, peft `0.3.0`, numpy `2.0.2`, pandas `2.3.3`, and scikit-learn
+`1.6.1` for all three models. The unit-test summary was:
 
 ```text
 Ran 31 tests in 16.225s
@@ -366,7 +368,8 @@ tests, MICA config/SVD checks, and a fake-model partial-export/resume test.
 
 ### 5.2 MF results
 
-Source: `/kaggle/working/collm_logs/vb2_out/results.csv` and the session log.
+Source: `/kaggle/working/collm_logs/vb2_out/results.csv`, the session log, and
+the downloaded copy in `raw_logs/warm_cold_logs/`.
 
 | Subset | Rows | AUC | Primary UAUC | Official `uAUC_me` | Unique users | Computed users |
 |---|---:|---:|---:|---:|---:|---:|
@@ -420,9 +423,9 @@ split.** The CoLLM comparison is reported below.
 
 ### 5.4 CoLLM results
 
-Source: **Kaggle console output; pending verification against the downloaded
-result files.** The CoLLM metric values are shown only to the four decimal
-places supplied in that output; no additional digits are inferred.
+Source: the downloaded `results.csv`/`results.json`, both CoLLM prediction
+CSVs, and the local recomputation in Section 5.7. Full-precision values are in
+`results.csv`; the table below keeps four decimal places.
 
 | Model | Warm AUC | Warm UAUC | Cold AUC | Cold UAUC | Overall AUC |
 |---|---:|---:|---:|---:|---:|
@@ -439,9 +442,9 @@ Acceptance gates (tolerance `1e-6`):
 | CoLLM-LoRA | overall `0.7434193394` | **PASS** |
 | CoLLM-MICA | overall `0.7419987742` | **PASS** |
 
-All three gates reported PASS. The CoLLM metrics above are not yet checked
-against the downloaded `results.csv`/`results.json`; until that check is done,
-they remain console-sourced values.
+All three gates passed in the exported run and again on recomputation. The
+CoLLM rows above are verified from the downloaded files, not console-only
+values.
 
 ### 5.5 Interpretation of the warm/cold results
 
@@ -461,6 +464,93 @@ These numbers are not direct reproductions of the paper's table. The run uses a
 different split implementation and this project's checkpoints, which may differ
 from the paper's assets. The valid comparison here is the internal
 warm-versus-cold trend, not a claim that a number matches the published table.
+
+### 5.7 Verification against the downloaded files
+
+Verification date: 2026-10-21. Inputs: the local copy of the Kaggle output in
+`raw_logs/warm_cold_logs/`.
+
+**Inventory.** All 11 expected files are present and no extra files were found:
+
+```text
+results.csv                  results.json
+pred_mf.csv                  pred_mf.meta.json
+pred_collm_lora.csv          pred_collm_lora.meta.json
+pred_collm_mica.csv          pred_collm_mica.meta.json
+warm_row_idx.npy             cold_row_idx.npy
+warm_cold_tests_cell_output.txt
+```
+
+`results.csv` SHA-256 is
+`6db25d40a4922125cd9d00052853c613326057aae61bc16f07c0260b2ea73131`;
+`results.json` is
+`ae2eb98e236c6b2e427dacc37b815279edfa28f15e01f8631ce150ab06ac0757`.
+The prediction CSVs are 209–265 KB; the test-cell log is 357,649 bytes.
+
+**Data and prediction contract.** `collm-datasets/ml-1m.zip` contains
+`train_ood2.pkl` (SHA-256
+`a0c4cb50a61a27453aa8c14a81cb1b41b1fdc874362e46960956b0bc720c21fe`) and
+`test_ood2.pkl` (SHA-256
+`a35ec4a7d93a76f2a81a0c0c926a95ad5fa5fe4ea8190f02dc1630c58a0e167a`);
+both hashes match all three metadata files. The test split has 7,331 rows. For
+each model, the CSV has the five required columns, exactly 7,331 rows,
+`row_idx` equal to `0..7330` with no duplicates, and finite logits. `uid`,
+`iid`, and `label` match `test_ood2.pkl` after `reset_index(drop=True)` for every
+row. All three models cover the same rows.
+
+**Masks.** The regenerated masks have 3,682 warm rows and 3,649 cold rows, are
+disjoint, and cover all 7,331 rows. `warm_row_idx.npy` and `cold_row_idx.npy`
+match the regenerated arrays exactly. User-count checks match the exported
+table: warm has 245 unique users, 158 computed, 53 single-class, and 34
+single-interaction; cold has 166 unique, 82 computed, 39 single-class, and 45
+single-interaction. These counts are identical for all three models.
+
+**Metrics.** Re-running `python -m warm_cold.evaluate` on the three exported
+CSVs with the locally extracted data produced a `results.csv` identical in every
+field to the exported `results.csv`. `results.json` also matched on all model
+metrics, split statistics, and acceptance results. Full-precision core values:
+
+| Model | Warm AUC | Warm UAUC | Cold AUC | Cold UAUC | Overall AUC |
+|---|---:|---:|---:|---:|---:|
+| MF | 0.7272980480780473 | 0.6689595892862342 | 0.5433530245487074 | 0.5578108021042136 | 0.649366087184006 |
+| CoLLM-LoRA | 0.7782099266974793 | 0.7146614481079735 | 0.7031433308063144 | 0.6548131593738812 | 0.7434193394326927 |
+| CoLLM-MICA | 0.7706538324357364 | 0.7155236105401004 | 0.712070605153898 | 0.6655873718468952 | 0.7419987746648602 |
+
+The recomputed gates all passed: MF overall/warm/cold deltas were at most
+`2.93e-13`; LoRA overall delta `3.3e-11`; MICA overall delta `4.6e-10`, against
+tolerance `1e-6`.
+
+**Metadata.** All three models record threshold `3`, seed `42`, and
+`git_commit=87afe6960d858e2da5bf703354678072e8d0bd1b`; all data hashes are
+identical. Environment: Python `3.12.13`, torch `2.10.0+cu128`, transformers
+`4.28.0`, peft `0.3.0`, numpy `2.0.2`, pandas `2.3.3`, scikit-learn `1.6.1`.
+Checkpoints:
+
+| Model | Checkpoint | SHA-256 | Size |
+|---|---|---|---:|
+| MF | `/kaggle/working/CoLLM-thesis/weights/0912_ml1m_oodv2_best_model_d256lr-0.001wd0.0001.pth` | `08f3574e4fa39d81bfd54cad6fdc610c9af486d01f1d3e9b2c42de97d75fe1ce` | 4,195,749 B |
+| CoLLM-LoRA | `/kaggle/input/models/rahelehvafajoo/collm-merged-lora/pytorch/default/1/merged_lora_s12.pth` | `6fbe4456017b699e1c0bd866f9e6d108f7725ad2f584faeef0a966ee62e4446d` | 61,409,517 B |
+| CoLLM-MICA | `/kaggle/input/models/rahelehvafajoo/collm-merged-mica/pytorch/default/1/merged_mica_s12.pth` | `700bbc34aed06c02981f3bf7802d0e929b18e9255140f5a4b2b06c9c2ebf95fb` | 53,006,183 B |
+
+LoRA used config `collm_eval_mf_ood.yaml` (SHA-256
+`a97f6826344ed4ee446a6a0911761b2f4d12f000caeb4a2de6105a1afb0fd8fa`) and MICA
+used `collm_mica_eval_mf_ood.yaml` (SHA-256
+`a358f949d90a6e280f83bed7e185d255255bc86da410b1e23d0d452600fb7d73`). Both used
+the same frozen MF checkpoint and merged Vicuna directory
+`/kaggle/working/vicuna-v0/pretrained_ckpt/vicuna_ckpt/7b_v0`. MICA recorded
+`patched=64`, `nonzero=64`, `total=64`. The exported `git_commit` predates the
+report commit `8b98345`; this is expected because the predictions were produced
+at `87afe696` and the report was updated later.
+
+**Discrepancies.** None. No expected file was missing, no unexpected file was
+present, and no metric or count differed at the printed precision.
+
+**Limit of this verification.** The prediction CSVs were not regenerated: a
+local rerun of the LLM export is not possible in this environment (no
+Vicuna/transformers/peft installation and no GPU). The check verifies the
+exported logits, CSV contract, masks, counts, metrics, gates, and metadata. The
+recompute used Python `3.13.0`, numpy `2.3.5`, pandas `2.2.3`, and scikit-learn
+`1.8.0`; despite that difference, every metric and count matched exactly.
 
 ---
 
@@ -633,16 +723,20 @@ pred_collm_mica.csv
 pred_collm_mica.meta.json
 warm_row_idx.npy
 cold_row_idx.npy
+warm_cold_tests_cell_output.txt
 ```
 
 `results.json` records the threshold, threshold source, data paths, split
 statistics, per-user AUC arrays, acceptance details, and provenance. The masks
-are exactly the warm/cold row indices used by the scorer. The CoLLM console
-values have not yet been checked against these files.
+are exactly the warm/cold row indices used by the scorer. All values in Sections
+5.2 and 5.4 have been checked against these files; Section 5.7 records the
+checks. The downloaded copy used for verification is
+`raw_logs/warm_cold_logs/`.
 
-## Appendix B: Remaining verification
+## Appendix B: Remaining limitations
 
-- Download `results.csv`, `results.json`, and both CoLLM prediction CSVs/meta
-  files.
-- Verify the console-sourced CoLLM metrics against those files.
-- No CoLLM export or gate run remains: all three gates reported PASS.
+- The LLM export itself was not rerun locally; only the exported logits were
+  rescored.
+- No significance test or confidence interval has been computed.
+- Cold UAUC is based on 82 computed users and is noisy.
+- The numbers are not a direct reproduction of the paper table (Section 5.6).
