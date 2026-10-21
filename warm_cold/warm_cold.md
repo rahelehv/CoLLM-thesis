@@ -6,11 +6,15 @@
 - Dataset: ML-1M, author-provided `test_ood2.pkl`.
 - Branch: `feat/vb2-warm-cold-infra`.
 - Implemented commits: `89b942c`, `ed2c4ff`, `7708a72`.
-- Results reported here: MF only. CoLLM-LoRA and CoLLM-MICA remain **NOT YET RUN**.
+- Results reported here: MF, CoLLM-LoRA, and CoLLM-MICA. The MF values were
+  verified from the result files; the CoLLM values are **taken from the Kaggle
+  console output; pending verification against the downloaded result files**.
+- All three acceptance gates reported PASS in that run.
 
-Numbers in this report are taken from repository files or from the supplied
-Kaggle run log. A value that has not been measured is explicitly marked
-**NOT YET RUN**; no value has been estimated or filled in.
+Numbers in this report are taken from repository files, the supplied Kaggle run
+log, or the Kaggle console output. The CoLLM values are explicitly marked as
+pending file verification until those result files are provided. No value has
+been estimated or filled in.
 
 ---
 
@@ -25,15 +29,14 @@ The intended model set is:
 
 | Model | Checkpoint | Status |
 |---|---|---|
-| MF | `weights/0912_ml1m_oodv2_best_model_d256lr-0.001wd0.0001.pth` | **Done** (CPU scoring) |
-| CoLLM-LoRA | merged stage-2 LoRA checkpoint (`COLLM_STAGE2_CKPT`) | **NOT YET RUN** |
-| CoLLM-MICA | frozen merged checkpoint `merged_mica_s12.pth` (`COLLM_MICA_STAGE2_CKPT`) | **NOT YET RUN** |
+| MF | `weights/0912_ml1m_oodv2_best_model_d256lr-0.001wd0.0001.pth` | **Done** (verified from result files) |
+| CoLLM-LoRA | merged stage-2 LoRA checkpoint (`COLLM_STAGE2_CKPT`) | **Done** (Kaggle console; pending result-file verification) |
+| CoLLM-MICA | frozen merged checkpoint `merged_mica_s12.pth` (`COLLM_MICA_STAGE2_CKPT`) | **Done** (Kaggle console; pending result-file verification) |
 
 Scope limits:
 
 - Only ML-1M and only the full `test_ood2.pkl` split.
-- The MF result is a reference point for the scorer and split, not a claim about
-  CoLLM.
+- The MF result is the reference point for comparing CoLLM.
 - No TALLRec result is produced or reported.
 - The paper table is not reproduced exactly; this work uses the repository's
   `*_ood2.pkl` split and this project's checkpoints. Comparisons are therefore
@@ -138,7 +141,8 @@ For each user in the subset:
 This is the main table value. It is therefore a **NaN-skipping mean over users
 with both classes**, not the official NaN-propagating function.
 
-Per-subset user counts for the current MF run:
+Per-subset user counts for the current run (all three models use the same test
+masks):
 
 | Subset | Unique users | Computed users | Users skipped for single class | Users with one interaction |
 |---|---:|---:|---:|---:|
@@ -146,7 +150,8 @@ Per-subset user counts for the current MF run:
 | Cold | 166 | 82 | 39 | 45 |
 
 The counts partition each subset's users: 158 + 53 + 34 = 245, and
-82 + 39 + 45 = 166.
+82 + 39 + 45 = 166. In short: warm UAUC uses 158 of 245 users, cold UAUC uses
+82 of 166 users.
 
 **Caveat:** cold UAUC is based on only 82 computed users. It is a noisy estimate
 and should not be treated as a stable ranking of cold-start quality.
@@ -252,10 +257,10 @@ get a gate.
 | CoLLM-LoRA | overall | `0.7434193394` |
 | CoLLM-MICA | overall | `0.7419987742` |
 
-The MF anchors are verified results from the current run. The CoLLM-LoRA and
-CoLLM-MICA numbers are **gate targets to be checked later, not results**. They
-must not be quoted as achieved values until their prediction CSVs exist and the
-gate prints PASS.
+The MF anchors were verified from the result files. The CoLLM anchors are
+pre-registered overall-AUC gates; all three reported PASS in the Kaggle run.
+The observed CoLLM values are taken from the Kaggle console output and remain
+pending verification against the downloaded result files.
 
 ### 4.5 CoLLM export: determinism, single process, resume
 
@@ -409,29 +414,53 @@ close to random ranking (`0.5`) on the cold subset. Its warm UAUC (`0.6690`) is
 also higher than its cold UAUC (`0.5578`), but the cold UAUC is based on only 82
 users and is noisy.
 
-At this stage the numbers support only this statement: **MF performs
+For MF alone, the numbers support only this statement: **MF performs
 substantially better on warm interactions than on cold interactions in this
-split.** No statement about CoLLM is made yet.
+split.** The CoLLM comparison is reported below.
 
 ### 5.4 CoLLM results
 
-| Model | Status | Gate target (overall AUC only) |
+Source: **Kaggle console output; pending verification against the downloaded
+result files.** The CoLLM metric values are shown only to the four decimal
+places supplied in that output; no additional digits are inferred.
+
+| Model | Warm AUC | Warm UAUC | Cold AUC | Cold UAUC | Overall AUC |
+|---|---:|---:|---:|---:|---:|
+| MF | 0.7273 | 0.6690 | 0.5434 | 0.5578 | 0.6494 |
+| CoLLM-LoRA | 0.7782 | 0.7147 | 0.7031 | 0.6548 | 0.7434 |
+| CoLLM-MICA | 0.7707 | 0.7155 | 0.7121 | 0.6656 | 0.7420 |
+
+The MICA row uses the frozen merged checkpoint `merged_mica_s12.pth`.
+Acceptance gates (tolerance `1e-6`):
+
+| Model | Anchor(s) | Result |
 |---|---|---|
-| CoLLM-LoRA | **NOT YET RUN** | `0.7434193394` |
-| CoLLM-MICA (frozen `merged_mica_s12.pth`) | **NOT YET RUN** | `0.7419987742` |
+| MF | overall `0.649366087184`; warm `0.727298048078`; cold `0.543353024549` | **PASS** |
+| CoLLM-LoRA | overall `0.7434193394` | **PASS** |
+| CoLLM-MICA | overall `0.7419987742` | **PASS** |
 
-There are no warm AUC, cold AUC, warm UAUC, or cold UAUC values for either CoLLM
-model yet. The two numbers above are pre-registered acceptance gates, not
-results. They must remain labelled as pending until the prediction CSVs are
-generated and `warm_cold.evaluate` prints PASS.
+All three gates reported PASS. The CoLLM metrics above are not yet checked
+against the downloaded `results.csv`/`results.json`; until that check is done,
+they remain console-sourced values.
 
-### 5.5 Comparability caveat
+### 5.5 Interpretation of the warm/cold results
 
-These numbers are not direct reproductions of the paper's table. The run uses the
-repository's `*_ood2.pkl` split and this project's checkpoints, which may differ
-from the paper's split implementation and training assets. The valid comparison
-here is the internal warm-versus-cold trend, not a claim that a number matches
-the published table.
+- MF drops about `0.184` AUC from warm to cold and is close to random on cold.
+- CoLLM-LoRA drops about `0.075`; CoLLM-MICA drops about `0.059`.
+- On cold, both CoLLM variants are about `0.16`–`0.17` AUC above MF.
+- LoRA is slightly higher on warm AUC and overall AUC; MICA is slightly higher
+  on cold AUC.
+
+These differences are small. **No significance test or confidence interval has
+been computed**, so this report does not claim that either CoLLM variant is
+better than the other.
+
+### 5.6 Comparability caveat
+
+These numbers are not direct reproductions of the paper's table. The run uses a
+different split implementation and this project's checkpoints, which may differ
+from the paper's assets. The valid comparison here is the internal
+warm-versus-cold trend, not a claim that a number matches the published table.
 
 ---
 
@@ -575,6 +604,17 @@ expanded by the shell.
    expects `train_ood2.pkl`, `valid_ood2.pkl`, and `test_ood2.pkl` in
    `COLLM_ML1M_DIR`; do not point it at a path whose stem already includes
    `_ood2.pkl`.
+7. **A session change can lose `pred_mf.csv`.** It was missing when the session
+   changed and was regenerated; MF is deterministic and takes only seconds.
+8. **Merged checkpoints are uploaded as Kaggle Models.** The LoRA and MICA
+   merged `.pth` files are attached as model inputs, not produced in the
+   notebook. Keep the MICA file named exactly `merged_mica_s12.pth`.
+9. **The `Wrote ...` line was observed twice for MICA.** This is duplicate
+   logging, not a second export: `predict_collm` prints at
+   `warm_cold/models/collm.py:678-679`, then the CLI calls `_write_message` at
+   `warm_cold/predict.py:88`, which prints again at `warm_cold/predict.py:33-39`.
+   The code does this for both CoLLM-LoRA and CoLLM-MICA; it is not
+   MICA-specific.
 
 ---
 
@@ -587,18 +627,22 @@ results.csv
 results.json
 pred_mf.csv
 pred_mf.meta.json
+pred_collm_lora.csv
+pred_collm_lora.meta.json
+pred_collm_mica.csv
+pred_collm_mica.meta.json
 warm_row_idx.npy
 cold_row_idx.npy
 ```
 
 `results.json` records the threshold, threshold source, data paths, split
 statistics, per-user AUC arrays, acceptance details, and provenance. The masks
-are exactly the warm/cold row indices used by the scorer.
+are exactly the warm/cold row indices used by the scorer. The CoLLM console
+values have not yet been checked against these files.
 
-## Appendix B: What remains
+## Appendix B: Remaining verification
 
-- Run CoLLM-LoRA export and the overall-AUC gate.
-- Run CoLLM-MICA export and the overall-AUC gate.
-- Run the combined three-model evaluation.
-- Report warm/cold AUC and UAUC for both CoLLM variants only after those runs
-  exist. Until then, their status remains **NOT YET RUN**.
+- Download `results.csv`, `results.json`, and both CoLLM prediction CSVs/meta
+  files.
+- Verify the console-sourced CoLLM metrics against those files.
+- No CoLLM export or gate run remains: all three gates reported PASS.
