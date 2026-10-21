@@ -145,11 +145,13 @@ class MiniGPT4Rec_MiCA(MiniGPT4Rec_v2):
             use_grad_checkpoint=use_grad_checkpoint,
         )
 
+        self.mica_patched_modules = 0
         if use_mica and self.use_lora:
             r = int(lora_config.r) if hasattr(lora_config, "r") else int(lora_config.get("r", 8))
             # base_llama is the original model before peft; peft_model wraps it
             # Keep a reference before overwriting
             n_patched = _apply_mica_to_peft_model(self.llama_model_lora, self.llama_model, r)
+            self.mica_patched_modules = n_patched
             logging.info(f"MiCA init done: patched {n_patched} lora_B modules (r={r}), froze B, zeroed A")
             print(f"MiCA: patched {n_patched} lora_B (r={r}) with minor singular vectors, B frozen, A zeroed")
             # Re-apply freeze_lora if requested (should not affect: A remains trainable? freeze_lora means freeze ALL lora)

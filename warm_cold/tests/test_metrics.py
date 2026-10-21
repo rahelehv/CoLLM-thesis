@@ -1,4 +1,5 @@
 import math
+import os
 import unittest
 
 import numpy as np
@@ -51,6 +52,8 @@ class MetricsTests(unittest.TestCase):
         try:
             from minigpt4.tasks.rec_base_task import uAUC_me as official_uauc
         except Exception as exc:
+            if os.environ.get("COLLM_REQUIRE_OFFICIAL_PARITY") == "1":
+                self.fail(f"official uAUC_me import failed: {exc}")
             self.skipTest(f"official uAUC_me not importable in this environment: {exc}")
 
         got = uAUC_me(self.users, self.logits, self.labels)
