@@ -60,10 +60,20 @@ def uAUC_me(user, predict, label):
             only_one_class += 1
             # print("only one class")
         
-    auc_for_user = np.array(auc)
-    print("computed user:", auc_for_user.shape[0], "can not users:", only_one_class)
-    uauc = auc_for_user.mean()
-    print("uauc for validation Cost:", time.time()-start_time,'uauc:', uauc)
+    auc_for_user = np.array(auc, dtype=float)
+    n_eligible = len(candidates_dict)
+    n_nan = int(np.isnan(auc_for_user).sum())
+    n_valid = int(auc_for_user.shape[0] - n_nan)
+    print("eligible users:", n_eligible, "computed user:", auc_for_user.shape[0],
+          "can not users:", only_one_class, "valid auc:", n_valid, "nan auc:", n_nan)
+    if n_valid == 0:
+        # np.nanmean would only emit a warning and return nan here; report explicitly instead.
+        uauc = np.float64(np.nan)
+        print("uauc for validation Cost:", time.time()-start_time,
+              'uauc: nan (no defined per-user AUC)')
+    else:
+        uauc = np.nanmean(auc_for_user)
+        print("uauc for validation Cost:", time.time()-start_time,'uauc:', uauc)
     return uauc, computed_u, auc_for_user
 
 def u_dcg(predict, label):
