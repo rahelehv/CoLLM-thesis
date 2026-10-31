@@ -1,6 +1,6 @@
 """
-Focused local tests for UAUC aggregation in minigpt4/tasks/rec_base_task.py
-(no GPU, no LAVIS runtime deps needed).
+Focused local tests for UAUC aggregation in the shared `uauc.py` implementation
+used by minigpt4/tasks/rec_base_task.py (no GPU, no LAVIS runtime deps needed).
 
 Covers:
   1. mixture of valid per-user AUC values and NaN
