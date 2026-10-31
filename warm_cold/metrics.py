@@ -7,9 +7,8 @@ Primary UAUC (the thesis table):
     UAUC is NaN.
 
 Secondary UAUC:
-    the original repo ``uAUC_me`` semantics, vendored below. It averages
-    the per-user AUC array with ``np.mean``; a single NaN poisons the
-    aggregate. It is reported only as a diagnostic.
+    the repo's shared ``uAUC_me`` implementation, imported directly from
+    ``uauc``. It also averages defined per-user AUCs and ignores NaNs.
 """
 
 import math
@@ -19,53 +18,7 @@ import numpy as np
 from sklearn.exceptions import UndefinedMetricWarning
 from sklearn.metrics import roc_auc_score
 
-VENDORED_UAUC_SOURCE = "minigpt4/tasks/rec_base_task.py:25-67 (uAUC_me)"
-
-
-def uAUC_me(user, predict, label):
-    """Vendored numeric logic of the repo's ``uAUC_me``.
-
-    The original prints and timing calls are omitted; the AUC computation,
-    grouping, skip rules, and NaN-propagating mean are preserved.
-    """
-    predict = np.asarray(predict).squeeze()
-    label = np.asarray(label).squeeze()
-    user = np.asarray(user)
-
-    u, inverse, counts = np.unique(user, return_inverse=True, return_counts=True)
-    index = np.argsort(inverse)
-    candidates_dict = {}
-    k = 0
-    total_num = 0
-    computed_u = []
-
-    for u_i in u:
-        start_id, end_id = total_num, total_num + counts[k]
-        u_i_counts = counts[k]
-        index_ui = index[start_id:end_id]
-        if u_i_counts == 1:
-            total_num += counts[k]
-            k += 1
-            continue
-        candidates_dict[u_i] = [predict[index_ui], label[index_ui]]
-        total_num += counts[k]
-        k += 1
-
-    auc = []
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore", UndefinedMetricWarning)
-        for ui, pre_and_true in candidates_dict.items():
-            pre_i, label_i = pre_and_true
-            try:
-                ui_auc = roc_auc_score(label_i, pre_i)
-                auc.append(ui_auc)
-                computed_u.append(ui)
-            except Exception:
-                continue
-
-    auc_for_user = np.array(auc)
-    uauc = auc_for_user.mean()
-    return uauc, computed_u, auc_for_user
+from uauc import uAUC_me
 
 
 def per_user_aucs(user, predict, label):
@@ -116,11 +69,13 @@ def per_user_aucs(user, predict, label):
 def uauc_summary(user, predict, label):
     primary = per_user_aucs(user, predict, label)
     if primary["aucs"].size:
-        uauc = float(np.mean(primary["aucs"]))
+        uauc = float(np.nanmean(primary["aucs"]))
     else:
         uauc = float("nan")
 
-    official_uauc, official_computed, official_aucs = uAUC_me(user, predict, label)
+    official_uauc, official_computed, official_aucs = uAUC_me(
+        user, predict, label, verbose=False
+    )
     return {
         "uauc": uauc,
         "uauc_official": float(official_uauc),

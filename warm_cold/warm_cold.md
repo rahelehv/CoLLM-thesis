@@ -159,15 +159,16 @@ and should not be treated as a stable ranking of cold-start quality.
 
 ### 3.3 Official `uAUC_me` (secondary diagnostic)
 
-The repository's original `uAUC_me` (`minigpt4/tasks/rec_base_task.py:25-67`) is
-vendored with its numeric behavior in `warm_cold/metrics.py:25-68`. It computes
-per-user AUCs and then calls `np.mean` on the resulting array. A single `NaN`
-per-user value therefore poisons the whole subset value. On this ML-1M run the
-official value is `NaN` for both warm and cold, so it is reported only as the
-secondary diagnostic column `UAUC (official, NaN-propagating)`.
+At the time of the reported ML-1M run, `uAUC_me` was vendored in
+`warm_cold/metrics.py` and called `np.mean` on the per-user array, so a single
+`NaN` poisoned the subset value. Those result tables retain the historical
+`NaN` values and the old `UAUC (official, NaN-propagating)` label.
 
-The primary UAUC is not affected because it explicitly skips single-class users
-and non-finite per-user values.
+The current implementation imports the shared `uauc.uAUC_me` in both
+`minigpt4/tasks/rec_base_task.py` and `warm_cold/metrics.py`, and averages
+defined per-user AUCs with `np.nanmean`. Re-evaluating the same prediction
+files now gives numeric official UAUC values equal to the primary UAUC, not
+`NaN`; see `warm_cold/METRICS.md`.
 
 ---
 
@@ -179,7 +180,7 @@ and non-finite per-user values.
 warm_cold/
 ├── __init__.py          package version
 ├── data.py              split loading, threshold, warm/cold masks
-├── metrics.py           AUC, primary UAUC, vendored official uAUC_me
+├── metrics.py           AUC, primary UAUC, shared official uAUC_me
 ├── predictions.py       prediction CSV contract and validation
 ├── provenance.py        hashes, git commit, environment metadata
 ├── predict.py           unified prediction CLI
@@ -211,7 +212,7 @@ At repository root:
 | Module | Responsibility |
 |---|---|
 | `warm_cold/data.py` | Load and validate pickles; read only `uid`/`iid`/`label`; build the threshold masks; expose row indices and split statistics. |
-| `warm_cold/metrics.py` | Compute subset AUC; compute primary per-user UAUC; preserve the official NaN-propagating `uAUC_me` as a diagnostic. |
+| `warm_cold/metrics.py` | Compute subset AUC; compute primary per-user UAUC; import the shared `uAUC_me` for the official diagnostic. |
 | `warm_cold/predictions.py` | Enforce the five-column prediction contract, atomic writes, and full-coverage/ID/label validation. |
 | `warm_cold/provenance.py` | Record checkpoint hashes, data hashes, config hash, environment versions, and git commit in metadata JSON. |
 | `warm_cold/models/mf.py` | Load the MF state dict directly and score the exact user/item dot product on CPU; no LAVIS/transformers import required. |

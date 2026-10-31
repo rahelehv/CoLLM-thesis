@@ -44,13 +44,22 @@ For every subset, `results.csv` and `results.json` report:
 - users skipped because they have a single class,
 - users with a single interaction.
 
-## Secondary UAUC (`UAUC (official, NaN-propagating)`)
+## Secondary UAUC (`UAUC (official)`)
 
-The repo's original `uAUC_me` (`minigpt4/tasks/rec_base_task.py:25-67`) is
-vendored in `warm_cold/metrics.py` and reported separately. Its aggregate is
-`np.mean(per_user_aucs)`, so one `NaN` per-user value poisons the subset value.
-This explains the historical `NaN` UAUC despite many computable users.
+The repo's `uAUC_me` implementation now lives in `uauc.py` and is imported both
+by `minigpt4/tasks/rec_base_task.py` and by `warm_cold/metrics.py`. Both
+evaluation paths therefore use the same per-user loop and aggregation:
 
-The vendored function preserves the official grouping, skip rules, and
-NaN-propagating mean. A parity test compares it with the official function
-when the official import is available (for example on Kaggle).
+- per-user AUCs are computed exactly as before;
+- single-interaction users are skipped;
+- NaN per-user AUCs (including single-class users) are ignored with
+  `np.nanmean`;
+- if no defined per-user AUC exists, the result is `NaN` and no avoidable
+  `RuntimeWarning` is emitted.
+
+The primary and secondary UAUC values therefore use the same eligible-user
+population and agree when per-user AUCs are defined. The per-user counts in
+`results.csv` still report how many users were included or skipped.
+
+The `results.csv` files under `raw_logs/warm_cold_logs/` were generated before
+this fix and retain the historical `NaN` values and column label.
